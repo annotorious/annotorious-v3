@@ -67,6 +67,11 @@
         var config = await fetch('config.json').then((response) => response.json());
         
         var supabase = SupabasePlugin(anno, config);
+
+        supabase.on('presence', function(users) {
+          console.log('presence change', users);
+        });
+
         supabase.connect();
         
         fetch('annotations.json').then((response) => response.json())

@@ -16,7 +16,7 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, channel: R
     });
   })
 
-  anno.store.observe(event => onStoreChange, { origin: Origin.LOCAL });
+  anno.store.observe(onStoreChange, { origin: Origin.LOCAL });
 
   channel.on('broadcast', { event: 'change' }, event => {
     const { updated } = event.payload;

@@ -36,11 +36,14 @@ export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: Supaba
   
     channel = client.channel(config.channel);
 
+    broadcast = BroadcastConnector(anno, channel);
+
+    postgres = PostgresConnector(anno, config, channel);
+
     channel.subscribe(status => {
       if (status === 'SUBSCRIBED') {
-        broadcast = BroadcastConnector(anno, channel);
+        // TODO refactor, so we can move this out of the subscribe handler
         presence = PresenceConnector(anno, channel, emitter);
-        postgres = PostgresConnector(anno, config, channel);
       }
     });  
   });

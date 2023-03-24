@@ -48,9 +48,30 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, config: Sup
 
   anno.store.observe(onStoreChange, { affects: ChangeType.BOTH, origin: Origin.LOCAL });
 
-  channel.on('postgres_changes', { event: '*', schema: 'public'}, (payload) => {
-    console.log('[PG Rx]', payload);
-  });
+  channel.on(
+    'postgres_changes', 
+    { 
+      event: '*', 
+      schema: 'public'
+    }, (payload) => {
+      console.log('[PG Rx]', payload);
+
+      /* Example message:
+
+      {
+        "schema": "public",
+        "table": "annotations",
+        "commit_timestamp": null,
+        "eventType": "UPDATE",
+        "new": {},
+        "old": {},
+        "errors": [
+          "Error 401: Unauthorized"
+        ]
+      }
+      
+      */
+    });
 
   return {
     destroy: () => { 
