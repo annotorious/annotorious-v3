@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>Annotorious 3.0.0-alpha</title>
+    <script type='module' src='./index.ts'></script>
+    <style>
+      html, body, #openseadragon {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .openseadragon-canvas {
+        outline: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="openseadragon">
+      <button id="draw" style="position:absolute; top: 10px; right: 10px; z-index: 1;">Draw</button>
+    </div>
+
+    <script type='module'>
+      import { OpenSeadragon, Annotorious, SupabasePlugin } from './index.ts';
+
+      window.onload = async function() {
+        var viewer = OpenSeadragon({
+          id: 'openseadragon',
+          prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1/build/openseadragon/images/', 
+          gestureSettingsMouse: {
+            clickToZoom: false
+          },
+          gestureSettingsTouch: {
+            pinchRotate: true
+          },
+          tileSources: {
+            '@context' : 'http://iiif.io/api/image/2/context.json',
+            protocol : 'http://iiif.io/api/image',
+            width : 7808,
+            height : 5941,
+            sizes : [
+              { width : 244, height : 185 },
+              { width : 488, height : 371 },
+              { width : 976, height : 742 }
+            ],
+            tiles : [
+              { width : 256, height : 256, scaleFactors : [ 1, 2, 4, 8, 16, 32 ] }
+            ],
+            '@id' : 'https://iiif.bodleian.ox.ac.uk/iiif/image/af315e66-6a85-445b-9e26-012f729fc49c',
+            profile : [
+              'http://iiif.io/api/image/2/level2.json',
+              { formats : [ 'jpg', 'png', 'webp' ],
+                qualities : ['native','color','gray','bitonal'],
+                supports : ['regionByPct','regionSquare','sizeByForcedWh','sizeByWh','sizeAboveFull','sizeUpscaling','rotationBy90s','mirroring'],
+                maxWidth : 1000,
+                maxHeight : 1000
+              }
+            ]
+          }
+        });
+
+        var anno = Annotorious(viewer);
+
+        var config = await fetch('config.json').then((response) => response.json());
+        
+        var supabase = SupabasePlugin(anno, config);
+        supabase.connect();
+        
+        fetch('annotations.json').then((response) => response.json())
+          .then(annotations => anno.setAnnotations(annotations));
+
+        document.getElementById('draw').addEventListener('click', function() {
+          anno.startDrawing('box');
+        });
+      }
+    </script>
+  </body>
+</html>

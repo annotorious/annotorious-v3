@@ -1,0 +1,23 @@
+{
+  "name": "@annotorious/supabase",
+  "version": "3.0.0-alpha",
+  "description": "Experimental rewrite of Annotorious",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "vite --host",
+    "test": "echo 'Skipping tests in @annotorious/supabase package'"
+  },
+  "author": "Rainer Simon",
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "vite": "^3.2.0",
+    "vite-plugin-dts": "^2.1.0"
+  },
+  "dependencies": {
+    "@supabase/realtime-js": "^2.7.1",
+    "@supabase/supabase-js": "^2.12.1",
+    "nanoevents": "^7.0.1"
+  }
+}

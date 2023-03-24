@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "checkJs": true,
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "incremental": false,
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "outDir": "./dist",
+    "paths": { 
+      "@annotorious/openseadragon": ["../annotorious-openseadragon/src"] 
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": false,
+    "sourceMap": true,
+    "target": "ESNext"
+  },
+  "include": ["./src/**/*", "./test/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

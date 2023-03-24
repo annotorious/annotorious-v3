@@ -1,2 +1,3 @@
-# annotorious-3
-Prototyping the next major release of Annotorious
+# Annotorious v3 Prototyping
+
+Prototyping for the next major version of [Annotorious](https://annotorious.com).
