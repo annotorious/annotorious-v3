@@ -131,3 +131,19 @@ export const shouldNotify = <T extends Annotation>(observer: StoreObserver<T>, e
   }
 
 }
+
+export const mergeChanges = <T extends Annotation>(event: StoreChangeEvent<T>, toMerge: StoreChangeEvent<T>) => {
+  if (event.origin !== toMerge.origin)
+    throw 'Cannot merge events from different origins';
+
+  return {
+    origin: toMerge.origin,
+    changes: {
+      // TODO filter created that were deleted in the same go
+      created: [...(event.changes.created || []), ...(toMerge.changes.created || []) ],
+      deleted: [...(event.changes.deleted || []), ...(toMerge.changes.deleted || []) ] 
+      // TODO merge updates
+    },
+    state: toMerge.state
+  }
+}
