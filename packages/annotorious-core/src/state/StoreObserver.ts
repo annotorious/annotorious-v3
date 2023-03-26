@@ -20,9 +20,6 @@ export interface StoreChangeEvent<T extends Annotation> {
 
 }
 
-/** Enum to indicate whether the change originated locally or from a remote source **/
-export enum Origin { LOCAL = 'LOCAL', REMOTE = 'REMOTE' };
-
 export interface ChangeSet<T extends Annotation> {
 
   added?: T[];
@@ -49,7 +46,7 @@ export interface Update<T extends Annotation> {
 
 }
 
-/** Options to control which events the observer want to get notified of **/
+/** Options to control which events the observer wants to get notified about **/
 export interface StoreObserveOptions {
 
   // Observe changes on targets, bodies or both?
@@ -63,17 +60,28 @@ export interface StoreObserveOptions {
 
 }
 
-/** Allows observers to register for events that affect specific annotation parts **/
+/** Allows the observer to listen for events affecting specific annotation parts **/
 export enum Affects { 
 
+  // Only changes that affected full annotations (add, delete)
   ANNOTATION = 'ANNOTATION',
   
+  // Only changes that affected at least one body
   BODY = 'BODY',
 
+  // Only changes that affected at least one target
   TARGET = 'TARGET'
 
 }
 
+/** Allows the observer to listen only for events that originated locally or from a remote source **/
+export enum Origin { 
+  
+  LOCAL = 'LOCAL', 
+  
+  REMOTE = 'REMOTE' 
+
+}
 
 /** Tests if this observer should be notified about this event **/
 export const shouldNotify = <T extends Annotation>(observer: StoreObserver<T>, event: StoreChangeEvent<T>) => {
