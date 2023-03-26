@@ -96,9 +96,9 @@
   });
 
   store.observe(event => {
-    const { added, updated, deleted } = event.changes;
+    const { created, updated, deleted } = event.changes;
 
-    added.forEach(annotation => stage.addAnnotation(annotation));
+    created.forEach(annotation => stage.addAnnotation(annotation));
 
     updated.forEach(({ oldValue, newValue }) => stage.updateAnnotation(oldValue, newValue));
 
