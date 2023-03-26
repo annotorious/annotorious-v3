@@ -23,7 +23,7 @@ export function createStore<T extends Annotation>() {
     const event: StoreChangeEvent<T> = {
       origin,
       changes: {
-        added: changes.added || [],
+        created: changes.created || [],
         updated: changes.updated || [],
         deleted: changes.deleted || []
       },
@@ -43,7 +43,7 @@ export function createStore<T extends Annotation>() {
       throw Error(`Cannot add annotation ${annotation.id} - exists already`);
     } else {
       index.set(annotation.id, annotation);
-      emit(origin, { added: [annotation] });
+      emit(origin, { created: [annotation] });
     }
   }
 
@@ -58,7 +58,7 @@ export function createStore<T extends Annotation>() {
       index.set(oldValue.id, newValue);
 
       const update: Update<T> = {
-        oldValue, newValue, bodiesAdded: [ body ]
+        oldValue, newValue, bodiesCreated: [ body ]
       };
 
       emit(origin, { updated: [update] });
@@ -75,7 +75,7 @@ export function createStore<T extends Annotation>() {
 
       annotations.forEach(annotation => index.set(annotation.id, annotation));
 
-      emit(origin, { added: annotations, deleted });
+      emit(origin, { created: annotations, deleted });
     } else {
       // Don't allow overwriting of existing annotations
       const existing = annotations.reduce((all, next) => {
@@ -88,7 +88,7 @@ export function createStore<T extends Annotation>() {
 
       annotations.forEach(annotation => index.set(annotation.id, annotation));
 
-      emit(origin, { added: annotations });
+      emit(origin, { created: annotations });
     }
   }
 

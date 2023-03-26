@@ -22,7 +22,7 @@ export interface StoreChangeEvent<T extends Annotation> {
 
 export interface ChangeSet<T extends Annotation> {
 
-  added?: T[];
+  created?: T[];
 
   deleted?: T[];
 
@@ -36,7 +36,7 @@ export interface Update<T extends Annotation> {
 
   newValue: T;
 
-  bodiesAdded?: AnnotationBody[];
+  bodiesCreated?: AnnotationBody[];
 
   bodiesDeleted?: AnnotationBody[];
 
@@ -50,7 +50,7 @@ export interface Update<T extends Annotation> {
 export interface StoreObserveOptions {
 
   // Observe changes on targets, bodies or both?
-  affects?: Affects;
+  ignore?: Ignore;
 
   // Observe changes on one more specific annotations
   annotations?: string | string[];
@@ -60,17 +60,14 @@ export interface StoreObserveOptions {
 
 }
 
-/** Allows the observer to listen for events affecting specific annotation parts **/
-export enum Affects { 
+/** Allows the observer to ignore certain event types **/
+export enum Ignore { 
 
-  // Only changes that affected full annotations (add, delete)
-  ANNOTATION = 'ANNOTATION',
-  
-  // Only changes that affected at least one body
-  BODY = 'BODY',
+  // Don't notify this observer for changes that involve bodies only
+  BODY_ONLY = 'BODY_ONLY',
 
-  // Only changes that affected at least one target
-  TARGET = 'TARGET'
+  // Don't notify for changes on targets only
+  TARGET_ONLY = 'TARGET_ONLY'
 
 }
 
@@ -93,32 +90,34 @@ export const shouldNotify = <T extends Annotation>(observer: StoreObserver<T>, e
   if (!isRelevantOrigin)
     return false;
 
-  if (observer.options.affects) {
-    const { affects } = observer.options;
+  if (observer.options.ignore) {
+    const { ignore } = observer.options;
 
-    const hasAnnotationChange = 
-      changes.added?.length > 0 || changes.deleted?.length > 0;
+    // Shorthand
+    const has = (arg: any[]) => arg?.length > 0;
 
-    if (affects === Affects.ANNOTATION && !hasAnnotationChange)
-      return false;
+    const hasAnnotationChanges =
+      has(changes.created) || has(changes.deleted);
 
-    const hasTargetChange =
-      hasAnnotationChange || changes.updated?.some(u => u.targetUpdated);
+    if (!hasAnnotationChanges) {
+      const hasBodyChanges =
+        changes.updated?.some(u => has(u.bodiesCreated) || has(u.bodiesDeleted) || has(u.bodiesUpdated));
+    
+      const hasTargetChanges = 
+        changes.updated?.some(u => u.targetUpdated);
 
-    if (affects === Affects.TARGET && !hasTargetChange)
-      return false;
+      if (ignore === Ignore.BODY_ONLY && hasBodyChanges && !hasTargetChanges)
+        return false;
 
-    const hasBodyChange = 
-      changes.updated?.some(u => u.bodiesAdded?.length > 0 || u.bodiesDeleted?.length > 0 || u.bodiesUpdated?.length > 0);
-
-    if (affects === Affects.BODY && !hasBodyChange)
-      return false;
+      if (ignore === Ignore.TARGET_ONLY && hasTargetChanges && !hasBodyChanges)
+        return false;
+    }
   }
 
   if (observer.options.annotations) {
     // This observer has a filter set on specific annotations - check affected
     const affectedAnnotations = new Set([
-      ...changes.added.map(a => a.id),
+      ...changes.created.map(a => a.id),
       ...changes.deleted.map(a => a.id),
       ...changes.updated.map(({ oldValue }) => oldValue.id)
     ]);
