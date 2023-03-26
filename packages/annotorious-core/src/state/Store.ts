@@ -1,5 +1,5 @@
 import type { Annotation, AnnotationBody, AnnotationTarget } from '../model';
-import { ChangeType, Origin, shouldNotify, UpdateChange, type ChangeSet } from './StoreObserver';
+import { ChangeType, Origin, shouldNotify, type UpdateChange, type ChangeSet } from './StoreObserver';
 import type { StoreObserver, StoreChangeEvent, StoreObserveOptions } from './StoreObserver';
 
 export type Store<T extends Annotation> = ReturnType<typeof createStore<T>>;
