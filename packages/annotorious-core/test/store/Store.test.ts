@@ -20,13 +20,13 @@ describe('store', () => {
     ],
   };
 
-  it('addAnnotation()', () => {
+  it('should properly run addAnnotation', () => {
     const store = createStore();
     store.addAnnotation(annotation);
     expect(equal(store.getAnnotation(id), annotation)).toBe(true);
   });
 
-  it('addBody()', () => {
+  it('should properly run addBody', () => {
     const store = createStore();
     store.addAnnotation(annotation);
 
@@ -43,7 +43,7 @@ describe('store', () => {
     expect(updatedAnnotation?.bodies.map(b => b.id)).toContain('body-2');
   });
 
-  it('bulkAddAnnotation()', () => {
+  it('should properly run bulkAddAnnotation', () => {
     const store = createStore();
 
     const newAnnotations = [
@@ -64,7 +64,7 @@ describe('store', () => {
     expect(store.getAnnotation('annotation-2')).toBeDefined();
   });
 
-  it('deleteAnnotation()', () => {
+  it('should properly run deleteAnnotation', () => {
     const store = createStore();
     store.addAnnotation(annotation);
 
@@ -74,7 +74,7 @@ describe('store', () => {
     expect(store.getAnnotation(id)).toBeUndefined();
   });
 
-  it('deleteBody()', () => {
+  it('should properly run deleteBody', () => {
     const store = createStore();
     store.addAnnotation(annotation);
 
@@ -85,7 +85,7 @@ describe('store', () => {
     expect(updatedAnnotation?.bodies.length).toBe(0);
   });
 
-  it('updateBody()', () => {
+  it('should properly run updateBody', () => {
     const store = createStore();
     store.addAnnotation(annotation);
 
@@ -103,7 +103,7 @@ describe('store', () => {
     expect(updatedAnnotation?.bodies[0].value).toBe('This is the updated body text');
   });
 
-  it('observe() and unobserve()', () => {
+  it('should properly observe and unobserve', () => {
     const store = createStore();
     const mockObserver = vi.fn()
 
@@ -127,7 +127,7 @@ describe('store', () => {
     expect(mockObserver).not.toHaveBeenCalled();
   });
 
-  it('emit() with origin = Origin.LOCAL', () => {
+  it('should emit with origin = Origin.LOCAL', () => {
     const store = createStore();
     const mockObserver = vi.fn();
 
@@ -137,4 +137,5 @@ describe('store', () => {
     expect(mockObserver).toHaveBeenCalled();
     expect(mockObserver.mock.calls[0][0].origin).toBe(Origin.LOCAL);
   });
+  
 });
