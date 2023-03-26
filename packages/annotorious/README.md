@@ -1,4 +1,4 @@
-# Annotorious
+# @annotorious/annotorious
 
 JavaScript image annotation library.
 
