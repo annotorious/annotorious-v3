@@ -30,6 +30,8 @@ export interface AbstractSelector { }
 
 export interface AnnotationBody {
 
+  id: string;
+
   annotation: string;
 
   type?: string;

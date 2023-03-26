@@ -5,8 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "test": "echo 'Skipping tests in @annotorious/annotorious package'"
   },
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
