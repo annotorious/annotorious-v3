@@ -21,6 +21,7 @@ export const parseW3C = (annotations: WebAnnotation[], invertY: boolean = false)
       const { body } = annotation;
 
       const bodies: AnnotationBody[] = (Array.isArray(body) ? body : [body]).map(b => ({
+        id: uuidv4(),
         annotation:id,
         type: b.type,
         purpose: b.purpose,

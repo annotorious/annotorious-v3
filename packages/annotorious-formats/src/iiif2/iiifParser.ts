@@ -31,6 +31,7 @@ export const parseAnnotations = (annotations: IIIFAnnotation[]): IIIFParseResult
           }
         },
         bodies: [{
+          id: uuidv4(),
           annotation: id,
           purpose: 'transcribing',
           value: resource.chars
@@ -51,6 +52,7 @@ export const parseAnnotations = (annotations: IIIFAnnotation[]): IIIFParseResult
             }
           },
           bodies: [{
+            id: uuidv4(),
             annotation: id,
             purpose: 'transcribing',
             value: resource.chars

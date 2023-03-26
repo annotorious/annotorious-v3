@@ -1,5 +1,5 @@
 import type { Annotation, AnnotationBody, AnnotationTarget } from '../model';
-import { ChangeType, Origin, shouldNotify, type UpdateChange, type ChangeSet } from './StoreObserver';
+import { Origin, shouldNotify, type Update, type ChangeSet } from './StoreObserver';
 import type { StoreObserver, StoreChangeEvent, StoreObserveOptions } from './StoreObserver';
 
 export type Store<T extends Annotation> = ReturnType<typeof createStore<T>>;
@@ -19,10 +19,9 @@ export function createStore<T extends Annotation>() {
       observers.splice(idx, 1);
   }
 
-  const emit = (origin: Origin, affects: ChangeType, changes: ChangeSet<T>) => {
+  const emit = (origin: Origin, changes: ChangeSet<T>) => {
     const event: StoreChangeEvent<T> = {
       origin,
-      affects,
       changes: {
         added: changes.added || [],
         updated: changes.updated || [],
@@ -44,7 +43,7 @@ export function createStore<T extends Annotation>() {
       throw Error(`Cannot add annotation ${annotation.id} - exists already`);
     } else {
       index.set(annotation.id, annotation);
-      emit(origin, ChangeType.BOTH, { added: [annotation] });
+      emit(origin, { added: [annotation] });
     }
   }
 
@@ -58,11 +57,11 @@ export function createStore<T extends Annotation>() {
 
       index.set(oldValue.id, newValue);
 
-      const update: UpdateChange<T> = {
+      const update: Update<T> = {
         oldValue, newValue, bodiesAdded: [ body ]
       };
 
-      emit(origin, ChangeType.BODY, { updated: [update] });
+      emit(origin, { updated: [update] });
     } else {
       console.warn(`Attempt to add body to missing annotation: ${body.annotation}`);
     }
@@ -76,7 +75,7 @@ export function createStore<T extends Annotation>() {
 
       annotations.forEach(annotation => index.set(annotation.id, annotation));
 
-      emit(origin, ChangeType.BOTH, { added: annotations, deleted });
+      emit(origin, { added: annotations, deleted });
     } else {
       // Don't allow overwriting of existing annotations
       const existing = annotations.reduce((all, next) => {
@@ -89,7 +88,7 @@ export function createStore<T extends Annotation>() {
 
       annotations.forEach(annotation => index.set(annotation.id, annotation));
 
-      emit(origin, ChangeType.BOTH, { added: annotations });
+      emit(origin, { added: annotations });
     }
   }
 
@@ -100,7 +99,7 @@ export function createStore<T extends Annotation>() {
 
     if (existing) {
       index.delete(id);
-      emit(origin, ChangeType.BOTH, { deleted: [ existing ] });
+      emit(origin, { deleted: [ existing ] });
     } else {
       console.warn(`Attempt to delete missing annotation: ${id}`);
     }
@@ -116,11 +115,11 @@ export function createStore<T extends Annotation>() {
       
       index.set(oldValue.id, newValue);
 
-      const update: UpdateChange<T> = {
+      const update: Update<T> = {
         oldValue, newValue, bodiesDeleted: [body]
       };
 
-      emit(origin, ChangeType.BODY, { updated: [update] });
+      emit(origin, { updated: [update] });
     } else {
       console.warn(`Attempt to delete body from missing annotation: ${body.annotation}`);
     }
@@ -139,19 +138,19 @@ export function createStore<T extends Annotation>() {
         bodies: oldValue.bodies.map(b => b === oldBody ? newBody : b)
       };
 
-      const update: UpdateChange<T> = {
+      const update: Update<T> = {
         oldValue, newValue,
         bodiesUpdated: [{ oldBody, newBody }]
       }
 
       index.set(oldValue.id, newValue);
-      emit(origin, ChangeType.BODY, { updated: [update] });
+      emit(origin, { updated: [update] });
     } else {
       console.warn(`Attempt to add body to missing annotation: ${oldBody.annotation}`);
     }
   }
 
-  const updateOneTarget = (target: AnnotationTarget): UpdateChange<T> => {
+  const updateOneTarget = (target: AnnotationTarget): Update<T> => {
     const oldValue = index.get(target.annotation);
     
     if (oldValue) {
@@ -172,12 +171,12 @@ export function createStore<T extends Annotation>() {
 
   const updateTarget = (target: AnnotationTarget, origin = Origin.LOCAL) => {
     const update = updateOneTarget(target);
-    emit(origin, ChangeType.TARGET, { updated: [ update ]} );
+    emit(origin, { updated: [ update ]} );
   }
 
   const bulkUpdateTarget = (targets: AnnotationTarget[], origin = Origin.LOCAL) => {
     const updated = targets.map(updateOneTarget)
-    emit(origin, ChangeType.TARGET, { updated });
+    emit(origin, { updated });
   }
 
 	return {

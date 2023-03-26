@@ -14,14 +14,13 @@ export interface StoreChangeEvent<T extends Annotation> {
 
   origin: Origin;
 
-  affects: ChangeType;
-
   changes: ChangeSet<T>;
 
   state: T[];
 
 }
 
+/** Enum to indicate whether the change originated locally or from a remote source **/
 export enum Origin { LOCAL = 'LOCAL', REMOTE = 'REMOTE' };
 
 export interface ChangeSet<T extends Annotation> {
@@ -30,11 +29,11 @@ export interface ChangeSet<T extends Annotation> {
 
   deleted?: T[];
 
-  updated?: UpdateChange<T>[];
+  updated?: Update<T>[];
 
 }
 
-export interface UpdateChange<T extends Annotation> {
+export interface Update<T extends Annotation> {
 
   oldValue: T;
 
@@ -50,14 +49,11 @@ export interface UpdateChange<T extends Annotation> {
 
 }
 
-/** Enum to indicate whether the change affects annotation targets, bodies or both **/
-export enum ChangeType { BOTH, TARGET, BODY }
-
 /** Options to control which events the observer want to get notified of **/
 export interface StoreObserveOptions {
 
   // Observe changes on targets, bodies or both?
-  affects?: ChangeType;
+  affects?: Affects;
 
   // Observe changes on one more specific annotations
   annotations?: string | string[];
@@ -67,9 +63,21 @@ export interface StoreObserveOptions {
 
 }
 
+/** Allows observers to register for events that affect specific annotation parts **/
+export enum Affects { 
+
+  ANNOTATION = 'ANNOTATION',
+  
+  BODY = 'BODY',
+
+  TARGET = 'TARGET'
+
+}
+
+
 /** Tests if this observer should be notified about this event **/
 export const shouldNotify = <T extends Annotation>(observer: StoreObserver<T>, event: StoreChangeEvent<T>) => {
-  const { affects, changes, origin } = event;
+  const { changes, origin } = event;
 
   const isRelevantOrigin = 
     !observer.options.origin || observer.options.origin === origin;
@@ -77,26 +85,27 @@ export const shouldNotify = <T extends Annotation>(observer: StoreObserver<T>, e
   if (!isRelevantOrigin)
     return false;
 
-  // Should this observer be notified of body changes?
-  const shouldNotifyBodies = 
-    observer.options.affects === undefined ||
-    observer.options.affects === ChangeType.BODY || 
-    observer.options.affects === ChangeType.BOTH;
+  if (observer.options.affects) {
+    const { affects } = observer.options;
 
-  // Should this observer be notified of target changes?
-  const shouldNotifyTargets = 
-    observer.options.affects === undefined ||
-    observer.options.affects === ChangeType.TARGET || 
-    observer.options.affects === ChangeType.BOTH;
+    const hasAnnotationChange = 
+      changes.added?.length > 0 || changes.deleted?.length > 0;
 
-  // Is this change relevant to this observer?
-  const isRelevantChangeType = 
-    (affects === ChangeType.BOTH) ||
-    (affects === ChangeType.BODY && shouldNotifyBodies) ||
-    (affects === ChangeType.TARGET && shouldNotifyTargets);
+    if (affects === Affects.ANNOTATION && !hasAnnotationChange)
+      return false;
 
-  if (!isRelevantChangeType)
-    return false;
+    const hasTargetChange =
+      hasAnnotationChange || changes.updated?.some(u => u.targetUpdated);
+
+    if (affects === Affects.TARGET && !hasTargetChange)
+      return false;
+
+    const hasBodyChange = 
+      changes.updated?.some(u => u.bodiesAdded?.length > 0 || u.bodiesDeleted?.length > 0 || u.bodiesUpdated?.length > 0);
+
+    if (affects === Affects.BODY && !hasBodyChange)
+      return false;
+  }
 
   if (observer.options.annotations) {
     // This observer has a filter set on specific annotations - check affected

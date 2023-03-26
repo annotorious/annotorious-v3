@@ -1,4 +1,4 @@
-import { Annotation, AnnotationLayer, ChangeType, Origin, StoreChangeEvent } from '@annotorious/core';
+import { Annotation, AnnotationLayer, Origin, StoreChangeEvent } from '@annotorious/core';
 import { createClient } from '@supabase/supabase-js';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabasePluginConfig } from 'src/SupabasePluginConfig';
@@ -46,7 +46,7 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, config: Sup
     }
   });
 
-  anno.store.observe(onStoreChange, { affects: ChangeType.BOTH, origin: Origin.LOCAL });
+  anno.store.observe(onStoreChange, { origin: Origin.LOCAL });
 
   channel.on(
     'postgres_changes', 
