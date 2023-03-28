@@ -1,25 +1,20 @@
 import { Annotation, AnnotationLayer, Origin, StoreChangeEvent } from '@annotorious/core';
-import { createClient } from '@supabase/supabase-js';
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import type { SupabasePluginConfig } from 'src/SupabasePluginConfig';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 const DEBOUNCE_DELAY_MS = 1000;
 
-export const PostgresConnector = (anno: AnnotationLayer<Annotation>, config: SupabasePluginConfig, channel: RealtimeChannel) => {
-
-  const client = createClient(`https://${config.base}`, config.apiKey);
-
-  const { store } = anno;
+export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, channel: RealtimeChannel) => {
 
   let debounceTimer: ReturnType<typeof setTimeout> = null;
 
   let debouncedChanges = [];
 
   const onStoreChange = ((event: StoreChangeEvent<Annotation>) =>  {
-    const { added } = event.changes;
+    const { created } = event.changes;
 
     // For this hack, ignore everything except create events
-    if (added.length > 0) {
+    if (created.length > 0) {
       clearTimeout(debounceTimer);
 
       // TODO batch changes instead of just pushing to the list    
@@ -28,12 +23,12 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, config: Sup
       debounceTimer = setTimeout(() => { 
         // Just a hack for now
         console.log('[PG Tx] Sending DB update');
-        const firstAdded = added[0];
+        const firstAdded = created[0];
 
         // TODO POST annotation + target
         console.log('inserting', firstAdded);
 
-        client
+        supabase
           .from('annotations')
           .insert({ 
             id: firstAdded.id,
@@ -74,10 +69,7 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, config: Sup
     });
 
   return {
-    destroy: () => { 
-      anno.store.unobserve(onStoreChange);
-      // TODO clean up client
-    }
+    destroy: () => anno.store.unobserve(onStoreChange)
   }
 
 }
