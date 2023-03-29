@@ -12,6 +12,8 @@ export interface LifecycleEvents<T extends Annotation> {
 
   deleteAnnotation: (annotation: T) => void;
 
+  selectionChanged: (annotation: T[]) => void;
+
   updateAnnotation: (annotation: T, previous: T) => void;
 
 }
@@ -38,21 +40,9 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
       callbacks.splice(callbacks.indexOf(callback), 1);
   }
 
-  const emit = (event: keyof LifecycleEvents<T>, arg0: T, arg1: T = null) => {
+  const emit = (event: keyof LifecycleEvents<T>, arg0: T | T[], arg1: T = null) => {
     if (observers.has(event))
-      observers.get(event).forEach(callback => callback(arg0, arg1));
-  }
-
-  // Helper to check if the set of selected annotations has changed
-  const hasSelectionChanged = (updated: T[] | null) => {
-    if (!updated && !initialSelection) // both null
-      return false;
-
-    if (!updated || !initialSelection) // one of them is null
-      return true;
-
-    const initialIds = new Set(initialSelection.map(a => a.id));
-    return !updated.every(a => initialIds.has(a.id));
+      observers.get(event).forEach(callback => callback(arg0 as T & T[], arg1));
   }
 
   selectionState.subscribe(selected => {
@@ -93,6 +83,8 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
         ...selected.filter(id => !initialIds.has(id)).map(id => store.getAnnotation(id))
       ];
     }
+
+    emit('selectionChanged', initialSelection);
   });
 
   // Forward local CREATE and DELETE events
