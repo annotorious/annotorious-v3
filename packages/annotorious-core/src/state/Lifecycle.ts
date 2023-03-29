@@ -102,9 +102,6 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
     deleted.forEach(a => emit('deleteAnnotation', a));
   }, { origin: Origin.LOCAL });
 
-  return {
-    on,
-    off
-  }
+  return { on, off }
 
 }
