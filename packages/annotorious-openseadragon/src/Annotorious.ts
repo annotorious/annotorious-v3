@@ -20,12 +20,12 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
 
   const displayLayer = new PixiLayer({
     target: viewer.element,
-    props: { store, viewer, opts }
+    props: { store, viewer }
   });
 
   const drawingLayer = new SVGDrawingLayer({
     target: viewer.element.querySelector('.openseadragon-canvas'),
-    props: { store, viewer, opts, user: currentUser }
+    props: { store, viewer, user: currentUser }
   });
 
   displayLayer.$on('click', (evt: CustomEvent<PixiLayerClickEvent>) => {

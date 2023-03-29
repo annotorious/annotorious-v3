@@ -39,7 +39,7 @@ export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: Supaba
     realtime = new RealtimeClient(`wss://${base}/realtime/v1`, {
       params: {
         apikey: apiKey,
-        eventsPerSecond: eventsPerSecond || 10,
+        eventsPerSecond: eventsPerSecond || 30,
       }
     });
 

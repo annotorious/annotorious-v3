@@ -6,9 +6,9 @@ export type Selection<T extends Annotation> = ReturnType<typeof createSelectionS
 
 export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
 
-  const { subscribe, set } = writable<T[]>(null);
+  const { subscribe, set } = writable<string[]>(null);
 
-  let currentSelection: T[] = null;
+  let currentSelection: string[] = null;
 
   subscribe(updated => currentSelection = updated);
 
@@ -21,46 +21,33 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
       return false;
 
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
-    return currentSelection.some(a => a.id === id);
+    return currentSelection.some(i => i === id);
   }
 
   const clickSelect = (evt: PointerEvent, id: string) => {
     // TODO allow CTRL select
-    const annotation = store.getAnnotation(id);
-    if (annotation)
-      set([annotation]);
+    set([id]);
   }
 
   const setSelected = (idOrIds: string | string[]) => {
     const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-    set(ids.map(id => store.getAnnotation(id))); 
+    set(ids); 
   }
 
-  const removeFromSelection = (annotations: T[]) => {
+  const removeFromSelection = (ids: string[]) => {
     if (!currentSelection)
       return;
 
-    const ids = new Set(annotations.map(a => a.id));
-
     // Checks which of the given annotations are actually in the selection
-    const toRemove = currentSelection.filter(a => ids.has(a.id))
+    const toRemove = currentSelection.filter(id => ids.includes(id))
 
     if (toRemove.length > 0)
-      set(currentSelection.filter(a => !ids.has(a.id)))
-  }
-
-  const updateInSelection = (oldValue: T, newValue: T) => {
-    if (currentSelection && isSelected(oldValue))
-      set(currentSelection.map(a => a.id === oldValue.id ? newValue : a));
+      set(currentSelection.filter(id => !ids.includes(id)))
   }
 
   // Track store delete and update events
-  store.observe(({ changes }) => {    
-    removeFromSelection(changes.deleted);
-    
-    changes.updated.forEach(({ oldValue, newValue }) =>
-      updateInSelection(oldValue, newValue));
-  });
+  store.observe(({ changes }) =>
+    removeFromSelection(changes.deleted.map(a => a.id)));
 
   return { 
     clear, 

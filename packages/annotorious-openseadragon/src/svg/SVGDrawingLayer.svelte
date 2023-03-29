@@ -2,7 +2,7 @@
   import { onMount, type SvelteComponent } from 'svelte';
   import { v4 as uuidv4 } from 'uuid';
   import OpenSeadragon from 'openseadragon';
-  import type { User } from '@annotorious/core';
+  import type { StoreChangeEvent, User } from '@annotorious/core';
   import { getEditor } from '@annotorious/annotorious';
   import type { AnnotoriousOptions, ImageAnnotation, Shape, ImageAnnotationStore } from '@annotorious/annotorious';
     
@@ -10,24 +10,50 @@
 
   export let viewer: OpenSeadragon.Viewer;
 
-  export let opts: AnnotoriousOptions;
-
   export let user: User;
 
   export let tool: typeof SvelteComponent = null;
 
   export let keepEnabled: boolean = false;
 
+  // Current layer scale
+  let scale = 1;
+
+  // CSS layer transform
+  let layerTransform: string;
+
+  // Selected IDs
   const { selection } = store;
 
-  // CSS transform, SVG overlay to OSD viewport state
-  let overlayTransform: string;
+  // Selected annotations, tracked live from the store
+  let selectedAnnotations: ImageAnnotation[] = null;
 
-  let scale = 1;
+  let storeObserver = null;
 
   $: if (tool && $selection) { selection.clear() }
   
   $: tool ? viewer.setMouseNavEnabled(false) : viewer.setMouseNavEnabled(true); 
+
+  $: trackSelection($selection);
+
+  const trackSelection = (ids: string[] | null) => {
+    store.unobserve(storeObserver);
+
+    if (ids) {
+      // Resolve selected IDs from the store
+      selectedAnnotations = ids.map(id => store.getAnnotation(id));
+
+      // Track updates on the selected annotations
+      storeObserver = (event: StoreChangeEvent<ImageAnnotation>) => {
+        const { updated } = event.changes;
+        selectedAnnotations = updated.map(change => change.newValue);
+      }   
+      
+      store.observe(storeObserver, { annotations: $selection });
+    } else {
+      selectedAnnotations = null;
+    }
+  }
 
   // Coordinate transform, element offset to OSD image coordinates
   const toolTransform = (offsetX: number, offsetY: number): [number, number] => {
@@ -49,7 +75,7 @@
     const scaleX = flipped ? - scaleY : scaleY;
     const rotation = viewer.viewport.getRotation();
 
-    overlayTransform = `translate(${p.x}, ${p.y}) scale(${scaleX}, ${scaleY}) rotate(${rotation})`;
+    layerTransform = `translate(${p.x}, ${p.y}) scale(${scaleX}, ${scaleY}) rotate(${rotation})`;
 
     scale = zoom * containerWidth / viewer.world.getContentFactor();
   }
@@ -119,9 +145,9 @@
 <svg 
   class="a9s-svg-drawing-canvas"
   class:drawing={tool}>
-  <g transform={overlayTransform}>
-    {#if $selection}
-      {#each $selection as selected}
+  <g transform={layerTransform}>
+    {#if selectedAnnotations}
+      {#each selectedAnnotations as selected}
         <svelte:component 
           this={getEditor(selected.target.selector)}
           shape={cast(selected.target.selector)}

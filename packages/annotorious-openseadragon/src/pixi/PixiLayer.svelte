@@ -9,8 +9,6 @@
 
   export let viewer: OpenSeadragon.Viewer;
 
-  export let opts: AnnotoriousOptions;
-
   const { hover } = store;
   
   const dispatch = createEventDispatcher<{ click: PixiLayerClickEvent}>();

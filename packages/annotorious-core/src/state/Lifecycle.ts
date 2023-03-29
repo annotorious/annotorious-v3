@@ -56,13 +56,12 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
   }
 
   selectionState.subscribe(selected => {
-    // Don't do anything if the set of selected annotations hasn't changed
-    if (!hasSelectionChanged(selected))
+    if (!initialSelection && !selected)
       return;
 
     if (initialSelection === null && selected) {
       // A new selection was made - store as initial state
-      initialSelection = selected.map(t => ({...t}));
+      initialSelection = selected.map(id => store.getAnnotation(id));
     } else if (initialSelection && selected === null) {
       // Deselect!
       initialSelection.forEach(initial => {
@@ -76,7 +75,7 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
     } else {
       // Changed selection
       const initialIds = new Set(initialSelection.map(a => a.id));
-      const selectedIds = new Set(selected.map(a => a.id));
+      const selectedIds = new Set(selected);
 
       // Fire update events for deselected annotations that have changed
       const deselected = initialSelection.filter(a => !selectedIds.has(a.id));
@@ -91,16 +90,35 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
         // Remove annotations that were deselected
         ...initialSelection.filter(a => selectedIds.has(a.id)),
         // Add annotations that were selected
-        ...selected.filter(a => !initialIds.has(a.id))
+        ...selected.filter(id => !initialIds.has(id)).map(id => store.getAnnotation(id))
       ];
     }
   });
 
+  // Forward local CREATE and DELETE events
   store.observe(event => {
     const { created, deleted } = event.changes;
     created.forEach(a => emit('createAnnotation', a));
     deleted.forEach(a => emit('deleteAnnotation', a));
   }, { origin: Origin.LOCAL });
+
+  // Track remote changes - these should update the initial state
+  store.observe(event => {
+    if (initialSelection) {
+      const selectedIds = new Set(initialSelection.map(a => a.id));
+
+      const relevantUpdates = event.changes.updated
+        .filter(({ newValue }) => selectedIds.has(newValue.id))
+        .map(({ newValue }) => newValue);
+
+      if (relevantUpdates.length > 0) {
+        initialSelection = initialSelection.map(selected => {
+          const updated = relevantUpdates.find(updated => updated.id === selected.id);
+          return updated ? updated : selected;
+        })
+      }
+    }
+  }, { origin: Origin.REMOTE });
 
   return { on, off }
 
