@@ -1,6 +1,7 @@
 import equal from 'deep-equal';
 import type { Annotation } from '../model';
 import type { Store } from './Store';
+import { Origin } from './StoreObserver';
 import type { Selection } from './Selection';
 
 export type Lifecycle<T extends Annotation> = ReturnType<typeof createLifecyleObserver<T>>;
@@ -8,8 +9,6 @@ export type Lifecycle<T extends Annotation> = ReturnType<typeof createLifecyleOb
 export interface LifecycleEvents<T extends Annotation> {
 
   createAnnotation: (annotation: T) => void;
-
-  createSelection: (annotation: T) => void;
 
   deleteAnnotation: (annotation: T) => void;
 
@@ -64,25 +63,44 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
     if (initialSelection === null && selected) {
       // A new selection was made - store as initial state
       initialSelection = selected.map(t => ({...t}));
-
-      selected.forEach(annotation => {
-        if (annotation.bodies.length === 0)
-          emit('createSelection', annotation);
-      });
     } else if (initialSelection && selected === null) {
       // Deselect!
-      initialSelection.forEach(initialAnnotation => {
-        const currentState = store.getAnnotation(initialAnnotation.id);        
-        if (!currentState) {
-          emit('deleteAnnotation', initialAnnotation);
-        } else if (initialAnnotation.bodies.length === 0 && currentState.bodies.length > 0) {
-          emit('createAnnotation', currentState);
-        } else if (!equal(currentState, initialAnnotation)) {
-          emit('updateAnnotation', currentState, initialAnnotation);
-        }
+      initialSelection.forEach(initial => {
+        const updatedState = store.getAnnotation(initial.id);        
+
+        if (updatedState && !equal(updatedState, initial))
+          emit('updateAnnotation', updatedState, initial);
       });
+
+      initialSelection = null;
+    } else {
+      // Changed selection
+      const initialIds = new Set(initialSelection.map(a => a.id));
+      const selectedIds = new Set(selected.map(a => a.id));
+
+      // Fire update events for deselected annotations that have changed
+      const deselected = initialSelection.filter(a => !selectedIds.has(a.id));
+      deselected.forEach(initial => {
+        const updatedState = store.getAnnotation(initial.id);
+
+        if (updatedState && !equal(updatedState, initial))
+          emit('updateAnnotation', updatedState, initial);
+      });
+
+      initialSelection = [
+        // Remove annotations that were deselected
+        ...initialSelection.filter(a => selectedIds.has(a.id)),
+        // Add annotations that were selected
+        ...selected.filter(a => !initialIds.has(a.id))
+      ];
     }
   });
+
+  store.observe(event => {
+    const { created, deleted } = event.changes;
+    created.forEach(a => emit('createAnnotation', a));
+    deleted.forEach(a => emit('deleteAnnotation', a));
+  }, { origin: Origin.LOCAL });
 
   return {
     on,
