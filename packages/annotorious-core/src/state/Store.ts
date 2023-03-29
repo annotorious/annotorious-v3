@@ -48,6 +48,8 @@ export function createStore<T extends Annotation>() {
   }
 
   const addBody = (body: AnnotationBody, origin = Origin.LOCAL) => {
+    console.log('adding body');
+    
     const oldValue = index.get(body.annotation);
     if (oldValue) {
       const newValue = { 
