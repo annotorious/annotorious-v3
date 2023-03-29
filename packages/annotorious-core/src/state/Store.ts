@@ -125,7 +125,7 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const getAnnotation = (id: string): T | undefined => index.get(id);
+  const getAnnotation = (id: string): T | undefined => ({...index.get(id)});
 
   const updateBody = (oldBody: AnnotationBody, newBody: AnnotationBody, origin = Origin.LOCAL) => {
     if (oldBody.annotation !== newBody.annotation)
