@@ -96,7 +96,6 @@ export function createStore<T extends Annotation>() {
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
 
     const existing = index.get(id);
-
     if (existing) {
       index.delete(id);
       emit(origin, { deleted: [ existing ] });
@@ -125,7 +124,10 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const getAnnotation = (id: string): T | undefined => ({...index.get(id)});
+  const getAnnotation = (id: string): T | undefined => {
+    const a = index.get(id);
+    return a ? {...a} : undefined;
+  }
 
   const updateBody = (oldBody: AnnotationBody, newBody: AnnotationBody, origin = Origin.LOCAL) => {
     if (oldBody.annotation !== newBody.annotation)

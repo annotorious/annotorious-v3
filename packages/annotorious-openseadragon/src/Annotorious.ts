@@ -1,7 +1,7 @@
 import type OpenSeadragon from 'openseadragon';
 import { createImageStore, fillDefaults, listTools, getTool, type ImageAnnotation } from '@annotorious/annotorious';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
-import { createAnonymousGuest, Origin, type AnnotationLayer, type User } from '@annotorious/core';
+import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLayer, type User } from '@annotorious/core';
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer } from './svg';
@@ -13,6 +13,8 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   const opts = fillDefaults(options);
 
   const store = createImageStore(opts);
+
+  const lifecycle = createLifecyleObserver(store.selection, store);
 
   let currentUser = opts.readOnly ? null : createAnonymousGuest();
 
@@ -58,6 +60,8 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   return {
     getUser,
     listTools,
+    on: lifecycle.on,
+    off: lifecycle.off,
     setAnnotations,
     setUser,
     startDrawing,

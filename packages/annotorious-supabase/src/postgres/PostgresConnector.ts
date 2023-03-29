@@ -1,4 +1,4 @@
-import { Annotation, AnnotationLayer, Origin, StoreChangeEvent } from '@annotorious/core';
+import type { Annotation, AnnotationLayer } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -10,7 +10,8 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
 
   let debouncedChanges = [];
 
-  const onStoreChange = ((event: StoreChangeEvent<Annotation>) =>  {
+  /*
+  const onLifecycleEvent = (event =>  {
     const { created } = event.changes;
 
     // For this hack, ignore everything except create events
@@ -40,8 +41,28 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       }, DEBOUNCE_DELAY_MS);
     }
   });
+  */
 
-  anno.store.observe(onStoreChange, { origin: Origin.LOCAL });
+  const onCreateSelection = (a: Annotation) => {
+    console.log('created selection', a);
+  }
+
+  const onCreateAnnotation = (a: Annotation) => {
+    console.log('created', a);
+  }
+
+  const onDeleteAnnotation = (a: Annotation) => {
+    console.log('deleted', a);
+  }
+
+  const onUpdateAnnotation = (a: Annotation, previous: Annotation) => {
+    console.log('updated', previous, 'with', a);
+  }
+
+  anno.on('createSelection', onCreateSelection);
+  anno.on('createAnnotation', onCreateAnnotation);
+  anno.on('deleteAnnotation', onDeleteAnnotation);
+  anno.on('updateAnnotation', onUpdateAnnotation);
 
   channel.on(
     'postgres_changes', 
@@ -69,7 +90,12 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
     });
 
   return {
-    destroy: () => anno.store.unobserve(onStoreChange)
+    destroy: () => {
+      anno.off('createAnnotation', onCreateSelection);
+      anno.off('createAnnotation', onCreateAnnotation);
+      anno.off('deleteAnnotation', onDeleteAnnotation);
+      anno.off('updateAnnotation', onUpdateAnnotation);
+    }
   }
 
 }

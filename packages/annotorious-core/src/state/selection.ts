@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store';
 import type { Annotation } from '../model';
 import type { Store } from './Store';
+   
+export type Selection<T extends Annotation> = ReturnType<typeof createSelectionState<T>>;
 
 export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
 

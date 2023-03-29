@@ -71,6 +71,11 @@
         document.getElementById('draw').addEventListener('click', function() {
           anno.startDrawing('polygon');
         });
+
+        anno.on('createAnnotation', a => console.log('created', a));
+        anno.on('createSelection', a => console.log('new selection', a));
+        anno.on('deleteAnnotation', a => console.log('deleted', a));
+        anno.on('updateAnnotation', (a, previous) => console.log('updated', previous, 'with', a));
       }
     </script>
   </body>

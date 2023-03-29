@@ -1,31 +1,31 @@
 import equal from 'deep-equal';
 import type { Annotation } from '../model';
-import { createSelectionState } from './selection';
 import type { Store } from './Store';
+import type { Selection } from './Selection';
 
-interface LifecycleEvents {
+export type Lifecycle<T extends Annotation> = ReturnType<typeof createLifecyleObserver<T>>;
 
-  createAnnotation: (annotation: Annotation) => void;
+export interface LifecycleEvents<T extends Annotation> {
 
-  createSelection: (annotation: Annotation) => void;
+  createAnnotation: (annotation: T) => void;
 
-  deleteAnnotation: (annotation: Annotation) => void;
+  createSelection: (annotation: T) => void;
 
-  updateAnnotation: (annotation: Annotation, previous: Annotation) => void;
+  deleteAnnotation: (annotation: T) => void;
+
+  updateAnnotation: (annotation: T, previous: T) => void;
 
 }
 
-export const createLifecyleEmitter = <T extends Annotation>(store: Store<T>, ) => {
+export const createLifecyleObserver = <T extends Annotation>(selectionState: Selection<T>, store: Store<T> ) => {
 
-  const selectionState = createSelectionState(store);
-
-  const observers = new Map<string, LifecycleEvents[keyof LifecycleEvents][]>();
+  const observers = new Map<string, LifecycleEvents<T>[keyof LifecycleEvents<T>][]>();
 
   // The currently selected annotations, in the state 
   // when they were selected 
   let initialSelection: T[] = null;
 
-  const on = <E extends keyof LifecycleEvents>(event: E, callback: LifecycleEvents[E]) => {
+  const on = <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => {
     if (observers.has(event)) {
       observers.get(event).push(callback);
     } else {
@@ -33,13 +33,13 @@ export const createLifecyleEmitter = <T extends Annotation>(store: Store<T>, ) =
     }
   }
 
-  const off = <E extends keyof LifecycleEvents>(event: E, callback: LifecycleEvents[E]) => {
+  const off = <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => {
     const callbacks = observers.get(event);
     if (callbacks)
       callbacks.splice(callbacks.indexOf(callback), 1);
   }
 
-  const emit = (event: keyof LifecycleEvents, arg0: Annotation, arg1: Annotation = null) => {
+  const emit = (event: keyof LifecycleEvents<T>, arg0: T, arg1: T = null) => {
     if (observers.has(event))
       observers.get(event).forEach(callback => callback(arg0, arg1));
   }
