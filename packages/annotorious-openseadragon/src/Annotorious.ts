@@ -57,6 +57,10 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     drawingLayer.$set({ tool: t, keepEnabled })
   }
 
+  const stopDrawing = () => {
+    drawingLayer.$set({ tool: null });
+  }
+
   return {
     getUser,
     listTools,
@@ -65,6 +69,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     setAnnotations,
     setUser,
     startDrawing,
+    stopDrawing,
     store
   }
 

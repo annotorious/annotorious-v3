@@ -20,7 +20,7 @@
 
   <body>
     <div id="openseadragon">
-      <button id="draw" style="position:absolute; top: 10px; right: 10px; z-index: 1;">Draw</button>
+      <button id="draw" style="position:absolute; top: 10px; right: 10px; z-index: 1;">Start Drawing</button>
     </div>
 
     <script type='module'>
@@ -68,8 +68,19 @@
           .then(annotations =>
             anno.setAnnotations(annotations));
 
-        document.getElementById('draw').addEventListener('click', function() {
-          anno.startDrawing('polygon');
+        const trigger = document.getElementById('draw');
+        trigger.addEventListener('click', function() {
+          const enabled = trigger.dataset.enabled;
+
+          if (enabled) {
+            anno.stopDrawing();
+            delete trigger.dataset.enabled;
+            trigger.innerHTML = 'Start Drawing';
+          } else {
+            anno.startDrawing('box', true);
+            trigger.dataset.enabled = 'true';
+            trigger.innerHTML = 'Stop Drawing';
+          }
         });
 
         anno.on('createAnnotation', a => console.log('created', a));

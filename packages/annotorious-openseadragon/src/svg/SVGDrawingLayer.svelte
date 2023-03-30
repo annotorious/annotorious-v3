@@ -4,7 +4,7 @@
   import OpenSeadragon from 'openseadragon';
   import type { StoreChangeEvent, User } from '@annotorious/core';
   import { getEditor } from '@annotorious/annotorious';
-  import type { AnnotoriousOptions, ImageAnnotation, Shape, ImageAnnotationStore } from '@annotorious/annotorious';
+  import type { ImageAnnotation, Shape, ImageAnnotationStore } from '@annotorious/annotorious';
     
   export let store: ImageAnnotationStore;
 
@@ -30,10 +30,15 @@
 
   let storeObserver = null;
 
-  $: if (tool && $selection) { selection.clear() }
-  
+  // Disable mouse nav when new tool activates
   $: tool ? viewer.setMouseNavEnabled(false) : viewer.setMouseNavEnabled(true); 
 
+  // Clear selection when new tool activates
+  $: tool && selection.clear();
+
+  // If there's no selection and keepEnabled is on, disable mouse nav
+  $: if (!$selection && keepEnabled && tool) { viewer.setMouseNavEnabled(false) }
+  
   $: trackSelection($selection);
 
   const trackSelection = (ids: string[] | null) => {
@@ -105,29 +110,25 @@
   }
 
   const onSelectionCreated = <T extends Shape>(evt: CustomEvent<T>) => {
-    const { detail } = evt;
+    const id = uuidv4();
 
-    if (!keepEnabled) {
-      tool = null;
-      viewer.setMouseNavEnabled(true);
-
-      const id = uuidv4();
-
-      const annotation: ImageAnnotation = {
-        id,
-        bodies: [],
-        target: {
-          annotation: id,
-          selector: detail,
-          creator: user,
-          created: new Date()
-        }
+    const annotation: ImageAnnotation = {
+      id,
+      bodies: [],
+      target: {
+        annotation: id,
+        selector: evt.detail,
+        creator: user,
+        created: new Date()
       }
-
-      store.addAnnotation(annotation);
-
-      selection.setSelected(annotation.id);
     }
+
+    store.addAnnotation(annotation);
+
+    selection.setSelected(annotation.id);
+
+    if (!keepEnabled)
+      tool = null;
   }
 
   onMount(() => {
