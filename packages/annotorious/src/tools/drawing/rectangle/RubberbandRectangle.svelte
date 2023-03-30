@@ -37,23 +37,26 @@
   }
     
   const onPointerUp = () => {
-    const shape: Rectangle = {
-      type: ShapeType.RECTANGLE, 
-      geometry: {
-        bounds: {
-          minX: x, 
-          minY: y,
-          maxX: x + w,
-          maxY: y + h
-        },
-        x, y, w, h
+    // Require 4x4 pixels minimum
+    if (w * h > 15) {
+      const shape: Rectangle = {
+        type: ShapeType.RECTANGLE, 
+        geometry: {
+          bounds: {
+            minX: x, 
+            minY: y,
+            maxX: x + w,
+            maxY: y + h
+          },
+          x, y, w, h
+        }
       }
+
+      dispatch('create', shape);
     }
 
     origin = null;
     anchor = null;
-    
-    dispatch('create', shape);
   }
 
   onMount(() => {

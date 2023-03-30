@@ -127,6 +127,8 @@
 
     selection.setSelected(annotation.id);
 
+    viewer.setMouseNavEnabled(true);
+
     if (!keepEnabled)
       tool = null;
   }
