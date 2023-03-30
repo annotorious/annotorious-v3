@@ -2,6 +2,9 @@ import type { Annotation, AnnotationBody, AnnotationTarget } from '../model';
 import { Origin, shouldNotify, type Update, type ChangeSet } from './StoreObserver';
 import type { StoreObserver, StoreChangeEvent, StoreObserveOptions } from './StoreObserver';
 
+// Shorthand
+type AnnotationBodyIdentifier = { id: string, annotation: string }; 
+
 export type Store<T extends Annotation> = ReturnType<typeof createStore<T>>;
 
 export function createStore<T extends Annotation>() {
@@ -104,23 +107,30 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const deleteBody = (body: AnnotationBody, origin = Origin.LOCAL) => {
-    const oldValue = index.get(body.annotation);
-    if (oldValue) {
-      const newValue = {
-        ...oldValue,
-        bodies: oldValue.bodies.filter(b => b !== body)
-      };
-      
-      index.set(oldValue.id, newValue);
+  const deleteBody = (body: AnnotationBodyIdentifier, origin = Origin.LOCAL) => {
+    const oldAnnotation = index.get(body.annotation);
 
-      const update: Update<T> = {
-        oldValue, newValue, bodiesDeleted: [body]
-      };
+    if (oldAnnotation) {
+      const oldBody = oldAnnotation.bodies.find(b => b.id === body.id);
 
-      emit(origin, { updated: [update] });
+      if (oldBody) {
+        const newAnnotation = {
+          ...oldAnnotation,
+          bodies: oldAnnotation.bodies.filter(b => b.id !== body.id)
+        };
+        
+        index.set(oldAnnotation.id, newAnnotation);
+
+        const update: Update<T> = {
+          oldValue: oldAnnotation, newValue: newAnnotation, bodiesDeleted: [oldBody]
+        };
+
+        emit(origin, { updated: [update] });
+      } else {
+        console.warn(`Attempt to delete missing body ${body.id} from annotation ${body.annotation}`);
+      }
     } else {
-      console.warn(`Attempt to delete body from missing annotation: ${body.annotation}`);
+      console.warn(`Attempt to delete body from missing annotation ${body.annotation}`);
     }
   }
 
@@ -129,26 +139,30 @@ export function createStore<T extends Annotation>() {
     return a ? {...a} : undefined;
   }
 
-  const updateBody = (oldBody: AnnotationBody, newBody: AnnotationBody, origin = Origin.LOCAL) => {
+  const updateBody = (oldBody: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
     if (oldBody.annotation !== newBody.annotation)
       throw 'Annotation integrity violation: annotation ID must be the same when updating bodies';
 
-    const oldValue = index.get(oldBody.annotation);
-    if (oldValue) {
-      const newValue = { 
-        ...oldValue,
-        bodies: oldValue.bodies.map(b => b === oldBody ? newBody : b)
+    const oldAnnotation = index.get(oldBody.annotation);
+    if (oldAnnotation) {
+      const oldBody = oldAnnotation.bodies.find(b => b.id === oldBody.id);
+
+      const newAnnotation = { 
+        ...oldAnnotation,
+        bodies: oldAnnotation.bodies.map(b => b.id === oldBody.id ? newBody : b)
       };
 
+      index.set(oldAnnotation.id, newAnnotation);
+
       const update: Update<T> = {
-        oldValue, newValue,
+        oldValue: oldAnnotation, 
+        newValue: newAnnotation,
         bodiesUpdated: [{ oldBody, newBody }]
       }
 
-      index.set(oldValue.id, newValue);
       emit(origin, { updated: [update] });
     } else {
-      console.warn(`Attempt to add body to missing annotation: ${oldBody.annotation}`);
+      console.warn(`Attempt to add body to missing annotation ${oldBody.annotation}`);
     }
   }
 

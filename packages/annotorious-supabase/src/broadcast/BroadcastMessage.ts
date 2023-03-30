@@ -1,88 +1,94 @@
 import type { Annotation, AnnotationBody, AnnotationTarget } from '@annotorious/core';
 
-export enum BroadcastMessageType {
+export interface BroadcastMessage {
 
-  CREATE_ANNOTATION = 'CREATE_ANNOTATION',
+  from: string;
 
-  DELETE_ANNOTATION = 'DELETE_ANNOTATION',
-
-  CREATE_BODY = 'CREATE_BODY',
-
-  DELETE_BODY = 'DELETE_BODY',
-
-  UPDATE_BODY = 'UPDATE_BODY',
-
-  UPDATE_TARGET = 'UPDATE_TARGET',
-
-  SELECT_ANNOTATION = 'SELECT_ANNOTATION'
+  events: BroadcastEvent[];
 
 }
 
-export type CreateAnnotationMessage = {
+export type BroadcastEvent = 
+  CreateAnnotationEvent | 
+  DeleteAnnotationEvent |
+  CreateBodyEvent |
+  DeleteBodyEvent |
+  UpdateBodyEvent |
+  UpdateTargetEvent |
+  SelectAnnotationEvent;
 
-  type: BroadcastMessageType.CREATE_ANNOTATION;
+export enum BroadcastEventType {
+
+  CREATE_ANNOTATION = 'CRTANN',
+
+  DELETE_ANNOTATION = 'DELANN',
+
+  CREATE_BODY = 'CRTBDY',
+
+  DELETE_BODY = 'DELBDY',
+
+  UPDATE_BODY = 'UPTBDY',
+
+  UPDATE_TARGET = 'UPTTGT',
+
+  SELECT_ANNOTATION = 'SELECT'
+
+}
+
+export type CreateAnnotationEvent = {
+
+  type: BroadcastEventType.CREATE_ANNOTATION;
 
   annotation: Annotation;
 
 }
 
-export type DeleteAnnotationMessage = {
+export type DeleteAnnotationEvent = {
 
-  type: BroadcastMessageType.DELETE_ANNOTATION;
+  type: BroadcastEventType.DELETE_ANNOTATION;
 
-  annotation: Annotation;
+  id: string;
 
 } 
 
-export type CreateBodyMessage = {
+export type CreateBodyEvent = {
 
-  type: BroadcastMessageType.CREATE_BODY;
-
-  body: AnnotationBody;
-
-}
-
-export type DeleteBodyMessage = {
-
-  type: BroadcastMessageType.DELETE_BODY;
+  type: BroadcastEventType.CREATE_BODY;
 
   body: AnnotationBody;
 
 }
 
-export type UpdateBodyMessage = {
+export type DeleteBodyEvent = {
 
-  type: BroadcastMessageType.UPDATE_BODY;
+  type: BroadcastEventType.DELETE_BODY;
 
-  oldValue: AnnotationBody;
+  id: string;
 
-  newValue: AnnotationBody;
-
-}
-
-export type UpdateTargetMessage = {
-
-  type: BroadcastMessageType.UPDATE_TARGET;
-
-  oldValue: AnnotationTarget;
-
-  newValue: AnnotationTarget;
+  annotation: string;
 
 }
 
-export type SelectAnnotationMessage = {
+export type UpdateBodyEvent = {
 
-  type: BroadcastMessageType.SELECT_ANNOTATION;
+  type: BroadcastEventType.UPDATE_BODY;
 
-  id: string
+  body: AnnotationBody;
 
 }
 
-export type BroadcastMessage =
-  CreateAnnotationMessage |
-  DeleteAnnotationMessage |
-  CreateBodyMessage |
-  DeleteBodyMessage |
-  UpdateBodyMessage |
-  UpdateTargetMessage |
-  SelectAnnotationMessage;
+export type UpdateTargetEvent = {
+
+  type: BroadcastEventType.UPDATE_TARGET;
+
+  target: AnnotationTarget;
+
+}
+
+export type SelectAnnotationEvent = {
+
+  type: BroadcastEventType.SELECT_ANNOTATION;
+
+  ids: string[]
+
+}
