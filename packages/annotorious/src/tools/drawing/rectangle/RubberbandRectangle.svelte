@@ -13,33 +13,40 @@
 
   let anchor: [number, number];
 
+  let x: number, y: number, w: number, h: number;
+
   const onPointerDown = (evt: PointerEvent) => {
     origin = transform.elementToImage(evt.offsetX, evt.offsetY);
     anchor = origin;
+
+    x = origin[0];
+    y = origin[1];
+    w = 1;
+    h = 1;
   }
 
   const onPointerMove = (evt: PointerEvent) => {
-    if (origin)
+    if (origin) {
       anchor = transform.elementToImage(evt.offsetX, evt.offsetY);
+
+      x = Math.min(anchor[0], origin[0]);
+      y = Math.min(anchor[1], origin[1]);
+      w = Math.abs(anchor[0] - origin[0]);
+      h = Math.abs(anchor[1] - origin[1]);
+    }
   }
     
   const onPointerUp = () => {
-    const [minX, minY] = origin;
-    const [maxX, maxY] = anchor;
-
-    const w = maxX - minX;
-    const h = maxY - minY;
-
     const shape: Rectangle = {
       type: ShapeType.RECTANGLE, 
       geometry: {
         bounds: {
-          minX, 
-          minY,
-          maxX,
-          maxY
+          minX: x, 
+          minY: y,
+          maxX: x + w,
+          maxY: y + h
         },
-        x: minX, y: minY, w, h
+        x, y, w, h
       }
     }
 
@@ -67,10 +74,10 @@
 <g bind:this={container}>
   {#if origin}
     <rect
-      x={origin[0]} 
-      y={origin[1]} 
-      width={anchor[0] - origin[0]} 
-      height={anchor[1] - origin[1]} />
+      x={x} 
+      y={y} 
+      width={w} 
+      height={h} />
   {/if}
 </g>
 

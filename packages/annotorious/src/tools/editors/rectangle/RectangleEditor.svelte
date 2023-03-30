@@ -60,18 +60,20 @@
       }
     }
 
+    const x = Math.min(x0, x1);
+    const y = Math.min(y0, y1);
+    const w = Math.abs(x1 - x0);
+    const h = Math.abs(y1 - y0);
+
     return {
       ...rectangle,
       geometry: {
-        x: x0,
-        y: y0,
-        w: x1 - x0,
-        h: y1 - y0,
+        x, y, w, h,
         bounds: {
-          minX: x0,
-          minY: y0,
-          maxX: x1,
-          maxY: y1
+          minX: x,
+          minY: y,
+          maxX: x + w,
+          maxY: y + h
         }
       }
     };
@@ -82,8 +84,8 @@
   shape={shape}
   transform={transform}
   editor={editor}
-  on:change 
   on:grab
+  on:change 
   on:release
   let:grab={grab}>
 

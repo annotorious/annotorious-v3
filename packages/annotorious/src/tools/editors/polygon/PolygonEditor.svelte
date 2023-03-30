@@ -54,3 +54,9 @@
       x={point[0] - handleSize / 2} y={point[1] - handleSize / 2} height={handleSize} width={handleSize} />
   {/each}
 </Editor>
+
+<style>
+  :global(.a9s-annotation.selected .a9s-corner-handle) {
+    cursor: move;
+  }
+</style>

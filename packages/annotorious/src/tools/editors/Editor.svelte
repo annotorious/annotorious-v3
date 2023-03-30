@@ -16,6 +16,8 @@
 
   let origin: [number, number];
 
+  let initialShape: Shape = shape;
+
   const onGrab = (handle: Handle) => (evt: PointerEvent) => {
     grabbedHandle = handle;
     origin = transform.elementToImage(evt.offsetX, evt.offsetY);
@@ -32,9 +34,7 @@
 
       const delta: [number, number] = [x - origin[0], y - origin[1]];
 
-      origin = transform.elementToImage(evt.offsetX, evt.offsetY);
-
-      shape = editor(shape, grabbedHandle, delta)
+      shape = editor(initialShape, grabbedHandle, delta)
       
       dispatch('change', shape);
     }
@@ -45,6 +45,8 @@
     target.releasePointerCapture(evt.pointerId);
 
     grabbedHandle = null;
+
+    initialShape = shape;
     
     dispatch('release');
   }
@@ -73,6 +75,7 @@
     fill: transparent;
     stroke: #000;
     stroke-width: 1px;
+    cursor: move;
   }
 
   :global(.a9s-annotation.selected .a9s-edge-handle) {
