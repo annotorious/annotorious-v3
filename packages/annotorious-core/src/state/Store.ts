@@ -139,13 +139,13 @@ export function createStore<T extends Annotation>() {
     return a ? {...a} : undefined;
   }
 
-  const updateBody = (oldBody: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
-    if (oldBody.annotation !== newBody.annotation)
+  const updateBody = (oldBodyId: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
+    if (oldBodyId.annotation !== newBody.annotation)
       throw 'Annotation integrity violation: annotation ID must be the same when updating bodies';
 
-    const oldAnnotation = index.get(oldBody.annotation);
+    const oldAnnotation = index.get(oldBodyId.annotation);
     if (oldAnnotation) {
-      const oldBody = oldAnnotation.bodies.find(b => b.id === oldBody.id);
+      const oldBody = oldAnnotation.bodies.find(b => b.id === oldBodyId.id);
 
       const newAnnotation = { 
         ...oldAnnotation,
@@ -162,7 +162,7 @@ export function createStore<T extends Annotation>() {
 
       emit(origin, { updated: [update] });
     } else {
-      console.warn(`Attempt to add body to missing annotation ${oldBody.annotation}`);
+      console.warn(`Attempt to add body to missing annotation ${oldBodyId.annotation}`);
     }
   }
 

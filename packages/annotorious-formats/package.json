@@ -1,10 +1,12 @@
 {
   "name": "@annotorious/formats",
-  "version": "3.0.0-alpha",
+  "version": "3.0.0-pre-alpha-01",
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "test": "vitest"
+    "build": "echo 'Skipping build in @annotorious/formats package'",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "repository": {
     "type": "git",

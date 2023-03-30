@@ -1,7 +1,7 @@
 {
   "name": "@annotorious/monorepo",
   "private": true,
-  "version": "3.0.0-alpha",
+  "version": "3.0.0-pre-alpha-01",
   "description": "Annotorious v3 monorep",
   "author": "Rainer Simon",
   "repository": {
@@ -10,6 +10,7 @@
   },
   "license": "BSD-3-Clause",
   "scripts": {
+    "build": "npm run build --workspaces",
     "test": "npm run test --workspaces"
   },
   "workspaces": [

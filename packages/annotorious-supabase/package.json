@@ -1,11 +1,13 @@
 {
   "name": "@annotorious/supabase",
-  "version": "3.0.0-alpha",
+  "version": "3.0.0-pre-alpha-01",
   "description": "Experimental rewrite of Annotorious",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
     "start": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
     "test": "echo 'Skipping tests in @annotorious/supabase package'"
   },
   "author": "Rainer Simon",

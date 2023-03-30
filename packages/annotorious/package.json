@@ -1,10 +1,11 @@
 {
   "name": "@annotorious/annotorious",
-  "version": "3.0.0-alpha",
+  "version": "3.0.0-pre-alpha-01",
   "description": "Experimental rewrite of Annotorious",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
+    "build": "echo 'Skipping build in @annotorious/annotorious package'",
     "test": "echo 'Skipping tests in @annotorious/annotorious package'"
   },
   "author": "Rainer Simon",
