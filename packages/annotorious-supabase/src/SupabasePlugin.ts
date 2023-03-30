@@ -9,7 +9,7 @@ import type { SupabasePluginEvents } from './SupabasePluginEvents';
 import { PostgresConnector } from './postgres/PostgresConnector';
 // import { createAuth } from './auth/auth';
 
-export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: SupabasePluginConfig) => {
+export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
 
   const { base, apiKey, eventsPerSecond } = config;
 
