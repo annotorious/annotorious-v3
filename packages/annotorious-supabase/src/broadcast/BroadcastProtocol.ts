@@ -60,6 +60,42 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastE
     ];
   }, []);
 
+const reviveDateFields = (obj: any, keyOrKeys: string | string[]) => {
+  const keys = Array.isArray(keyOrKeys) ? keyOrKeys : [ keyOrKeys ];
+
+  keys.forEach(key => {
+    if (obj[key])
+      obj[key] = new Date(obj[key]);
+  });
+
+  return obj;
+}
+
+export const reviveDates = (event: BroadcastEvent) => {
+  if (event.type === BroadcastEventType.CREATE_ANNOTATION) {
+    return { 
+      ...event,
+      annotation: {
+        ...event.annotation,
+        target: reviveDateFields(event.annotation.target, ['created', 'updated']),
+        bodies: event.annotation.bodies.map(b => reviveDateFields(b, ['created', 'updated']))
+      }
+    }
+  } else if (event.type === BroadcastEventType.CREATE_BODY || event.type === BroadcastEventType.UPDATE_BODY) {
+    return {
+      ...event,
+      body: reviveDateFields(event.body, ['created', 'updated'])
+    }
+  } else if (event.type === BroadcastEventType.UPDATE_TARGET) {
+    return  {
+      ...event,
+      target: reviveDateFields(event.target, ['created', 'updated'])
+    }
+  } else {
+    return event;
+  }
+}
+  
 export const apply = (store: Store<Annotation>, event: BroadcastEvent) => {
   if (event.type === BroadcastEventType.CREATE_ANNOTATION) {
     store.addAnnotation(event.annotation, Origin.REMOTE);

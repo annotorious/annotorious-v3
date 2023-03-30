@@ -7,7 +7,7 @@ import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
 import type { SupabasePluginEvents } from './SupabasePluginEvents';
 import { PostgresConnector } from './postgres/PostgresConnector';
-import { createAuth } from './auth/auth';
+// import { createAuth } from './auth/auth';
 
 export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: SupabasePluginConfig) => {
 
@@ -45,9 +45,9 @@ export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: Supaba
 
     channel = realtime.channel(config.channel);
 
-    const auth = createAuth(supabase);
+    // const auth = createAuth(supabase);
 
-    auth.checkStatusAndSignIn('aboutgeo@gmail.com').then(user => {
+    // auth.checkStatusAndSignIn('aboutgeo@gmail.com').then(user => {
       broadcast = BroadcastConnector(anno, channel);
 
       postgres = PostgresConnector(anno, supabase, channel);
@@ -58,7 +58,7 @@ export const SupabasePlugin = (anno: AnnotationLayer<Annotation>, config: Supaba
           presence = PresenceConnector(anno, channel, emitter);
         }
       });  
-    });
+    // });
   });
 
   const disconnect = () => {

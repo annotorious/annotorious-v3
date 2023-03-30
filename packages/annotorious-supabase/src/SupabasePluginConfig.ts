@@ -8,4 +8,6 @@ export interface SupabasePluginConfig {
 
   channel: string;
 
+  user: { id: string, name: string }
+
 }
