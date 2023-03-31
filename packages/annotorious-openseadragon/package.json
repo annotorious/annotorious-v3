@@ -1,12 +1,12 @@
 {
   "name": "@annotorious/openseadragon",
-  "version": "3.0.0-pre-alpha-03",
+  "version": "3.0.0-pre-alpha-04",
   "description": "Experimental rewrite of Annotorious OpenSeadragon",
   "type": "module",
   "main": "./dist/annotorious-openseadragon.js",
   "types": "./dist/annotorious-openseadragon.d.ts",
   "scripts": {
-    "start": "vite --host",
+    "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo 'Skipping tests in @annotorious/openseadragon package'"
