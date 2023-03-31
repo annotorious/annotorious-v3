@@ -16,11 +16,12 @@
 
   let origin: [number, number];
 
-  let initialShape: Shape = shape;
+  let initialShape: Shape = null;
 
   const onGrab = (handle: Handle) => (evt: PointerEvent) => {
     grabbedHandle = handle;
     origin = transform.elementToImage(evt.offsetX, evt.offsetY);
+    initialShape = shape;
 
     const target = evt.target as Element;
     target.setPointerCapture(evt.pointerId);
