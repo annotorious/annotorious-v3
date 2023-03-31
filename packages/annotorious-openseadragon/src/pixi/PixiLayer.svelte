@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
   import OpenSeadragon from 'openseadragon';
-  import type { AnnotoriousOptions, ImageAnnotationStore } from '@annotorious/annotorious';
+  import type { ImageAnnotationStore } from '@annotorious/annotorious';
   import type { PixiLayerClickEvent } from './PixiLayerClickEvent';
   import { createStage } from './stageRenderer';
 
@@ -17,12 +17,16 @@
 
   let dragged = false;
 
-  const onPointerMove = (canvas: HTMLCanvasElement) => (evt: PointerEvent) => {
-    const offsetXY = new OpenSeadragon.Point(evt.offsetX, evt.offsetY);
+  // Helper
+  const getImageXY = (xy: OpenSeadragon.Point): OpenSeadragon.Point => {
+    const offsetXY = new OpenSeadragon.Point(xy.x, xy.y);
     const {x, y} = viewer.viewport.pointFromPixel(offsetXY);
-    const imageXY = viewer.viewport.viewportToImageCoordinates(x, y);
+    return viewer.viewport.viewportToImageCoordinates(x, y);
+  }
 
-    const hovered = store.getAt(imageXY.x, imageXY.y);
+  const onPointerMove = (canvas: HTMLCanvasElement) => (evt: PointerEvent) => {
+    const {x, y} = getImageXY(new OpenSeadragon.Point(evt.offsetX, evt.offsetY));
+    const hovered = store.getAt(x, y);
 
     if (hovered) {
       canvas.classList.add('hover');
@@ -40,11 +44,15 @@
   const onCanvasRelease = (evt: OpenSeadragon.CanvasReleaseEvent) => {
     const originalEvent = evt.originalEvent as PointerEvent;
 
-    if (!dragged)
-      if ($hover)
-        dispatch('click', { originalEvent, annotation: store.getAnnotation($hover) });
+    if (!dragged) {
+      const {x, y} = getImageXY(evt.position);
+      const annotation = store.getAt(x, y);
+
+      if (annotation)
+        dispatch('click', { originalEvent, annotation });
       else
         dispatch('click', { originalEvent });
+    }
 
     dragged = false;
   }

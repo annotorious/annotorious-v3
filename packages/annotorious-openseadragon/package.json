@@ -6,7 +6,7 @@
   "main": "./dist/annotorious-openseadragon.js",
   "types": "./dist/annotorious-openseadragon.d.ts",
   "scripts": {
-    "start": "vite",
+    "start": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo 'Skipping tests in @annotorious/openseadragon package'"
