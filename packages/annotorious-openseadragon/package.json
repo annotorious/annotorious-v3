@@ -3,8 +3,7 @@
   "version": "3.0.0-pre-alpha-04",
   "description": "Experimental rewrite of Annotorious OpenSeadragon",
   "type": "module",
-  "main": "./dist/annotorious-openseadragon.js",
-  "types": "./dist/annotorious-openseadragon.d.ts",
+  "main": "src/index.ts",
   "scripts": {
     "start": "vite",
     "build": "vite build",
