@@ -1,4 +1,5 @@
 import type OpenSeadragon from 'openseadragon';
+import type { SvelteComponent } from 'svelte';
 import { createImageStore, fillDefaults, listTools, getTool, type ImageAnnotation } from '@annotorious/annotorious';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
 import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLayer, type User } from '@annotorious/core';
@@ -53,11 +54,13 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   const getUser = () => currentUser;
 
   const startDrawing = (tool: string, keepEnabled: boolean = false) => {
-    const t = getTool(tool);
+    const t = getTool(tool) as typeof SvelteComponent;
+    //@ts-ignore
     drawingLayer.$set({ tool: t, keepEnabled })
   }
 
   const stopDrawing = () => {
+    //@ts-ignore
     drawingLayer.$set({ tool: null });
   }
 

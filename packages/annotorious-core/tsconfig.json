@@ -14,8 +14,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": false,
     "sourceMap": true,
-    "target": "ESNext",
-    "verbatimModuleSyntax": true
+    "target": "ESNext"
   },
   "include": ["./src/**/*", "./test/**/*"],
   "exclude": ["node_modules", "dist"]
