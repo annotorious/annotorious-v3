@@ -7,6 +7,8 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "5.0",
+    "importsNotUsedAsValues": "error",
     "incremental": false,
     "isolatedModules": true,
     "module": "ESNext",

@@ -1,5 +1,5 @@
-import { Annotation, Origin } from '@annotorious/core';
-import type { AnnotationLayer, StoreChangeEvent } from '@annotorious/core';
+import { Origin } from '@annotorious/core';
+import type { Annotation, AnnotationLayer, StoreChangeEvent } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import { apply, marshal, reviveDates } from './BroadcastProtocol';
 import type { BroadcastMessage } from './BroadcastMessage';

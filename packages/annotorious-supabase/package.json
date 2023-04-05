@@ -14,8 +14,8 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "typescript": "^4.9.5",
-    "vite": "^3.2.0",
-    "vite-plugin-dts": "^2.1.0"
+    "vite": "^4.2.1",
+    "vite-plugin-dts": "^2.2.0"
   },
   "dependencies": {
     "@supabase/realtime-js": "^2.7.1",

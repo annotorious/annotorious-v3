@@ -6,6 +6,7 @@
     "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
     "incremental": false,
     "isolatedModules": true,
     "module": "ESNext",

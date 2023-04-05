@@ -1,5 +1,6 @@
-import { Annotation, Origin, Store, StoreChangeEvent } from '@annotorious/core';
-import { BroadcastEvent, BroadcastEventType } from './BroadcastMessage';
+import { Origin } from '@annotorious/core';
+import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
+import { type BroadcastEvent, BroadcastEventType } from './BroadcastMessage';
 
 export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
