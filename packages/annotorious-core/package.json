@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/core",
-  "version": "3.0.0-pre-alpha-04",
+  "version": "3.0.0-pre-alpha-05",
   "description": "Experimental rewrite of Annotorious",
   "type": "module",
   "main": "src/index.ts",
