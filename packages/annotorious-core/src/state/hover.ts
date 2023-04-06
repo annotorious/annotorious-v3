@@ -23,6 +23,10 @@ export const createHoverState = <T extends Annotation>(store: Store<T>) => {
     }
   });
 
-  return { subscribe, set };
+  return { 
+    get current() { return currentHover },
+    subscribe, 
+    set 
+  };
 
 }
