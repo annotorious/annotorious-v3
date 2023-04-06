@@ -4,7 +4,7 @@ import { ShapeType, computeArea, intersects } from '../model';
 import type { ImageAnnotation, ImageAnnotationTarget } from '../model';
 import type { AnnotoriousOptions } from '../AnnotoriousOptions';
 
-interface IndexedAnnotation {
+interface IndexedTarget {
 
   minX: number;
 
@@ -20,7 +20,7 @@ interface IndexedAnnotation {
 
 const createSpatialTree = () => {
 
-  const tree = new RBush<IndexedAnnotation>();
+  const tree = new RBush<IndexedTarget>();
 
   const all = () => tree.all().map(item => item.target);
 
@@ -40,9 +40,9 @@ const createSpatialTree = () => {
     tree.remove(item, (a, b) => a.target.annotation === b.target.annotation);
   };
 
-  const update = (previous: ImageAnnotationTarget, annotation: ImageAnnotationTarget) => {
+  const update = (previous: ImageAnnotationTarget, updated: ImageAnnotationTarget) => {
     remove(previous);
-    insert(annotation);
+    insert(updated);
   };
 
   const set = (targets: ImageAnnotationTarget[], replace: boolean = true) => {
