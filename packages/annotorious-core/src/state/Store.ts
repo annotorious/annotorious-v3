@@ -70,6 +70,8 @@ export function createStore<T extends Annotation>() {
     }
   }
 
+  const all = () => [...index.values()];
+
   const bulkAddAnnotation = (annotations: T[], replace = true, origin = Origin.LOCAL) => {
     if (replace) {
       // Delete existing first
@@ -198,6 +200,7 @@ export function createStore<T extends Annotation>() {
 	return {
     addAnnotation,
     addBody,
+    all,
     bulkAddAnnotation,
     bulkUpdateTarget,
     deleteAnnotation,
