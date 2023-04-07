@@ -1,19 +1,16 @@
-import { createNanoEvents } from 'nanoevents';
 import type { Annotation, AnnotationLayer } from '@annotorious/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { RealtimeChannel, RealtimeClient } from '@supabase/realtime-js';
 import { BroadcastConnector } from './broadcast/BroadcastConnector';
 import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
-import type { SupabasePluginEvents } from './SupabasePluginEvents';
 import { PostgresConnector } from './postgres/PostgresConnector';
+import type { PresenceEvents } from './presence/PresenceEvents';
 // import { createAuth } from './auth/auth';
 
 export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
 
   const { base, apiKey, eventsPerSecond } = config;
-
-  const emitter = createNanoEvents<SupabasePluginEvents>();
 
   let supabase: SupabaseClient = null;
 
@@ -22,10 +19,10 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
   let channel: RealtimeChannel = null;
 
   let broadcast = null;
-
-  let presence = null;
   
   let postgres = null;
+
+  const presence = PresenceConnector();
 
   const connect = () => new Promise((resolve, reject) => {
     if (supabase)
@@ -55,7 +52,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
       channel.subscribe(status => {
         if (status === 'SUBSCRIBED') {
           // TODO refactor, so we can move this out of the subscribe handler
-          presence = PresenceConnector(anno, channel, emitter);
+          presence.connect(anno, channel);
         }
       });  
     // });
@@ -70,13 +67,10 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
       realtime.removeChannel(channel);
   }
 
-  const on = <E extends keyof SupabasePluginEvents>(event: E, callback: SupabasePluginEvents[E]) =>
-    emitter.on(event, callback);
-
   return {
     connect,
     disconnect,
-    on
+    on: presence.on
   }
 
 }

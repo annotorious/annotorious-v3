@@ -68,8 +68,12 @@
         
         var supabase = SupabasePlugin(anno, config);
 
-        supabase.on('presence', function(users) {
-          console.log('presence change', users);
+        supabase.on('presence', function(usersStates) {
+          console.log('presence change', usersStates);
+        });
+
+        supabase.on('selectionChange', (user, selected) => {
+          console.log('user selection', user, selected);
         });
 
         supabase.connect();

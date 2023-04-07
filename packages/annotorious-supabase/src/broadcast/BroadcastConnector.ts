@@ -7,8 +7,8 @@ import type { BroadcastMessage } from './BroadcastMessage';
 export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel) => {
 
   const onStoreChange = ((event: StoreChangeEvent<Annotation>) =>  {
-    const message = {
-      from: 'test-user-1',
+    const message: BroadcastMessage = {
+      from: anno.getUser(),
       events: marshal([ event ])
     };
 

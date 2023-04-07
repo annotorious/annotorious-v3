@@ -1,8 +1,8 @@
-import type { Annotation, AnnotationBody, AnnotationTarget } from '@annotorious/core';
+import type { Annotation, AnnotationBody, AnnotationTarget, User } from '@annotorious/core';
 
 export interface BroadcastMessage {
 
-  from: string;
+  from: User;
 
   events: BroadcastEvent[];
 
