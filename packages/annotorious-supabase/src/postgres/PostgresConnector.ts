@@ -1,11 +1,36 @@
-import type { AbstractSelector, Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
+import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import equal from 'deep-equal';
 
-const serializeSelector = (s: AbstractSelector) => {
-  // TODO
-  return 'foo';
+// Helpers
+const hasTargetChanged = (oldValue: Annotation, newValue: Annotation) => 
+  !equal(oldValue.target, newValue.target);
+
+const bodiesAdded = (oldValue: Annotation, newValue: Annotation, anno: AnnotationLayer<Annotation>) => {
+  const oldBodyIds = new Set(oldValue.bodies.map(b => b.id));
+
+  const added = newValue.bodies.filter(b => !oldBodyIds.has(b.id));
+
+  if (added.some(b => b.creator.id !== anno.getUser().id)) {
+    console.error('Integrity exception: invalid creator on added body', added);
+    console.error('Current user:', anno.getUser());
+    throw 'Integrity exception: invalid creator on added body';
+  }
+
+  return added;
 }
+
+const bodiesRemoved = (oldValue: Annotation, newValue: Annotation) => {
+  const newBodyIds = new Set(oldValue.bodies.map(b => b.id));
+  return oldValue.bodies.filter(b => !newBodyIds.has(b.id));
+}
+
+const bodiesChanged = (oldValue: Annotation, newValue: Annotation, anno: AnnotationLayer<Annotation>) => 
+  newValue.bodies.filter(newBody => {
+    const oldBody = oldValue.bodies.find(b => b.id === newBody.id);
+    return oldBody ? !equal(oldBody, newBody) : false;
+  });
 
 export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, channel: RealtimeChannel) => {
 
@@ -34,8 +59,17 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       created_at: t.created,
       created_by: anno.getUser().id,
       annotation_id: t.annotation,
-      value: serializeSelector(t)
+      value: JSON.stringify(t.selector)
+    });
+
+  const updateTarget = (t: AnnotationTarget) => supabase
+    .from('targets')
+    .update({
+      updated_at: t.updated,
+      updated_by: anno.getUser().id,
+      value: JSON.stringify(t.selector)
     })
+    .eq('annotation_id', t.annotation);
 
   const onCreateAnnotation = (a: Annotation) => createAnnotation(a)
     .then(() => createTarget(a.target))
@@ -51,7 +85,16 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
   }
 
   const onUpdateAnnotation = (a: Annotation, previous: Annotation) => {
-    console.log('updated', previous, 'with', a);
+    if (hasTargetChanged(previous, a))
+      updateTarget(a.target).then(() => console.log('updated', previous, 'with', a));
+
+    const add = bodiesAdded(previous, a, anno);
+    const drop = bodiesRemoved(previous, a);
+    const update = bodiesChanged(previous, a, anno);
+
+    console.log('Body updates:', { add, drop, update });
+
+    // TODO
   }
 
   anno.on('createAnnotation', onCreateAnnotation);
