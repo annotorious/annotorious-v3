@@ -3,7 +3,6 @@ import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import equal from 'deep-equal';
 
-// Helpers
 const hasTargetChanged = (oldValue: Annotation, newValue: Annotation) => 
   !equal(oldValue.target, newValue.target);
 
@@ -48,6 +47,8 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       id: b.id,
       created_at: b.created,
       created_by: anno.getUser().id,
+      updated_at: b.created,
+      updated_by: anno.getUser().id,
       annotation_id: b.annotation,
       purpose: b.purpose,
       value: b.value
@@ -58,6 +59,8 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
     .insert({
       created_at: t.created,
       created_by: anno.getUser().id,
+      updated_at: t.created,
+      updated_by: anno.getUser().id,
       annotation_id: t.annotation,
       value: JSON.stringify(t.selector)
     });
@@ -81,7 +84,8 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
     });
 
   const onDeleteAnnotation = (a: Annotation) => {
-    console.log('deleted', a);
+    // TODO
+    console.log('deleting', a);
   }
 
   const onUpdateAnnotation = (a: Annotation, previous: Annotation) => {
@@ -123,6 +127,30 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       }
       */
     });
+
+  // Initial load
+  supabase.from('annotations').select(`
+    id,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by,
+    version,
+    auth.user (*),
+    targets ( 
+      *
+    ),
+    bodies ( 
+      * 
+    )
+  `).then(({ data, error }) => {
+    if (!error) {
+      console.log('initial load', data);
+     // anno.setAnnotations(data.map(toAnnotation))
+    } else {
+      console.error('Initial load failed', error);
+    }
+  })
 
   return {
     destroy: () => {
