@@ -15,12 +15,31 @@
       .openseadragon-canvas {
         outline: none;
       }
+
+      #draw {
+        position:absolute; 
+        top: 10px; 
+        right: 10px; 
+        z-index: 1;
+      }
+
+      #login {
+        background-color: #fff;
+        border: 1px solid #333;
+        color: #333;
+        padding: 2px 8px;
+        position: absolute;
+        top: 10px;
+        right: 80px;
+        z-index: 1;
+      }
     </style>
   </head>
 
   <body>
     <div id="openseadragon">
-      <button id="draw" style="position:absolute; top: 10px; right: 10px; z-index: 1;">Draw</button>
+      <button id="draw">Draw</button>
+      <button id="login">...</button>
     </div>
 
     <script type='module'>
@@ -68,6 +87,30 @@
         
         var supabase = SupabasePlugin(anno, config);
 
+        var login = document.getElementById('login');
+
+        login.addEventListener('click', function() {
+          var email = prompt('E-mail');
+          supabase.auth.signIn(email)
+            .then(response => {
+              login.disabled = true;
+              login.innerHTML = 'Logged In';
+              console.log('login response', response);
+            })
+            .catch(error => {
+              console.log('login error', error);
+            })
+        });
+
+        supabase.auth.getUser()
+          .then(response => {
+            console.log(response)
+            login.innerHTML = response.email;
+
+            anno.setUser({ id: response.id, name: response.email });
+          })
+          .catch(() => login.innerHTML = 'Not Logged In');
+
         supabase.on('presence', function(usersStates) {
           console.log('presence change', usersStates);
         });
@@ -77,9 +120,6 @@
         });
 
         supabase.connect();
-        
-        fetch('annotations.json').then((response) => response.json())
-          .then(annotations => anno.setAnnotations(annotations));
 
         document.getElementById('draw').addEventListener('click', function() {
           anno.startDrawing('box');

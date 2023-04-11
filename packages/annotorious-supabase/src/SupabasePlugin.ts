@@ -5,14 +5,15 @@ import { BroadcastConnector } from './broadcast/BroadcastConnector';
 import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
 import { PostgresConnector } from './postgres/PostgresConnector';
-import type { PresenceEvents } from './presence/PresenceEvents';
-// import { createAuth } from './auth/auth';
+import { createAuth } from './auth/auth';
 
 export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
 
   const { base, apiKey, eventsPerSecond } = config;
 
-  let supabase: SupabaseClient = null;
+  const supabase = createClient(`https://${config.base}`, config.apiKey);
+
+  const auth = createAuth(supabase);
 
   let realtime: RealtimeClient = null;
 
@@ -25,13 +26,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
   const presence = PresenceConnector();
 
   const connect = () => new Promise((resolve, reject) => {
-    if (supabase)
-      throw 'Client already connected';
-
     if (realtime)
       throw 'Realtime connection already established';
-
-    supabase = createClient(`https://${config.base}`, config.apiKey);
 
     realtime = new RealtimeClient(`wss://${base}/realtime/v1`, {
       params: {
@@ -68,6 +64,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
   }
 
   return {
+    auth,
     connect,
     disconnect,
     on: presence.on

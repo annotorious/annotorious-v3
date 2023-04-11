@@ -1,22 +1,50 @@
-import type { Annotation, AnnotationLayer } from '@annotorious/core';
+import type { AbstractSelector, Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
+const serializeSelector = (s: AbstractSelector) => {
+  // TODO
+  return 'foo';
+}
+
 export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, channel: RealtimeChannel) => {
 
-  const onCreateAnnotation = (a: Annotation) => {
-    console.log('created', a);
+  const createAnnotation = (a: Annotation) => supabase
+    .from('annotations')
+    .insert({
+      id: a.id,
+      created_at: new Date(),
+      created_by: anno.getUser().id
+    });
 
-    // Just a hack for testing
-    supabase
-      .from('annotations')
-      .insert({ 
-        id: a.id,
-        created_at: new Date()
-      }).then(res => {
-        console.log('supabase returned', res);
-      });
-  }
+  const createBody = (b: AnnotationBody) => supabase
+    .from('bodies')
+    .insert({
+      id: b.id,
+      created_at: b.created,
+      created_by: anno.getUser().id,
+      annotation_id: b.annotation,
+      purpose: b.purpose,
+      value: b.value
+    });
+
+  const createTarget = (t: AnnotationTarget) => supabase
+    .from('targets')
+    .insert({
+      created_at: t.created,
+      created_by: anno.getUser().id,
+      annotation_id: t.annotation,
+      value: serializeSelector(t)
+    })
+
+  const onCreateAnnotation = (a: Annotation) => createAnnotation(a)
+    .then(() => createTarget(a.target))
+    .then(({ error, status }) => {
+      if (status !== 201) {
+        console.error(error);
+        throw 'Error storing annotation';
+      }
+    });
 
   const onDeleteAnnotation = (a: Annotation) => {
     console.log('deleted', a);
