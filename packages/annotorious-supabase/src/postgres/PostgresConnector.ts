@@ -136,12 +136,12 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
     updated_at,
     updated_by,
     version,
-    auth.user (*),
     targets ( 
-      *
+      *,
+      profiles!targets_created_by_fkey(*)
     ),
     bodies ( 
-      * 
+      *
     )
   `).then(({ data, error }) => {
     if (!error) {
