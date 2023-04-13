@@ -1,10 +1,11 @@
-import type { Annotation, AnnotationLayer } from '@annotorious/core';
+import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import { BroadcastConnector } from './broadcast/BroadcastConnector';
 import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
 import { PostgresConnector } from './postgres/PostgresConnector';
 import { createAuth } from './auth/auth';
+import { PRESENCE_KEY } from './presence/Presence';
 
 export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
 
@@ -32,7 +33,13 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     if (channel)
       throw 'Connection already established';
 
-    channel = supabase.channel(config.channel);
+    channel = supabase.channel(config.channel, {
+      config: {
+        presence: {
+          key: PRESENCE_KEY
+        }
+      }
+    });
 
     // const auth = createAuth(supabase);
 
@@ -50,6 +57,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     // });
   });
 
+  const setUser = (user: User) => presence.setUser(user);
+
   const disconnect = () => {
     broadcast?.destroy();
     presence?.destroy();
@@ -63,7 +72,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     auth,
     connect,
     disconnect,
-    on: presence.on
+    on: presence.on,
+    setUser
   }
 
 }

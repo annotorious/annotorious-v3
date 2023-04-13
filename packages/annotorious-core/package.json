@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "deep-equal": "^2.2.0",
+    "nanoevents": "^7.0.1",
     "nanoid": "^4.0.1"
   }
 }

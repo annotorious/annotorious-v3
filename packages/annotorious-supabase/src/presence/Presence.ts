@@ -1,8 +1,13 @@
 import type { User } from '@annotorious/core';
 import { createNanoEvents } from 'nanoevents';
+import { nanoid } from 'nanoid';
+import type { RealtimePresenceState } from '@supabase/supabase-js';
 import type { PresenceEvents } from './PresenceEvents';
 import type { BroadcastMessage } from '../broadcast/BroadcastMessage';
 import { BroadcastEventType } from '../broadcast/BroadcastMessage';
+
+// This client's presence key
+export const PRESENCE_KEY = nanoid();
 
 const SEABORN_BRIGHT = [
   '#ff7c00', // orange
@@ -46,45 +51,32 @@ export const createPresenceState = () => {
     return color;
   }
 
-  const addOne = (user: User) => {
-    if (userStates.has(user.id)) {
-      console.warn('Attempt to add user that is already present', user);
+  const addOne = (presenceKey: string, user: User) => {
+    if (userStates.has(presenceKey)) {
+      console.warn('Attempt to add user that is already present', presenceKey, user);
       return;    
     }
 
     const color = assignRandomColor();
 
-    userStates.set(user.id, { user, color });
+    userStates.set(presenceKey, { user, color });
   }
 
-  const addUser = (user: User) => {
-    addOne(user);
-    emitter.emit('presence', getPresentUsers());
-  }
-
-  const removeOne = (userId: string) => {
-    const state = userStates.get(userId);
+  const removeOne = (presenceRef: string) => {
+    const state = userStates.get(presenceRef);
     if (!state) {
-      console.warn('Attempt to remove user that was not present', userId);
+      console.warn('Attempt to remove user that was not present', presenceRef);
       return;
     }
 
     unassignedColors.push(state.color);
-    userStates.delete(userId);
+    userStates.delete(presenceRef);
   }
 
-  const removeUser = (userId: string) => {
-    const state = userStates.get(userId);
-    if (state?.selection)
-      emitter.emit('selectionChange', state, null);
-
-    removeOne(userId);
-    emitter.emit('presence', getPresentUsers());
-  }
-
-  const syncUsers = (users: User[]) => {
-    console.log('syncing users', users);
+  const syncUsers = (presenceState: RealtimePresenceState<{ user: User }>) => {
+    console.log('syncing users', presenceState);
     
+    /*
     const toAdd = users.filter(user => !userStates.has(user.id));
 
     const toRemove = Array.from(userStates.values()).filter(state =>
@@ -98,6 +90,7 @@ export const createPresenceState = () => {
 
     if (toAdd.length > 0 || toRemove.length > 0)
       emitter.emit('presence', getPresentUsers());
+    */
   }
 
   const notify = (message: BroadcastMessage) => {
@@ -170,11 +163,9 @@ export const createPresenceState = () => {
     emitter.on(event, callback);
 
   return {
-    addUser,
     getPresentUsers,
     notify,
     on,
-    removeUser,
     syncUsers,
     updateSelection
   }

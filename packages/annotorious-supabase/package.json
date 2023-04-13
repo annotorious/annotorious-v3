@@ -21,6 +21,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.20.0",
     "deep-equal": "^2.2.0",
-    "nanoevents": "^7.0.1"
+    "nanoevents": "^7.0.1",
+    "nanoid": "^4.0.2"
   }
 }

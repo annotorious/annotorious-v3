@@ -106,8 +106,12 @@
             login.innerHTML = response.email;
 
             anno.setUser({ id: response.id, name: response.email });
-          })
-          .catch(() => login.innerHTML = 'Not Logged In');
+            supabase.setUser({ id: response.id, name: response.email });
+          }).catch(error => {
+            console.error(error);
+            
+            login.innerHTML = 'Not Logged In'
+          });
 
         supabase.on('presence', function(usersStates) {
           console.log('presence change', usersStates);

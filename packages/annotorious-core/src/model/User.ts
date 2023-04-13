@@ -1,9 +1,9 @@
 import { customAlphabet } from 'nanoid';
 
-export type User = SignedIn | Guest;
+export type User = AuthenticatedUser | Guest;
 
 export enum UserType { 
-  SIGNED_IN = 'SIGNED_IN',  
+  AUTHENTICATED = 'AUTHENTICATED',  
   GUEST = 'GUEST'
 }
 
@@ -15,9 +15,9 @@ export interface Guest {
 
 }
 
-export interface SignedIn {
+export interface AuthenticatedUser {
 
-  type: UserType.SIGNED_IN;
+  type: UserType.AUTHENTICATED;
 
   id: string;
 

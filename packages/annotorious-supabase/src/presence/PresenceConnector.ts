@@ -7,7 +7,11 @@ export const PresenceConnector = () => {
 
   const presence = createPresenceState();
 
-  const connect = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel) => {
+  let channel: RealtimeChannel;
+
+  const connect = (anno: AnnotationLayer<Annotation>, c: RealtimeChannel) => {
+    channel = c;
+
     // Register my own presence first
     channel.track({
       user: anno.getUser()
@@ -18,16 +22,7 @@ export const PresenceConnector = () => {
       // ...then start listening to presence state changes
       channel.on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<{ user: User }>();
-
-        console.log(state);
-
-        const others = 
-          Object.values(state)
-            .reduce((users, next) => ([...users, ...next]), [])
-            .map(p => p.user)
-            .filter(({ id }) => id !== anno.getUser().id);
-
-        presence.syncUsers(others);
+        presence.syncUsers(state);
       });
 
       channel.on('broadcast', { event: 'change' }, event =>
@@ -35,10 +30,16 @@ export const PresenceConnector = () => {
     });
   }
 
+  const setUser = (user: User) => {
+    if (channel)
+      channel.track({ user });
+  }
+
   return {
     connect,
     destroy: () => { /* Nothing to clean up. For future use. */ },
-    on: presence.on
+    on: presence.on,
+    setUser
   }
 
 }
