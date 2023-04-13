@@ -1,25 +1,10 @@
 import { customAlphabet } from 'nanoid';
 
-export type User = AuthenticatedUser | Guest;
-
-export enum UserType { 
-  AUTHENTICATED = 'AUTHENTICATED',  
-  GUEST = 'GUEST'
-}
-
-export interface Guest {
-
-  type: UserType.GUEST;
+export interface User {
 
   id: string;
 
-}
-
-export interface AuthenticatedUser {
-
-  type: UserType.AUTHENTICATED;
-
-  id: string;
+  isGuest?: boolean;
 
   name?: string;
 
@@ -31,5 +16,5 @@ export interface AuthenticatedUser {
 
 export const createAnonymousGuest = () => {
   const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_', 20);
-  return { type: UserType.GUEST, id: nanoid() }
+  return { isGuest: true, id: nanoid() }
 }

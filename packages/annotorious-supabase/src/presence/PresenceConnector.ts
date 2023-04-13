@@ -1,7 +1,6 @@
+import { createPresenceState } from '@annotorious/core';
 import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import { createPresenceState } from './Presence';
-import type { BroadcastMessage } from 'src/broadcast/BroadcastMessage';
 
 export const PresenceConnector = () => {
 
@@ -22,17 +21,25 @@ export const PresenceConnector = () => {
       // ...then start listening to presence state changes
       channel.on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<{ user: User }>();
-        presence.syncUsers(state);
+        
+        const presentUsers = Object.entries(state).map(([presenceKey, state]) => ({
+          presenceKey, user: state[0].user
+        }));
+        
+        presence.syncUsers(presentUsers);
       });
 
+      /*
       channel.on('broadcast', { event: 'change' }, event =>
         presence.notify(event.payload as BroadcastMessage));
+      */
     });
   }
 
-  const setUser = (user: User) => {
-    if (channel)
+  const setUser = (user: User) => {    
+    if (channel) {
       channel.track({ user });
+    }
   }
 
   return {

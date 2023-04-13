@@ -21,7 +21,7 @@
   },
   "homepage": "https://annotorious.com",
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.1.0",
+    "@sveltejs/vite-plugin-svelte": "^2.0.4",
     "@tsconfig/svelte": "^3.0.0",
     "@types/openseadragon": "^3.0.4",
     "@types/rbush": "^3.0.0",

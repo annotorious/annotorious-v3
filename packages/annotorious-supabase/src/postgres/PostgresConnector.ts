@@ -1,4 +1,4 @@
-import { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget, Origin, SignedIn, User, UserType } from '@annotorious/core';
+import { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget, Origin, User } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import equal from 'deep-equal';
@@ -39,8 +39,7 @@ const toAnnotation = (record: AnnotationRecord) => {
   if (record.targets.length > 1)
     console.warn('Invalid annotation: too many targets', record);
 
-  const toUser = (p: ProfileRecord): SignedIn => p ? ({
-    type: UserType.SIGNED_IN,
+  const toUser = (p: ProfileRecord): User => p ? ({
     id: p.id,
     name: p.nickname,
     email: p.email,
@@ -169,10 +168,9 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       if (event.table === 'targets') {
         const t = event.new;
 
-        console.log('updating target', t);
+        console.log('Updating target after CDC message', t);
 
-        const toUser = (p: ProfileRecord): SignedIn => p ? ({
-          type: UserType.SIGNED_IN,
+        const toUser = (p: ProfileRecord): User => p ? ({
           id: p.id,
           name: p.nickname,
           email: p.email,

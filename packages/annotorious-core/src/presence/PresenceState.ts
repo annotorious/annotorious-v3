@@ -8,6 +8,8 @@ import type { PresenceEvents } from './PresenceEvents';
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
+console.log('mykey', PRESENCE_KEY);
+
 export const createPresenceState = () => {
 
   const emitter = createNanoEvents<PresenceEvents>();
@@ -51,10 +53,13 @@ export const createPresenceState = () => {
   }
 
   const syncUsers = (state: { presenceKey: string, user: User }[]) => {
-    const keys = new Set(state.map(s => s.presenceKey));
+    // Presence state includes this users own key - remove
+    const others = state.filter(({ presenceKey }) => presenceKey !== PRESENCE_KEY);
+
+    const keys = new Set(others.map(s => s.presenceKey));
 
     // These users need to be added to the presentUsers list
-    const toAdd = state.filter(({ presenceKey }) => !presentUsers.has(presenceKey));
+    const toAdd = others.filter(({ presenceKey }) => !presentUsers.has(presenceKey));
 
     // These users need to be dropped from the list
     const toRemove = Array.from(presentUsers.values()).filter(presentUser =>

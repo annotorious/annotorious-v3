@@ -1,11 +1,11 @@
 import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
+import { PRESENCE_KEY } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import { BroadcastConnector } from './broadcast/BroadcastConnector';
 import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
 import { PostgresConnector } from './postgres/PostgresConnector';
 import { createAuth } from './auth/auth';
-import { PRESENCE_KEY } from './presence/Presence';
 
 export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
 

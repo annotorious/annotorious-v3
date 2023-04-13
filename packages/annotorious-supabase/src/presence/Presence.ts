@@ -1,13 +1,9 @@
-import type { User } from '@annotorious/core';
+import type { PresenceEvents, User } from '@annotorious/core';
 import { createNanoEvents } from 'nanoevents';
 import { nanoid } from 'nanoid';
 import type { RealtimePresenceState } from '@supabase/supabase-js';
-import type { PresenceEvents } from './PresenceEvents';
 import type { BroadcastMessage } from '../broadcast/BroadcastMessage';
 import { BroadcastEventType } from '../broadcast/BroadcastMessage';
-
-// This client's presence key
-export const PRESENCE_KEY = nanoid();
 
 const SEABORN_BRIGHT = [
   '#ff7c00', // orange
@@ -132,7 +128,7 @@ export const createPresenceState = () => {
       userStates.set(userState.user.id, {...userState, selection: updated });
     }
 
-    emitter.emit('selectionChange', userState, userStates.get(userState.user.id).selection);
+    // emitter.emit('selectionChange', userState, userStates.get(userState.user.id).selection);
   }
 
   const updateSelection = (user: User, selected: string[]) => {
@@ -153,7 +149,7 @@ export const createPresenceState = () => {
 
     userStates.set(user.id, { ...userState, selection: updated });
 
-    emitter.emit('selectionChange', userState, updated);
+    // emitter.emit('selectionChange', userState, updated);
   }
 
   const getPresentUsers = () =>

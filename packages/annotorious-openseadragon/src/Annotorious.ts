@@ -17,7 +17,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
 
   const lifecycle = createLifecyleObserver(store.selection, store);
 
-  let currentUser = opts.readOnly ? null : createAnonymousGuest();
+  let currentUser: User = opts.readOnly ? null : createAnonymousGuest();
 
   const displayLayer = new PixiLayer({
     target: viewer.element,
