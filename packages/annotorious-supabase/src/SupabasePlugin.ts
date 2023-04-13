@@ -1,6 +1,5 @@
 import type { Annotation, AnnotationLayer } from '@annotorious/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { RealtimeChannel, RealtimeClient } from '@supabase/realtime-js';
+import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import { BroadcastConnector } from './broadcast/BroadcastConnector';
 import { PresenceConnector } from './presence/PresenceConnector';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
@@ -11,11 +10,15 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
 
   const { base, apiKey, eventsPerSecond } = config;
 
-  const supabase = createClient(`https://${config.base}`, config.apiKey);
+  const supabase = createClient(`https://${base}`, apiKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: eventsPerSecond || 30,
+      }
+    }
+  });
 
   const auth = createAuth(supabase);
-
-  let realtime: RealtimeClient = null;
 
   let channel: RealtimeChannel = null;
 
@@ -26,17 +29,10 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
   const presence = PresenceConnector();
 
   const connect = () => new Promise((resolve, reject) => {
-    if (realtime)
-      throw 'Realtime connection already established';
+    if (channel)
+      throw 'Connection already established';
 
-    realtime = new RealtimeClient(`wss://${base}/realtime/v1`, {
-      params: {
-        apikey: apiKey,
-        eventsPerSecond: eventsPerSecond || 30,
-      }
-    });
-
-    channel = realtime.channel(config.channel);
+    channel = supabase.channel(config.channel);
 
     // const auth = createAuth(supabase);
 
@@ -59,8 +55,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     presence?.destroy();
     postgres?.destroy();
 
-    if (realtime && channel)
-      realtime.removeChannel(channel);
+    if (channel)
+      supabase.removeChannel(channel);
   }
 
   return {

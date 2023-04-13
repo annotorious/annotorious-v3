@@ -112,20 +112,6 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       schema: 'public'
     }, (payload) => {
       console.log('[PG Rx]', payload);
-
-      /* Example message:
-      {
-        "schema": "public",
-        "table": "annotations",
-        "commit_timestamp": null,
-        "eventType": "UPDATE",
-        "new": {},
-        "old": {},
-        "errors": [
-          "Error 401: Unauthorized"
-        ]
-      }
-      */
     });
 
   // Initial load
