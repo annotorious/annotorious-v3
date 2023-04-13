@@ -10,8 +10,6 @@ export interface AnnotationLayer<T extends Annotation> {
 
   off: <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => void;
 
-  setAnnotations: (annotations: T[]) => void;
-
   setUser: (user: User) => void;
 
   store: Store<T>;
