@@ -246,7 +246,6 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
   `).then(({ data, error }) => {
     if (!error) {
       const annotations = (data as AnnotationRecord[]).map(toAnnotation);
-      console.log(annotations);
       anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
     } else {
       console.error('Initial load failed', error);

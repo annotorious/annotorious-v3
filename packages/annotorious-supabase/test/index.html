@@ -95,7 +95,6 @@
             .then(response => {
               login.disabled = true;
               login.innerHTML = 'Logged In';
-              console.log('login response', response);
             })
             .catch(error => {
               console.log('login error', error);
@@ -104,7 +103,6 @@
 
         supabase.auth.getUser()
           .then(response => {
-            console.log(response)
             login.innerHTML = response.email;
 
             anno.setUser({ id: response.id, name: response.email });
