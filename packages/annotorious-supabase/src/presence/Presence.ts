@@ -83,6 +83,8 @@ export const createPresenceState = () => {
   }
 
   const syncUsers = (users: User[]) => {
+    console.log('syncing users', users);
+    
     const toAdd = users.filter(user => !userStates.has(user.id));
 
     const toRemove = Array.from(userStates.values()).filter(state =>

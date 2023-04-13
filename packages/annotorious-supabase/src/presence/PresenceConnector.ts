@@ -19,6 +19,8 @@ export const PresenceConnector = () => {
       channel.on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<{ user: User }>();
 
+        console.log(state);
+
         const others = 
           Object.values(state)
             .reduce((users, next) => ([...users, ...next]), [])

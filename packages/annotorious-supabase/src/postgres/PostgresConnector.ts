@@ -1,7 +1,8 @@
-import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
+import { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget, Origin, SignedIn, User, UserType } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import equal from 'deep-equal';
+import type { AnnotationRecord, ChangeEvent, ProfileRecord } from './PostgresSchema';
 
 const hasTargetChanged = (oldValue: Annotation, newValue: Annotation) => 
   !equal(oldValue.target, newValue.target);
@@ -31,6 +32,50 @@ const bodiesChanged = (oldValue: Annotation, newValue: Annotation, anno: Annotat
     return oldBody ? !equal(oldBody, newBody) : false;
   });
 
+const toAnnotation = (record: AnnotationRecord) => {
+  if (record.targets.length === 0)
+    throw { message: 'Invalid annotation: target missing', record };
+
+  if (record.targets.length > 1)
+    console.warn('Invalid annotation: too many targets', record);
+
+  const toUser = (p: ProfileRecord): SignedIn => p ? ({
+    type: UserType.SIGNED_IN,
+    id: p.id,
+    name: p.nickname,
+    email: p.email,
+    avatar: p.avatar_url
+  }) : null;
+
+  const t = record.targets[0];
+
+  const target: AnnotationTarget = {
+    annotation: t.annotation_id,
+    selector: JSON.parse(t.value),
+    creator: toUser(t.created_by),
+    created: new Date(t.created_at),
+    updatedBy: toUser(t.created_by),
+    updated: t.updated_at ? new Date(t.updated_at) : null
+  };
+
+  const bodies: AnnotationBody[] = record.bodies.map(body => ({
+    id: body.id,
+    annotation: body.annotation_id,
+    purpose: body.purpose,
+    value: JSON.parse(body.value),
+    creator: toUser(body.created_by),
+    created: new Date(body.created_at),
+    updatedBy: toUser(body.updated_by),
+    updated: t.updated_at ? new Date(t.updated_at) : null
+  }));
+
+  return {
+    id: record.id,
+    target,
+    bodies
+  };
+}
+
 export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, channel: RealtimeChannel) => {
 
   const createAnnotation = (a: Annotation) => supabase
@@ -54,25 +99,32 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       value: b.value
     });
 
-  const createTarget = (t: AnnotationTarget) => supabase
-    .from('targets')
-    .insert({
-      created_at: t.created,
-      created_by: anno.getUser().id,
-      updated_at: t.created,
-      updated_by: anno.getUser().id,
-      annotation_id: t.annotation,
-      value: JSON.stringify(t.selector)
-    });
+  const createTarget = (t: AnnotationTarget) => {
+    console.log('CREATING TARGET')
+    return supabase
+      .from('targets')
+      .insert({
+        created_at: t.created,
+        created_by: anno.getUser().id,
+        updated_at: t.created,
+        updated_by: anno.getUser().id,
+        annotation_id: t.annotation,
+        value: JSON.stringify(t.selector)
+      });
+  }
 
-  const updateTarget = (t: AnnotationTarget) => supabase
-    .from('targets')
-    .update({
-      updated_at: t.updated,
-      updated_by: anno.getUser().id,
-      value: JSON.stringify(t.selector)
-    })
-    .eq('annotation_id', t.annotation);
+  const updateTarget = (t: AnnotationTarget) => {
+    console.log('UPDATING TARGET');
+
+    return supabase
+      .from('targets')
+      .update({
+        updated_at: t.updated,
+        updated_by: anno.getUser().id,
+        value: JSON.stringify(t.selector)
+      })
+      .eq('annotation_id', t.annotation);
+  }
 
   const onCreateAnnotation = (a: Annotation) => createAnnotation(a)
     .then(() => createTarget(a.target))
@@ -111,28 +163,91 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       event: '*', 
       schema: 'public'
     }, (payload) => {
-      console.log('[PG Rx]', payload);
+      const event = payload as unknown as ChangeEvent;
+      console.log('[PG Rx]', event.commit_timestamp);
+
+      if (event.table === 'targets') {
+        const t = event.new;
+
+        console.log('updating target', t);
+
+        const toUser = (p: ProfileRecord): SignedIn => p ? ({
+          type: UserType.SIGNED_IN,
+          id: p.id,
+          name: p.nickname,
+          email: p.email,
+          avatar: p.avatar_url
+        }) : null;
+
+        const target: AnnotationTarget = {
+          annotation: t.annotation_id,
+          selector: JSON.parse(t.value),
+          creator: toUser(t.created_by),
+          created: new Date(t.created_at),
+          updatedBy: toUser(t.created_by),
+          updated: t.updated_at ? new Date(t.updated_at) : null
+        };
+
+        anno.store.updateTarget(target);
+      }
     });
 
   // Initial load
   supabase.from('annotations').select(`
     id,
-    created_at,
-    created_by,
-    updated_at,
-    updated_by,
-    version,
     targets ( 
-      *,
-      profiles!targets_created_by_fkey(*)
+      annotation_id,
+      created_at,
+      created_by:profiles!targets_created_by_fkey(
+        id,
+        email,
+        nickname,
+        first_name,
+        last_name,
+        avatar_url
+      ),
+      updated_at,
+      updated_by:profiles!targets_updated_by_fkey(
+        id,
+        email,
+        nickname,
+        first_name,
+        last_name,
+        avatar_url
+      ),
+      version,
+      value
     ),
     bodies ( 
-      *
+      id,
+      annotation_id,
+      created_at,
+      created_by:profiles!bodies_created_by_fkey(
+        id,
+        email,
+        nickname,
+        first_name,
+        last_name,
+        avatar_url
+      ),
+      updated_at,
+      updated_by:profiles!bodies_updated_by_fkey(
+        id,
+        email,
+        nickname,
+        first_name,
+        last_name,
+        avatar_url
+      ),
+      version,
+      purpose,
+      value
     )
   `).then(({ data, error }) => {
     if (!error) {
-      console.log('initial load', data);
-     // anno.setAnnotations(data.map(toAnnotation))
+      const annotations = (data as AnnotationRecord[]).map(toAnnotation);
+      console.log(annotations);
+      anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
     } else {
       console.error('Initial load failed', error);
     }

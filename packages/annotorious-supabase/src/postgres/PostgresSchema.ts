@@ -1,18 +1,6 @@
-import type { AnnotationTarget } from '@annotorious/core';
-
 export interface AnnotationRecord {
 
   id: string;
-
-  created_at: string;
-
-  created_by: string;
-
-  updated_at?: string;
-
-  updated_by?: string;
-
-  version?: number;
 
   targets: TargetRecord[];
 
@@ -22,19 +10,17 @@ export interface AnnotationRecord {
 
 export interface TargetRecord {
 
-  id: string;
+  annotation_id: string;
 
   created_at: string;
 
-  created_by: string;
+  created_by: ProfileRecord;
 
   updated_at?: string;
 
-  updated_by?: string;
+  updated_by?: ProfileRecord;
 
   version?: number;
-
-  annotation_id: string;
 
   value: string;
 
@@ -44,17 +30,17 @@ export interface BodyRecord {
 
   id: string;
 
+  annotation_id: string;
+
   created_at: string;
 
-  created_by: string;
+  created_by: ProfileRecord;
 
   updated_at?: string;
 
-  updated_by?: string;
+  updated_by?: ProfileRecord;
 
   version?: number;
-
-  annotation_id: string;
 
   purpose?: string;
 
@@ -62,36 +48,61 @@ export interface BodyRecord {
 
 }
 
-/*
-export const toAnnotation = (record: AnnotationRecord) => {
-  if (record.targets.length === 0)
-    throw { message: 'Invalid annotation: target missing', record };
+export interface ProfileRecord {
 
-  if (record.targets.length > 1)
-    console.warn('Invalid annotation: too many targets', record);
+  id: string;
 
-  const t = record.targets[0];
+  email: string;
 
-  const target: AnnotationTarget = {
-    
-    annotation: t.annotation_id,
+  nickname?: string;
 
-    selector: JSON.parse(t.value),
+  first_name?: string;
 
-    creator: t.created_by
+  last_name?: string;
 
-//
-  annotation: string;
+  avatar_url?: string;
 
-  selector: AbstractSelector;
+}
 
-  creator?: User;
 
-  created?: Date;
+export type AnnotationChangeEvent = {
 
-  updatedBy?: User;
+  table: 'annotations';
 
-  updated?: Date;
-*/
+  commit_timestamp: string;
 
-// }
+  eventType: 'UPDATE' | 'INSERT' | 'DELETE';
+
+  new: { annotation_id: string }
+
+}
+
+export type TargetChangeEvent = {
+
+  table: 'targets';
+
+  commit_timestamp: string;
+
+  eventType: 'UPDATE' | 'INSERT' | 'DELETE';
+
+  new: TargetRecord;
+
+  old: { id: string }
+
+}
+
+export type BodyChangeEvent = {
+
+  table: 'bodies';
+
+  commit_timestamp: string;
+
+  eventType: 'UPDATE' | 'INSERT' | 'DELETE';
+
+  new: BodyRecord;
+
+  old: { id: string }
+
+}
+
+export type ChangeEvent = AnnotationChangeEvent | TargetChangeEvent | BodyChangeEvent;
