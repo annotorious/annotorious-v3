@@ -8,8 +8,6 @@ import type { PresenceEvents } from './PresenceEvents';
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
-console.log('mykey', PRESENCE_KEY);
-
 export const createPresenceState = () => {
 
   const emitter = createNanoEvents<PresenceEvents>();
