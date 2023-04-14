@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/openseadragon",
-  "version": "3.0.0-pre-alpha-05",
+  "version": "3.0.0-pre-alpha-06",
   "description": "Experimental rewrite of Annotorious OpenSeadragon",
   "type": "module",
   "main": "./dist/annotorious-openseadragon.js",
