@@ -4,8 +4,12 @@
   "description": "Experimental rewrite of Annotorious",
   "type": "module",
   "main": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "echo 'Skipping build in @annotorious/core package'",
+    "build": "vite build",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
@@ -16,6 +20,8 @@
     "@types/uuid": "^9.0.1",
     "svelte": "^3.58.0",
     "typescript": "^4.9.5",
+    "vite": "^4.2.1",
+    "vite-plugin-dts": "^2.3.0",
     "vitest": "^0.29.3"
   },
   "dependencies": {
