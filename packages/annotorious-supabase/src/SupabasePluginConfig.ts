@@ -1,13 +1,11 @@
 export interface SupabasePluginConfig {
 
-  base: string;
-
   apiKey: string;
-
-  eventsPerSecond?: number;
+  
+  base: string;
 
   channel: string;
 
-  user: { id: string, name: string }
-
+  eventsPerSecond?: number;
+  
 }

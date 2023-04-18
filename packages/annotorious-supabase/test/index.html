@@ -91,26 +91,25 @@
 
         login.addEventListener('click', function() {
           var email = prompt('E-mail');
-          supabase.auth.signIn(email)
-            .then(response => {
-              login.disabled = true;
-              login.innerHTML = 'Logged In';
-            })
-            .catch(error => {
-              console.log('login error', error);
-            })
+
+          supabase.auth.signInWithOtp({ 
+            email,
+            options: {
+              emailRedirectTo: window.location.href
+            }
+          }).then(({ data, error }) => {
+            login.disabled = true;
+            console.log(data, error);
+          });
         });
 
         supabase.auth.getUser()
-          .then(response => {
-            login.innerHTML = response.email;
-
-            anno.setUser({ id: response.id, name: response.email });
-            supabase.setUser({ id: response.id, name: response.email });
-          }).catch(error => {
-            console.error(error);
-            
-            login.innerHTML = 'Not Logged In'
+          .then(({ data: { user }, error }) => {
+            if (user) {
+              login.innerHTML = user.email;
+            } else {
+              login.innerHTML = 'Not logged in';
+            }
           });
 
         supabase.on('presence', function(usersStates) {

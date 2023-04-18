@@ -2,7 +2,7 @@ import { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget, Origin, 
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import equal from 'deep-equal';
-import type { AnnotationRecord, ChangeEvent, ProfileRecord } from './PostgresSchema';
+import type { AnnotationRecord, ChangeEvent, ProfileRecord } from './Types';
 
 const hasTargetChanged = (oldValue: Annotation, newValue: Annotation) => 
   !equal(oldValue.target, newValue.target);
@@ -75,7 +75,7 @@ const toAnnotation = (record: AnnotationRecord) => {
   };
 }
 
-export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, channel: RealtimeChannel) => {
+export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
 
   const createAnnotation = (a: Annotation) => supabase
     .from('annotations')
@@ -152,105 +152,108 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
     // TODO
   }
 
-  anno.on('createAnnotation', onCreateAnnotation);
-  anno.on('deleteAnnotation', onDeleteAnnotation);
-  anno.on('updateAnnotation', onUpdateAnnotation);
+  const connect = (channel: RealtimeChannel) => {
+    anno.on('createAnnotation', onCreateAnnotation);
+    anno.on('deleteAnnotation', onDeleteAnnotation);
+    anno.on('updateAnnotation', onUpdateAnnotation);
 
-  channel.on(
-    'postgres_changes', 
-    { 
-      event: '*', 
-      schema: 'public'
-    }, (payload) => {
-      const event = payload as unknown as ChangeEvent;
-      console.log('[PG Rx]', event.commit_timestamp);
+    channel.on(
+      'postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public' 
+      }, (payload) => {
+        const event = payload as unknown as ChangeEvent;
+        console.log('[PG Rx]', event.commit_timestamp);
 
-      if (event.table === 'targets') {
-        const t = event.new;
+        if (event.table === 'targets') {
+          const t = event.new;
 
-        console.log('Updating target after CDC message', t);
+          console.log('Updating target after CDC message', t);
 
-        const toUser = (p: ProfileRecord): User => p ? ({
-          id: p.id,
-          name: p.nickname,
-          email: p.email,
-          avatar: p.avatar_url
-        }) : null;
+          const toUser = (p: ProfileRecord): User => p ? ({
+            id: p.id,
+            name: p.nickname,
+            email: p.email,
+            avatar: p.avatar_url
+          }) : null;
 
-        const target: AnnotationTarget = {
-          annotation: t.annotation_id,
-          selector: JSON.parse(t.value),
-          creator: toUser(t.created_by),
-          created: new Date(t.created_at),
-          updatedBy: toUser(t.created_by),
-          updated: t.updated_at ? new Date(t.updated_at) : null
-        };
+          const target: AnnotationTarget = {
+            annotation: t.annotation_id,
+            selector: JSON.parse(t.value),
+            creator: toUser(t.created_by),
+            created: new Date(t.created_at),
+            updatedBy: toUser(t.created_by),
+            updated: t.updated_at ? new Date(t.updated_at) : null
+          };
 
-        anno.store.updateTarget(target);
-      }
-    });
+          anno.store.updateTarget(target);
+        }
+      });
 
-  // Initial load
-  supabase.from('annotations').select(`
-    id,
-    targets ( 
-      annotation_id,
-      created_at,
-      created_by:profiles!targets_created_by_fkey(
-        id,
-        email,
-        nickname,
-        first_name,
-        last_name,
-        avatar_url
-      ),
-      updated_at,
-      updated_by:profiles!targets_updated_by_fkey(
-        id,
-        email,
-        nickname,
-        first_name,
-        last_name,
-        avatar_url
-      ),
-      version,
-      value
-    ),
-    bodies ( 
+    // Initial load
+    supabase.from('annotations').select(`
       id,
-      annotation_id,
-      created_at,
-      created_by:profiles!bodies_created_by_fkey(
-        id,
-        email,
-        nickname,
-        first_name,
-        last_name,
-        avatar_url
+      targets ( 
+        annotation_id,
+        created_at,
+        created_by:profiles!targets_created_by_fkey(
+          id,
+          email,
+          nickname,
+          first_name,
+          last_name,
+          avatar_url
+        ),
+        updated_at,
+        updated_by:profiles!targets_updated_by_fkey(
+          id,
+          email,
+          nickname,
+          first_name,
+          last_name,
+          avatar_url
+        ),
+        version,
+        value
       ),
-      updated_at,
-      updated_by:profiles!bodies_updated_by_fkey(
+      bodies ( 
         id,
-        email,
-        nickname,
-        first_name,
-        last_name,
-        avatar_url
-      ),
-      version,
-      purpose,
-      value
-    )
-  `).then(({ data, error }) => {
-    if (!error) {
-      const annotations = (data as AnnotationRecord[]).map(toAnnotation);
-      anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
-    } else {
-      console.error('Initial load failed', error);
-    }
-  })
+        annotation_id,
+        created_at,
+        created_by:profiles!bodies_created_by_fkey(
+          id,
+          email,
+          nickname,
+          first_name,
+          last_name,
+          avatar_url
+        ),
+        updated_at,
+        updated_by:profiles!bodies_updated_by_fkey(
+          id,
+          email,
+          nickname,
+          first_name,
+          last_name,
+          avatar_url
+        ),
+        version,
+        purpose,
+        value
+      )
+    `).then(({ data, error }) => {
+      if (!error) {
+        const annotations = (data as AnnotationRecord[]).map(toAnnotation);
+        anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
+      } else {
+        console.error('Initial load failed', error);
+      }
+    })
+  }
 
   return {
+    connect,
     destroy: () => {
       anno.off('createAnnotation', onCreateAnnotation);
       anno.off('deleteAnnotation', onDeleteAnnotation);
