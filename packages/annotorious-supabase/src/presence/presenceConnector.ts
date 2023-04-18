@@ -10,6 +10,11 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>) => {
 
   let channel: RealtimeChannel;
 
+  const trackUser = () => {    
+    if (channel)
+      channel.track({ user: anno.getUser() });
+  }
+
   const connect = (c: RealtimeChannel) => {
     connected = true;
 
@@ -24,19 +29,13 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>) => {
       
       presence.syncUsers(presentUsers);
     });
-  }
 
-  const trackUser = () => {    
-    if (channel)
-      channel.track({ user: anno.getUser() });
+    trackUser();
   }
-
-  const isConnected = () => isConnected;
 
   return {
     connect,
     destroy: () => channel && channel.untrack(),
-    isConnected,
     on: presence.on,
     trackUser
   }

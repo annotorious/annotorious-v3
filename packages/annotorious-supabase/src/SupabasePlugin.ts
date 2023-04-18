@@ -28,43 +28,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
   
   const postgres = PostgresConnector(anno, supabase);
 
-  // Update Annotorious identity with Supbase identity
-  supabase.auth.getUser().then(({ data }) => {
-    if (data?.user) {
-      anno.setUser({ 
-        id: data.user.id,
-        email: data.user.email
-      });
-
-      if (presence.isConnected())
-        presence.trackUser();
-    } else {
-      console.warn('[Supabase] no credentials - user signed out.');
-    }
-  });
-
-  supabase.auth.onAuthStateChange((event,session) => {
-    // Note that sign-in events are also triggered it the same user opens a second tab
-    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-      const hasChanged = anno.getUser().id !== session.user.id;
-      if (hasChanged) {
-        const { user } = session;
-
-        anno.setUser({
-          id: user.id,
-          email: user.email
-        });
-
-        if (presence.isConnected())
-          presence.trackUser(); 
-      }
-    }
-  });
-
-  const connect = () => {
-    if (channel)
-      throw 'Connection already established';
-
+  // Creates the channel and inits all connectors
+  const init = () => {
     channel = supabase.channel(config.channel, {
       config: {
         presence: {
@@ -82,6 +47,43 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
         presence.trackUser();
     });  
   }
+
+  // Will check if user is logged in, and fail otherwise
+  const connect = () => new Promise((resolve, reject) => {
+    if (channel)
+      reject('Connection already established');
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        // Update Annotorious identity with Supbase identity
+        anno.setUser({ 
+          id: data.user.id,
+          email: data.user.email
+        });
+
+        init();
+
+        resolve(anno.getUser());
+      } else {
+        reject('No credentials - user signed out.');
+      }
+    });
+
+    supabase.auth.onAuthStateChange((event,session) => {
+      // Note that sign-in events are also triggered it the same user opens a second tab
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        const hasChanged = anno.getUser().id !== session.user.id;
+        if (hasChanged) {
+          anno.setUser({
+            id: session.user.id,
+            email: session.user.email
+          });
+
+          presence.trackUser(); 
+        }
+      }
+    });
+  });
 
   const destroy = () => {
     broadcast?.destroy();
