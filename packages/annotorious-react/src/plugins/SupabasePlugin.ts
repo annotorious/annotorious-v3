@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { PresentUser } from '@annotorious/core';
 import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotorious/supabase';
-import { useAnnotationLayer } from '../AnnotationLayerContext';
+import { useAnnotationLayer } from '../useAnnotationLayer';
 
 export interface SupabasePluginProps extends SupabasePluginConfig {
 

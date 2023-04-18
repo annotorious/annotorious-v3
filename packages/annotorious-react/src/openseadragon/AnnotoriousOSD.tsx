@@ -1,9 +1,9 @@
-import React, { ReactElement, useEffect, useMemo } from 'react';
+import React, { ReactElement, forwardRef, useEffect, useImperativeHandle, useMemo } from 'react';
 import { Annotation, AnnotationLayer } from '@annotorious/core';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
 import { Annotorious } from '@annotorious/openseadragon';
-import { useViewer } from '../OpenSeadragon';
-import { AnnotationLayerContext } from '../AnnotationLayerContext';
+import { useViewer } from './OpenSeadragon';
+import { AnnotationLayerContext } from '../useAnnotationLayer';
 
 export interface AnnotoriousOSDProps {
 
@@ -17,7 +17,7 @@ export interface AnnotoriousOSDProps {
 
 }
 
-export const AnnotoriousOSD = ( props: AnnotoriousOSDProps) => {
+export const AnnotoriousOSD = forwardRef((props: AnnotoriousOSDProps, ref) => {
 
   const viewer = useViewer();
 
@@ -32,10 +32,12 @@ export const AnnotoriousOSD = ( props: AnnotoriousOSDProps) => {
       anno.stopDrawing();
   }, [props.tool, props.keepEnabled]);
 
+  useImperativeHandle(ref, () => anno);
+
   return (
     <AnnotationLayerContext.Provider value={anno as unknown as AnnotationLayer<Annotation>}>
       {props.children}
     </AnnotationLayerContext.Provider>
   );
 
-}
+});

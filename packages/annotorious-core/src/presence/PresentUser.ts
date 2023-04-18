@@ -6,7 +6,7 @@ export interface PresentUser {
 
   user: User;
 
-  selection?: string | string[];
+  selection?: string | string[] | null;
 
   color: string;
 

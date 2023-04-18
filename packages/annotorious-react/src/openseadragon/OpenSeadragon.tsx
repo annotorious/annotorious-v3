@@ -1,9 +1,9 @@
-import { default as OSD } from 'openseadragon';
+import OSD from 'openseadragon';
 import React, {
   ReactElement, 
   createContext, 
   forwardRef,
-  useContext, 
+  useContext,
   useEffect, 
   useImperativeHandle,
   useRef, 
@@ -16,7 +16,7 @@ export interface OpenSeadragonProps {
 
   options: OSD.Options;
 
-  children?: ReactElement;
+  children: ReactElement | never[];
 
 }
 
@@ -35,7 +35,6 @@ export const OpenSeadragon = forwardRef((props: OpenSeadragonProps, ref) => {
   useEffect(() => {
     if (element.current) {
       const v = OSD({...options, element: element.current });
-
       setViewer(v);
 
       return () => v.destroy();
@@ -43,7 +42,7 @@ export const OpenSeadragon = forwardRef((props: OpenSeadragonProps, ref) => {
   }, []);
 
   useImperativeHandle(ref, () => viewer);
-
+  
   return (
     <div className={className} ref={element}>
       {viewer && (
@@ -56,5 +55,4 @@ export const OpenSeadragon = forwardRef((props: OpenSeadragonProps, ref) => {
 
 });
 
-/** A helper to access the OSD viewer through a hook **/
 export const useViewer = () => useContext(ViewerContext);
