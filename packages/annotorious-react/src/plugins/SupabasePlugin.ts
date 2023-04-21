@@ -17,14 +17,10 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
     const supabase = Supabase(anno, props);
     
     supabase.connect();
-    supabase.auth.getUser().then(data => {
-       anno.setUser({ id: data.id, name: data.email });
-       supabase.setUser({ id: data.id, name: data.email });
-    });
 
     supabase.on('presence', props.onPresence);
 
-    return () => supabase.disconnect();
+    return () => supabase.destroy();
   }, [props.onPresence]);
 
   return null;
