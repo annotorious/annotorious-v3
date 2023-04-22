@@ -27,7 +27,7 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * - If it does: update if different.
    * - If it does not: insert.
    */
-  const onInsertBody = (event: BodyChangeEvent) => {
+  const onUpsertBody = (event: BodyChangeEvent) => {
     const body = parseBodyRecord(event.new);
 
     const annotation = store.getAnnotation(body.annotation);
@@ -40,19 +40,8 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
         store.addBody(body, Origin.REMOTE);
       }
     } else {
-      emitter.emit('integrityError', 'Attempt to insert body on missing annotation: ' + body.annotation);
+      emitter.emit('integrityError', 'Attempt to upsert body on missing annotation: ' + body.annotation);
     }
-  }
-
-  /**
-   * After UPDATE BODY:
-   * - Check if annotation exists.
-   * - Throw INTEGRITY ERROR if not.
-   * - Check if body exists.
-   * - Upsert if different.
-   */
-  const onUpdateBody = (event: BodyChangeEvent) => {
-    // TODO
   }
 
   /**
@@ -130,9 +119,9 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       if (table === 'annotations' && eventType === 'DELETE') {
         onDeleteAnnotation(event);
       } else if (table === 'bodies' && eventType === 'INSERT') {
-        onInsertBody(event);
+        onUpsertBody(event);
       } else if (table === 'bodies' && eventType === 'UPDATE') {
-        onUpdateBody(event);
+        onUpsertBody(event);
       } else if (table === 'bodies' && eventType === 'DELETE') {
         onDeleteBody(event);
       } else if (table === 'targets' && eventType === 'INSERT') {
