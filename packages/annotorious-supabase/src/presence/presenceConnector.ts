@@ -31,8 +31,6 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
       
       presence.syncUsers(presentUsers);
     });
-
-    trackUser();
   }
 
   return {

@@ -16,7 +16,12 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * - Delete if it does.
    */
   const onDeleteAnnotation = (event: AnnotationChangeEvent) => {
-    // TODO
+    const { id } = event.old;
+
+    const annotation = store.getAnnotation(id);
+    if (annotation) {
+      store.deleteAnnotation(id, Origin.REMOTE);
+    }
   }
 
   /**

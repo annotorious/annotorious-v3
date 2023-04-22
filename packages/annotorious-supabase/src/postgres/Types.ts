@@ -72,7 +72,9 @@ export type AnnotationChangeEvent = {
 
   eventType: 'UPDATE' | 'INSERT' | 'DELETE';
 
-  new: { annotation_id: string }
+  old: { id: string };
+
+  new: { id: string };
 
 }
 
@@ -84,9 +86,9 @@ export type TargetChangeEvent = {
 
   eventType: 'UPDATE' | 'INSERT' | 'DELETE';
 
-  new: TargetRecord;
+  old: { id: string };
 
-  old: { id: string }
+  new: TargetRecord;
 
 }
 
@@ -98,9 +100,9 @@ export type BodyChangeEvent = {
 
   eventType: 'UPDATE' | 'INSERT' | 'DELETE';
 
+  old: { id: string };
+  
   new: BodyRecord;
-
-  old: { id: string }
 
 }
 
