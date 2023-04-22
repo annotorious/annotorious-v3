@@ -14,7 +14,7 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
 
   const connect = (channel: RealtimeChannel) => {
     sender = createSender(anno, supabase, emitter);
-    receiver = createReceiver(anno, channel);
+    receiver = createReceiver(anno, channel, emitter);
   }
 
   return {

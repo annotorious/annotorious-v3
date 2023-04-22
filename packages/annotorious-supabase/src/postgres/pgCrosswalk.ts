@@ -1,5 +1,5 @@
 import type { AnnotationBody, User } from '@annotorious/core';
-import type { AnnotationRecord, ProfileRecord, TargetRecord } from './Types';
+import type { AnnotationRecord, BodyRecord, ProfileRecord, TargetRecord } from './Types';
 
 export const parseProfileRecord = (p: ProfileRecord | undefined): User => p ? ({
   id: p.id,
@@ -7,6 +7,17 @@ export const parseProfileRecord = (p: ProfileRecord | undefined): User => p ? ({
   email: p.email,
   avatar: p.avatar_url
 }) : undefined;
+
+export const parseBodyRecord = (body: BodyRecord) => ({
+  id: body.id,
+  annotation: body.annotation_id,
+  purpose: body.purpose,
+  value: JSON.parse(body.value),
+  creator: parseProfileRecord(body.created_by),
+  created: new Date(body.created_at),
+  updatedBy: parseProfileRecord(body.updated_by),
+  updated: body.updated_at ? new Date(body.updated_at) : null
+});
 
 export const parseTargetRecord = (target: TargetRecord) => ({
   annotation: target.annotation_id,
@@ -26,16 +37,7 @@ export const parseAnnotationRecord = (record: AnnotationRecord) => {
   if (record.targets.length > 1)
     console.warn('Invalid annotation: too many targets', record);
 
-  const bodies: AnnotationBody[] = record.bodies.map(body => ({
-    id: body.id,
-    annotation: body.annotation_id,
-    purpose: body.purpose,
-    value: JSON.parse(body.value),
-    creator: parseProfileRecord(body.created_by),
-    created: new Date(body.created_at),
-    updatedBy: parseProfileRecord(body.updated_by),
-    updated: body.updated_at ? new Date(body.updated_at) : null
-  }));
+  const bodies: AnnotationBody[] = record.bodies.map(parseBodyRecord);
 
   return {
     id: record.id,

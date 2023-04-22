@@ -64,7 +64,6 @@ export interface ProfileRecord {
 
 }
 
-
 export type AnnotationChangeEvent = {
 
   table: 'annotations';
