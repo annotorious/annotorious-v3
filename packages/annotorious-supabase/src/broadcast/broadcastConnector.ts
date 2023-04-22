@@ -1,7 +1,7 @@
 import { Origin } from '@annotorious/core';
 import type { Annotation, AnnotationLayer, StoreChangeEvent } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import { apply, marshal, reviveDates } from './broadcastProtocol';
+import { apply, marshal } from './broadcastProtocol';
 import type { BroadcastMessage } from './Types';
 
 export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
@@ -32,7 +32,7 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
     // Listen to RT channel broadcast events
     channel.on('broadcast', { event: 'change' }, event => {
       const { from, events } = event.payload as BroadcastMessage;
-      events.forEach(event => apply(anno.store, reviveDates(event)));
+      events.forEach(event => apply(anno.store, event));
     });
   }
 

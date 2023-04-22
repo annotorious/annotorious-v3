@@ -72,7 +72,7 @@ const reviveDateFields = (obj: any, keyOrKeys: string | string[]) => {
   return obj;
 }
 
-export const reviveDates = (event: BroadcastEvent) => {
+const reviveDates = (event: BroadcastEvent) => {
   if (event.type === BroadcastEventType.CREATE_ANNOTATION) {
     return { 
       ...event,
@@ -98,18 +98,20 @@ export const reviveDates = (event: BroadcastEvent) => {
 }
   
 export const apply = (store: Store<Annotation>, event: BroadcastEvent) => {
-  if (event.type === BroadcastEventType.CREATE_ANNOTATION) {
-    store.addAnnotation(event.annotation, Origin.REMOTE);
-  } else if (event.type === BroadcastEventType.DELETE_ANNOTATION) {
-    store.deleteAnnotation(event.id, Origin.REMOTE);
-  } else if (event.type === BroadcastEventType.CREATE_BODY) {
-    store.addBody(event.body, Origin.REMOTE);
-  } else if (event.type === BroadcastEventType.DELETE_BODY) {
-    store.deleteBody({ id: event.id, annotation: event.annotation }, Origin.REMOTE);
-  } else if (event.type === BroadcastEventType.UPDATE_BODY) {
-    const { id, annotation } = event.body;
-    store.updateBody({ id, annotation }, event.body, Origin.REMOTE);
-  } else if (event.type === BroadcastEventType.UPDATE_TARGET) {
-    store.updateTarget(event.target, Origin.REMOTE);
+  const e = reviveDates(event);
+
+  if (e.type === BroadcastEventType.CREATE_ANNOTATION) {
+    store.addAnnotation(e.annotation, Origin.REMOTE);
+  } else if (e.type === BroadcastEventType.DELETE_ANNOTATION) {
+    store.deleteAnnotation(e.id, Origin.REMOTE);
+  } else if (e.type === BroadcastEventType.CREATE_BODY) {
+    store.addBody(e.body, Origin.REMOTE);
+  } else if (e.type === BroadcastEventType.DELETE_BODY) {
+    store.deleteBody({ id: e.id, annotation: e.annotation }, Origin.REMOTE);
+  } else if (e.type === BroadcastEventType.UPDATE_BODY) {
+    const { id, annotation } = e.body;
+    store.updateBody({ id, annotation }, e.body, Origin.REMOTE);
+  } else if (e.type === BroadcastEventType.UPDATE_TARGET) {
+    store.updateTarget(e.target, Origin.REMOTE);
   }
 }
