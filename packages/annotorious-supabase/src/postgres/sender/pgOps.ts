@@ -1,4 +1,4 @@
-import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget, User } from '@annotorious/core';
+import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
@@ -64,9 +64,9 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       created_by: anno.getUser().id
     });
 
-  const createBody = (b: AnnotationBody) => supabase
+  const upsertBodies = (bodies: AnnotationBody[]) => supabase
     .from('bodies')
-    .insert({
+    .upsert(bodies.map(b => ({
       id: b.id,
       created_at: b.created,
       created_by: anno.getUser().id,
@@ -75,7 +75,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       annotation_id: b.annotation,
       purpose: b.purpose,
       value: b.value
-    });
+    })))
+    .select();
 
   const createTarget = (t: AnnotationTarget) => supabase
     .from('targets')
@@ -88,6 +89,16 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       value: JSON.stringify(t.selector)
     });
 
+  const deleteAnnotation = (a: Annotation) => supabase
+    .from('annotations')
+    .delete()
+    .eq('id', a.id);
+  
+  const deleteBodies = (b: AnnotationBody[]) => supabase
+    .from('bodies')
+    .delete()
+    .in('id', b.map(body => body.id));
+
   const updateTarget = (t: AnnotationTarget) => supabase
     .from('targets')
     .update({
@@ -99,10 +110,12 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
 
   return {
     createAnnotation,
-    createBody,
     createTarget,
+    deleteAnnotation,
+    deleteBodies,
     initialLoad,
-    updateTarget
+    updateTarget,
+    upsertBodies
   }
 
 }

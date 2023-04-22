@@ -27,11 +27,12 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
 
     // Link store change events to Supabase RT message channel
     observer = onStoreChange(channel);
+
     anno.store.observe(observer, { origin: Origin.LOCAL });
 
     // Listen to RT channel broadcast events
     channel.on('broadcast', { event: 'change' }, event => {
-      const { from, events } = event.payload as BroadcastMessage;
+      const { events } = event.payload as BroadcastMessage;
       events.forEach(event => apply(anno.store, event));
     });
   }

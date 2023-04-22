@@ -7,4 +7,6 @@ export interface SupabasePluginEvents extends PresenceEvents {
 
   initialLoadError: (error: PostgrestError) => void;
 
+  saveError: (message: PostgrestError) => void;
+
 }
