@@ -1,11 +1,13 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { Annotation, diffAnnotations, AnnotationLayer, Origin } from '@annotorious/core';
+import type { Emitter } from 'nanoevents';
 import type { AnnotationRecord, ChangeEvent } from './Types';
+import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 import { parseRecord, parseTargetRecord } from './pgCrosswalk';
 import { pgOps } from './pgOps';
 
-export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
+export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
 
   const ops = pgOps(anno, supabase);
 
@@ -58,8 +60,10 @@ export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: S
       if (!error) {
         const annotations = (data as AnnotationRecord[]).map(parseRecord);
         anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
+
+        emitter.emit('initialLoad', annotations);
       } else {
-        console.error('[Supabase] Loading initial annotations failed', error);
+        emitter.emit('initialLoadError', error);
       }
     });
   }

@@ -1,12 +1,16 @@
+import { createNanoEvents } from 'nanoevents';
 import { PRESENCE_KEY } from '@annotorious/core';
-import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
+import type { Annotation, AnnotationLayer, } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
-import { BroadcastConnector } from './broadcast';
-import { PresenceConnector } from './presence';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
+import type { SupabasePluginEvents } from './SupabasePluginEvents';
+import { BroadcastConnector } from './broadcast';
 import { PostgresConnector } from './postgres';
+import { PresenceConnector } from './presence';
 
 export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
+
+  const emitter = createNanoEvents<SupabasePluginEvents>();
 
   const { apiKey, base, eventsPerSecond } = config;
 
@@ -24,9 +28,9 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
 
   const broadcast = BroadcastConnector(anno);
   
-  const presence = PresenceConnector(anno);
+  const presence = PresenceConnector(anno, emitter);
   
-  const postgres = PostgresConnector(anno, supabase);
+  const postgres = PostgresConnector(anno, supabase, emitter);
 
   // Creates the channel and inits all connectors
   const init = () => {
@@ -85,6 +89,9 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     });
   });
 
+  const on = <E extends keyof SupabasePluginEvents>(event: E, callback: SupabasePluginEvents[E]) =>
+    emitter.on(event, callback);
+
   const destroy = () => {
     broadcast?.destroy();
     presence?.destroy();
@@ -98,7 +105,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     auth: supabase.auth,
     connect,
     destroy,
-    on: presence.on
+    on
   }
 
 }
