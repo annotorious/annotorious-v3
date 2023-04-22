@@ -6,8 +6,6 @@ import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 
 export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Emitter<SupabasePluginEvents>) => {
 
-  let connected = false;
-
   let channel: RealtimeChannel;
 
   const presence = createPresenceState();
@@ -22,8 +20,6 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
   }
 
   const connect = (c: RealtimeChannel) => {
-    connected = true;
-
     channel = c;
 
     channel.on('presence', { event: 'sync' }, () => {
