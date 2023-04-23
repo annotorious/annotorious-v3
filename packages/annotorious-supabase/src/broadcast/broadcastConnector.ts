@@ -1,17 +1,15 @@
 import { Origin } from '@annotorious/core';
 import { Annotation, AnnotationLayer, PRESENCE_KEY, StoreChangeEvent } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import type { Emitter } from 'nanoevents';
-import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 import { apply, marshal } from './broadcastProtocol';
-import type { BroadcastChangeMessage, BroadcastSelectMessage } from './Types';
+import type { BroadcastMessage } from './Types';
 
-export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, emitter: Emitter<SupabasePluginEvents>) => {
+export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
 
   let observer: (event: StoreChangeEvent<Annotation>) => void  = null;
 
   const onStoreChange = (channel: RealtimeChannel) => ((event: StoreChangeEvent<Annotation>) =>  {
-    const message: BroadcastChangeMessage = {
+    const message: BroadcastMessage = {
       from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
       events: marshal([ event ])
     };
@@ -32,30 +30,10 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, emitter: E
 
     anno.store.observe(observer, { origin: Origin.LOCAL });
 
-    // Link selection events to Supabase RT message channel
-    anno.on('selectionChanged', selection => {
-      const message: BroadcastSelectMessage = {
-        from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
-        ids: selection && selection.length > 0 ?
-          selection.map(a => a.id) : null
-        };
-  
-      channel.send({
-        type: 'broadcast',
-        event: 'select',
-        payload: message
-      });
-    });
-
     // Listen to RT channel broadcast events
     channel.on('broadcast', { event: 'change' }, event => {
-      const { events } = event.payload as BroadcastChangeMessage;
+      const { events } = event.payload as BroadcastMessage;
       events.forEach(event => apply(anno.store, event));
-    });
-
-    channel.on('broadcast', { event: 'select' }, event => {
-      const selectEvent = (event.payload as BroadcastSelectMessage);
-      emitter.emit('selectionChanged', selectEvent.from, selectEvent.ids);
     });
   }
 

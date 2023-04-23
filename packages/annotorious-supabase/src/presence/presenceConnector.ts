@@ -1,8 +1,9 @@
-import { createPresenceState } from '@annotorious/core';
+import { createPresenceState, PRESENCE_KEY } from '@annotorious/core';
 import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from '../SupabasePluginEvents';
+import type { SelectEvent } from './Types';
 
 export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Emitter<SupabasePluginEvents>) => {
 
@@ -12,7 +13,7 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
 
   // Forward presence events
   presence.on('presence', users => emitter.emit('presence', users));
-  presence.on('selectionChange', user => emitter.emit('selectionChange', user));
+  presence.on('selectionChange', (from, selection) => emitter.emit('selectionChange', from, selection));
 
   const trackUser = () => {    
     if (channel)
@@ -30,6 +31,25 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
       }));
       
       presence.syncUsers(presentUsers);
+    });
+
+    // Link selection events to Supabase RT message channel
+    anno.on('selectionChanged', selection => {
+      const event: SelectEvent = {
+        from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
+        ids: selection && selection.length > 0 ? selection.map(a => a.id) : null
+      };
+  
+      channel.send({
+        type: 'broadcast',
+        event: 'select',
+        payload: event
+      });
+    });
+
+    channel.on('broadcast', { event: 'select' }, event => {
+      const { from, ids } = (event.payload as SelectEvent);
+      presence.updateSelection(from.presenceKey, ids);
     });
   }
 

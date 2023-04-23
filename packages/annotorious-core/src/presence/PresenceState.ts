@@ -41,7 +41,7 @@ export const createPresenceState = () => {
   const removeUser = (presenceKey: string) => {
     const state = presentUsers.get(presenceKey);
     if (!state) {
-      console.warn('Attempt to remove user that was not present', presenceKey);
+      console.warn('Attempt to remove user that is not present', presenceKey);
       return;
     }
 
@@ -71,6 +71,16 @@ export const createPresenceState = () => {
       emitter.emit('presence', getPresentUsers());
   }
 
+  const updateSelection = (presenceKey: string, selection: string[] | null) => {
+    const from = presentUsers.get(presenceKey);
+    if (!from) {
+      console.warn('Selection change for user that is not present', presenceKey);
+      return;
+    }
+
+    emitter.emit('selectionChange', from, selection);
+  }
+
   const getPresentUsers = () =>
     [...Array.from(presentUsers.values())];
     
@@ -80,7 +90,8 @@ export const createPresenceState = () => {
   return {
     getPresentUsers,
     on,
-    syncUsers
+    syncUsers,
+    updateSelection
   }
 
 }
