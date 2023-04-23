@@ -6,8 +6,6 @@ export interface PresentUser {
 
   user: User;
 
-  selection?: string | string[] | null;
-
   color: string;
 
   lastActive: Date;

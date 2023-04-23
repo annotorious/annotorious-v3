@@ -1,53 +1,53 @@
 import { Origin } from '@annotorious/core';
 import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
-import { type BroadcastEvent, BroadcastEventType } from './Types';
+import { type BroadcastChangeEvent, BroadcastChangeEventType } from './Types';
 
-export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastEvent[] =>
+export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastChangeEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
     const { created, deleted, updated } = storeEvent.changes;
 
-    const createAnnotation: BroadcastEvent[] = created.map(annotation => 
-      ({ type: BroadcastEventType.CREATE_ANNOTATION, annotation }));
+    const createAnnotation: BroadcastChangeEvent[] = created.map(annotation => 
+      ({ type: BroadcastChangeEventType.CREATE_ANNOTATION, annotation }));
 
-    const deleteAnnotation: BroadcastEvent[] = deleted.map(annotation =>
-      ({ type: BroadcastEventType.DELETE_ANNOTATION, id: annotation.id }));
+    const deleteAnnotation: BroadcastChangeEvent[] = deleted.map(annotation =>
+      ({ type: BroadcastChangeEventType.DELETE_ANNOTATION, id: annotation.id }));
 
-    const createBody: BroadcastEvent[] = updated
+    const createBody: BroadcastChangeEvent[] = updated
       .filter(update => update.bodiesCreated?.length > 0)
       .reduce((all, update) => ([
         ...all, 
         ...update.bodiesCreated.map(body => ({ 
-          type: BroadcastEventType.CREATE_BODY, 
+          type: BroadcastChangeEventType.CREATE_BODY, 
           body 
         }))]
       ), []);
 
-    const deleteBody: BroadcastEvent[] = updated
+    const deleteBody: BroadcastChangeEvent[] = updated
       .filter(update => update.bodiesDeleted?.length > 0)
       .reduce((all, update) => ([
         ...all, 
         ...update.bodiesDeleted.map(body => ({ 
-          type: BroadcastEventType.DELETE_BODY, 
+          type: BroadcastChangeEventType.DELETE_BODY, 
           id: body.id, 
           annotation: body.annotation 
         }))]
       ), []);
 
-    const updateBody: BroadcastEvent[] = updated
+    const updateBody: BroadcastChangeEvent[] = updated
       .filter(update => update.bodiesUpdated?.length > 0)
       .reduce((all, update) => ([
         ...all,
         ...update.bodiesUpdated.map(({ newBody }) => ({
-          type: BroadcastEventType.UPDATE_BODY,
+          type: BroadcastChangeEventType.UPDATE_BODY,
           body: newBody
         }))]
       ), []);
 
-    const updateTarget: BroadcastEvent[] = updated
+    const updateTarget: BroadcastChangeEvent[] = updated
       .filter(update => update.targetUpdated)
       .reduce((all, update) => ([
         ...all,
-        { type: BroadcastEventType.UPDATE_TARGET, target: update.targetUpdated.newTarget }
+        { type: BroadcastChangeEventType.UPDATE_TARGET, target: update.targetUpdated.newTarget }
       ]), []);
 
     return [
@@ -72,8 +72,8 @@ const reviveDateFields = (obj: any, keyOrKeys: string | string[]) => {
   return obj;
 }
 
-const reviveDates = (event: BroadcastEvent) => {
-  if (event.type === BroadcastEventType.CREATE_ANNOTATION) {
+const reviveDates = (event: BroadcastChangeEvent) => {
+  if (event.type === BroadcastChangeEventType.CREATE_ANNOTATION) {
     return { 
       ...event,
       annotation: {
@@ -82,12 +82,12 @@ const reviveDates = (event: BroadcastEvent) => {
         bodies: event.annotation.bodies.map(b => reviveDateFields(b, ['created', 'updated']))
       }
     }
-  } else if (event.type === BroadcastEventType.CREATE_BODY || event.type === BroadcastEventType.UPDATE_BODY) {
+  } else if (event.type === BroadcastChangeEventType.CREATE_BODY || event.type === BroadcastChangeEventType.UPDATE_BODY) {
     return {
       ...event,
       body: reviveDateFields(event.body, ['created', 'updated'])
     }
-  } else if (event.type === BroadcastEventType.UPDATE_TARGET) {
+  } else if (event.type === BroadcastChangeEventType.UPDATE_TARGET) {
     return  {
       ...event,
       target: reviveDateFields(event.target, ['created', 'updated'])
@@ -97,21 +97,21 @@ const reviveDates = (event: BroadcastEvent) => {
   }
 }
   
-export const apply = (store: Store<Annotation>, event: BroadcastEvent) => {
+export const apply = (store: Store<Annotation>, event: BroadcastChangeEvent) => {
   const e = reviveDates(event);
 
-  if (e.type === BroadcastEventType.CREATE_ANNOTATION) {
+  if (e.type === BroadcastChangeEventType.CREATE_ANNOTATION) {
     store.addAnnotation(e.annotation, Origin.REMOTE);
-  } else if (e.type === BroadcastEventType.DELETE_ANNOTATION) {
+  } else if (e.type === BroadcastChangeEventType.DELETE_ANNOTATION) {
     store.deleteAnnotation(e.id, Origin.REMOTE);
-  } else if (e.type === BroadcastEventType.CREATE_BODY) {
+  } else if (e.type === BroadcastChangeEventType.CREATE_BODY) {
     store.addBody(e.body, Origin.REMOTE);
-  } else if (e.type === BroadcastEventType.DELETE_BODY) {
+  } else if (e.type === BroadcastChangeEventType.DELETE_BODY) {
     store.deleteBody({ id: e.id, annotation: e.annotation }, Origin.REMOTE);
-  } else if (e.type === BroadcastEventType.UPDATE_BODY) {
+  } else if (e.type === BroadcastChangeEventType.UPDATE_BODY) {
     const { id, annotation } = e.body;
     store.updateBody({ id, annotation }, e.body, Origin.REMOTE);
-  } else if (e.type === BroadcastEventType.UPDATE_TARGET) {
+  } else if (e.type === BroadcastChangeEventType.UPDATE_TARGET) {
     store.updateTarget(e.target, Origin.REMOTE);
   }
 }
