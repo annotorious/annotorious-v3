@@ -9,7 +9,9 @@ export type Store<T extends Annotation> = ReturnType<typeof createStore<T>>;
 
 export function createStore<T extends Annotation>() {
 
-  const index = new Map<string, T>();
+  const annotationIndex = new Map<string, T>();
+
+  const bodyIndex = new Map<string, string>();
 
   const observers: StoreObserver<T>[] = [];
 
@@ -30,7 +32,7 @@ export function createStore<T extends Annotation>() {
         updated: changes.updated || [],
         deleted: changes.deleted || []
       },
-      state: [...index.values()]
+      state: [...annotationIndex.values()]
     };
 
     observers.forEach(observer => {
@@ -40,25 +42,30 @@ export function createStore<T extends Annotation>() {
   }
 
   const addAnnotation = (annotation: T, origin = Origin.LOCAL) => {
-    const existing = index.get(annotation.id);
+    const existing = annotationIndex.get(annotation.id);
 
     if (existing) {
       throw Error(`Cannot add annotation ${annotation.id} - exists already`);
     } else {
-      index.set(annotation.id, annotation);
+      annotationIndex.set(annotation.id, annotation);
+
+      annotation.bodies.forEach(b => bodyIndex.set(b.id, annotation.id));
+
       emit(origin, { created: [annotation] });
     }
   }
 
   const addBody = (body: AnnotationBody, origin = Origin.LOCAL) => {
-    const oldValue = index.get(body.annotation);
+    const oldValue = annotationIndex.get(body.annotation);
     if (oldValue) {
       const newValue = { 
         ...oldValue,
         bodies: [ ...oldValue.bodies, body ]
       };
 
-      index.set(oldValue.id, newValue);
+      annotationIndex.set(oldValue.id, newValue);
+
+      bodyIndex.set(body.id, newValue.id);
 
       const update: Update<T> = {
         oldValue, newValue, bodiesCreated: [ body ]
@@ -70,28 +77,35 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const all = () => [...index.values()];
+  const all = () => [...annotationIndex.values()];
 
   const bulkAddAnnotation = (annotations: T[], replace = true, origin = Origin.LOCAL) => {
     if (replace) {
       // Delete existing first
-      const deleted = [...index.values()];
-      index.clear();
+      const deleted = [...annotationIndex.values()];
+      annotationIndex.clear();
+      bodyIndex.clear();
 
-      annotations.forEach(annotation => index.set(annotation.id, annotation));
+      annotations.forEach(annotation => {
+        annotationIndex.set(annotation.id, annotation);
+        annotation.bodies.forEach(b => bodyIndex.set(b.id, annotation.id));
+      });
 
       emit(origin, { created: annotations, deleted });
     } else {
       // Don't allow overwriting of existing annotations
       const existing = annotations.reduce((all, next) => {
-        const existing = index.get(next.id);
+        const existing = annotationIndex.get(next.id);
         return existing ? [...all, existing ] : all;
       }, []);
 
       if (existing.length > 0)
         throw Error(`Bulk insert would overwrite the following annotations: ${existing.map(a => a.id).join(', ')}`);
 
-      annotations.forEach(annotation => index.set(annotation.id, annotation));
+      annotations.forEach(annotation => {
+        annotationIndex.set(annotation.id, annotation);
+        annotation.bodies.forEach(b => bodyIndex.set(b.id, annotation.id));
+      });
 
       emit(origin, { created: annotations });
     }
@@ -100,9 +114,10 @@ export function createStore<T extends Annotation>() {
   const deleteAnnotation = (annotationOrId: T | string, origin = Origin.LOCAL) => {
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
 
-    const existing = index.get(id);
+    const existing = annotationIndex.get(id);
     if (existing) {
-      index.delete(id);
+      annotationIndex.delete(id);
+      existing.bodies.forEach(b => bodyIndex.delete(b.id));
       emit(origin, { deleted: [ existing ] });
     } else {
       console.warn(`Attempt to delete missing annotation: ${id}`);
@@ -110,18 +125,20 @@ export function createStore<T extends Annotation>() {
   }
 
   const deleteBody = (body: AnnotationBodyIdentifier, origin = Origin.LOCAL) => {
-    const oldAnnotation = index.get(body.annotation);
+    const oldAnnotation = annotationIndex.get(body.annotation);
 
     if (oldAnnotation) {
       const oldBody = oldAnnotation.bodies.find(b => b.id === body.id);
 
       if (oldBody) {
+        bodyIndex.delete(oldBody.id);
+
         const newAnnotation = {
           ...oldAnnotation,
           bodies: oldAnnotation.bodies.filter(b => b.id !== body.id)
         };
-        
-        index.set(oldAnnotation.id, newAnnotation);
+
+        annotationIndex.set(oldAnnotation.id, newAnnotation);
 
         const update: Update<T> = {
           oldValue: oldAnnotation, newValue: newAnnotation, bodiesDeleted: [oldBody]
@@ -137,15 +154,30 @@ export function createStore<T extends Annotation>() {
   }
 
   const getAnnotation = (id: string): T | undefined => {
-    const a = index.get(id);
+    const a = annotationIndex.get(id);
     return a ? {...a} : undefined;
+  }
+
+  const getBody = (id: string): AnnotationBody | undefined => {
+    const annotationId = bodyIndex.get(id);
+    if (annotationId) {
+      const annotation = getAnnotation(annotationId);
+      const body = annotation.bodies.find(b => b.id === id);
+      if (body) {
+        return body;
+      } else {
+        console.error(`Store integrity error: body ${id} in index, but not in annotation`);
+      }
+    } else {
+      console.warn(`Attempt to retrieve missing body: ${id}`);
+    }
   }
 
   const updateBody = (oldBodyId: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
     if (oldBodyId.annotation !== newBody.annotation)
       throw 'Annotation integrity violation: annotation ID must be the same when updating bodies';
 
-    const oldAnnotation = index.get(oldBodyId.annotation);
+    const oldAnnotation = annotationIndex.get(oldBodyId.annotation);
     if (oldAnnotation) {
       const oldBody = oldAnnotation.bodies.find(b => b.id === oldBodyId.id);
 
@@ -154,7 +186,7 @@ export function createStore<T extends Annotation>() {
         bodies: oldAnnotation.bodies.map(b => b.id === oldBody.id ? newBody : b)
       };
 
-      index.set(oldAnnotation.id, newAnnotation);
+      annotationIndex.set(oldAnnotation.id, newAnnotation);
 
       const update: Update<T> = {
         oldValue: oldAnnotation, 
@@ -169,12 +201,12 @@ export function createStore<T extends Annotation>() {
   }
 
   const updateOneTarget = (target: AnnotationTarget): Update<T> => {
-    const oldValue = index.get(target.annotation);
+    const oldValue = annotationIndex.get(target.annotation);
     
     if (oldValue) {
       const newValue = { ...oldValue, target };
 
-      index.set(oldValue.id, newValue);
+      annotationIndex.set(oldValue.id, newValue);
 
       return {
         oldValue, newValue, targetUpdated: { 
@@ -206,6 +238,7 @@ export function createStore<T extends Annotation>() {
     deleteAnnotation,
     deleteBody,
     getAnnotation,
+    getBody,
     observe,
     unobserve,
     updateBody,

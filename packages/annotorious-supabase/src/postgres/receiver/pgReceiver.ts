@@ -1,4 +1,4 @@
-import { Annotation, AnnotationLayer, Origin, Store } from '@annotorious/core';
+import { Annotation, AnnotationLayer, Origin } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
 import equal from 'deep-equal';
@@ -51,13 +51,17 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
 
   /**
    * After DELETE BODY:
-   * - Check if annotation exists.
-   * - Throw INTEGRITY ERROR if not.
    * - Check if body exists.
-   * - Delete if not.
+   * - Delete if it does.
+   * - Throw INTEGRITY ERROR if not.
    */
   const onDeleteBody = (event: BodyChangeEvent) => {
-    // TODO
+    const body = store.getBody(event.old.id);
+    if (body) {
+      store.deleteBody(body, Origin.REMOTE);
+    } else {
+      emitter.emit('integrityError', 'Attempt to delete missing body: ' + event.old.id);
+    }
   }
 
   /** 
@@ -102,15 +106,6 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
     }
   }
 
-  /**
-   * After DELETE TARGET:
-   * 1. check if annotation exists.
-   * 2. delete annotation if so.
-   */
-  const onDeleteTarget = (event: TargetChangeEvent) => {
-    // TODO
-  }
-
   channel.on(
     'postgres_changes', 
     { 
@@ -133,9 +128,7 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
         onInsertTarget(event);
       } else if (table === 'targets' && eventType === 'UPDATE') {
         onUpdateTarget(event);
-      } else if (table === 'targets' && eventType === 'DELETE') {
-        onDeleteTarget(event);
-      }      
+      }  
     });
   
 }
