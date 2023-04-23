@@ -63,39 +63,12 @@ export const createPresenceState = () => {
     const toRemove = Array.from(presentUsers.values()).filter(presentUser =>
       !keys.has(presentUser.presenceKey));
 
-    // If any removed users have selections, remove them
-    const toDeselect = toRemove.filter(presentUser => presentUser.selection);
-    toDeselect.forEach(presentUser => emitter.emit('selectionChange', { ...presentUser, selection: null }));
-
     toAdd.forEach(({ presenceKey, user }) => addUser(presenceKey, user));
 
     toRemove.forEach(({ presenceKey }) => removeUser(presenceKey));
 
     if (toAdd.length > 0 || toRemove.length > 0)
       emitter.emit('presence', getPresentUsers());
-  }
-
-  const updateSelection = (presenceKey: string, selected: string[]) => {
-    const presentUser = presentUsers.get(presenceKey);
-    if (!presentUser) {
-      console.warn('Attempt to update selection for user who is not registered as present');
-      return;
-    }
-
-    let selection: string | string[] | undefined;
-
-    if (!selected || selected?.length === 0)
-      selection = undefined;
-    else if (selected.length === 1)
-      selection = selected[0];
-    else
-      selection = selected;
-
-    const updatedUser = { ...presentUser, selection };
-
-    presentUsers.set(presenceKey, updatedUser);
-
-    emitter.emit('selectionChange', updatedUser);
   }
 
   const getPresentUsers = () =>
@@ -107,8 +80,7 @@ export const createPresenceState = () => {
   return {
     getPresentUsers,
     on,
-    syncUsers,
-    updateSelection
+    syncUsers
   }
 
 }

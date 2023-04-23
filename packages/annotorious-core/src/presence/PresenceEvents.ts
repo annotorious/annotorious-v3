@@ -4,6 +4,4 @@ export interface PresenceEvents {
 
   presence: (users: PresentUser[]) => void;
 
-  selectionChange: (user: PresentUser) => void;
-
 }
