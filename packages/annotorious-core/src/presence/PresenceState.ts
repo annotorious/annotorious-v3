@@ -71,7 +71,7 @@ export const createPresenceState = () => {
       emitter.emit('presence', getPresentUsers());
   }
 
-  const updateSelection = (presenceKey: string, selection: string[] | null) => {
+  const notifySelection = (presenceKey: string, selection: string[] | null) => {
     const from = presentUsers.get(presenceKey);
     if (!from) {
       console.warn('Selection change for user that is not present', presenceKey);
@@ -89,9 +89,9 @@ export const createPresenceState = () => {
 
   return {
     getPresentUsers,
+    notifySelection,
     on,
-    syncUsers,
-    updateSelection
+    syncUsers
   }
 
 }
