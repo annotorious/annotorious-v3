@@ -2,6 +2,29 @@ import { Origin } from '@annotorious/core';
 import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
 import { type BroadcastEvent, BroadcastEventType } from './Types';
 
+/**
+ * Returns a list of unique IDs of annotations that are 
+ * affected the list of events.
+ */
+export const affectedAnnotations = (events: BroadcastEvent[]) => {
+  const affectedAnnotations = events.reduce((annotationIds, e) => {
+    if (e.type === BroadcastEventType.CREATE_ANNOTATION) {
+      return [...annotationIds, e.annotation.id];
+    } else if (e.type === BroadcastEventType.CREATE_BODY) {
+      return [...annotationIds, e.body.annotation];
+    } else if (e.type === BroadcastEventType.DELETE_BODY) {
+      return [...annotationIds, e.annotation];
+    } else if (e.type === BroadcastEventType.UPDATE_BODY) {
+      return [...annotationIds, e.body.annotation];
+    } else if (e.type === BroadcastEventType.UPDATE_TARGET) {
+      return [...annotationIds, e.target.annotation];
+    }
+  }, [] as string[]);
+
+  // Unique IDs only
+  return Array.from(new Set(affectedAnnotations));
+}
+
 export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
     const { created, deleted, updated } = storeEvent.changes;

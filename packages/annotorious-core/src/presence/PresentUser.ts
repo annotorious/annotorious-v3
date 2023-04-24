@@ -8,6 +8,4 @@ export interface PresentUser {
 
   color: string;
 
-  lastActive: Date;
-
 }

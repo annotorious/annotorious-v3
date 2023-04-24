@@ -1,10 +1,11 @@
 import { Origin } from '@annotorious/core';
 import { Annotation, AnnotationLayer, PRESENCE_KEY, StoreChangeEvent } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
-import { apply, marshal } from './broadcastProtocol';
+import type { PresenceConnector } from '../presence';
+import { affectedAnnotations, apply, marshal } from './broadcastProtocol';
 import type { BroadcastMessage } from './Types';
 
-export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
+export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, presence: ReturnType<typeof PresenceConnector>) => {
 
   let observer: (event: StoreChangeEvent<Annotation>) => void  = null;
 
@@ -32,8 +33,13 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>) => {
 
     // Listen to RT channel broadcast events
     channel.on('broadcast', { event: 'change' }, event => {
-      const { events } = event.payload as BroadcastMessage;
+      const { from, events } = event.payload as BroadcastMessage;
+
+      // Apply the change event to the store
       events.forEach(event => apply(anno.store, event));
+
+      // Notify presence state about user activity
+      presence.notifyActivity(from.presenceKey, affectedAnnotations(events));
     });
   }
 

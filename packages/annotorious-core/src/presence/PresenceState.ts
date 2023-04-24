@@ -14,6 +14,8 @@ export const createPresenceState = () => {
 
   const presentUsers = new Map<string, PresentUser>();
 
+  const selectionStates = new Map<string, string[]>();
+
   const unassignedColors = [...PALETTE];
 
   const assignRandomColor = () => {
@@ -33,9 +35,7 @@ export const createPresenceState = () => {
 
     const color = assignRandomColor();
 
-    const lastActive = new Date();
-
-    presentUsers.set(presenceKey, { presenceKey, user, color, lastActive });
+    presentUsers.set(presenceKey, { presenceKey, user, color });
   }
 
   const removeUser = (presenceKey: string) => {
@@ -71,12 +71,31 @@ export const createPresenceState = () => {
       emitter.emit('presence', getPresentUsers());
   }
 
-  const notifySelection = (presenceKey: string, selection: string[] | null) => {
+  const notifyActivity = (presenceKey: string, annotationIds: string[]) => {
+    // We currently use this only to fix possible missed selection events
+    if (annotationIds.length > 0 && !selectionStates.has(presenceKey)) {
+
+      const user = presentUsers.get(presenceKey);
+      if (!user) {
+        console.warn('Activity notification from user that is not present');
+      } else {
+        selectionStates.set(presenceKey, annotationIds);
+        emitter.emit('selectionChange', user, annotationIds);
+      }
+    }
+  }
+
+  const updateSelection = (presenceKey: string, selection: string[] | null) => {
     const from = presentUsers.get(presenceKey);
     if (!from) {
       console.warn('Selection change for user that is not present', presenceKey);
       return;
     }
+
+    if (selection)
+      selectionStates.set(presenceKey, selection);
+    else 
+      selectionStates.delete(presenceKey);
 
     emitter.emit('selectionChange', from, selection);
   }
@@ -89,9 +108,10 @@ export const createPresenceState = () => {
 
   return {
     getPresentUsers,
-    notifySelection,
+    notifyActivity,
     on,
-    syncUsers
+    syncUsers,
+    updateSelection
   }
 
 }

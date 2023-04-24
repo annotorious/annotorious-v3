@@ -25,10 +25,10 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
 
   // Set up channel and connectors for each channel type
   let channel: RealtimeChannel = null;
-
-  const broadcast = BroadcastConnector(anno);
   
   const presence = PresenceConnector(anno, emitter);
+
+  const broadcast = BroadcastConnector(anno, presence);
   
   const postgres = PostgresConnector(anno, supabase, emitter);
 
@@ -42,8 +42,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
       }
     });
 
-    broadcast.connect(channel);
     presence.connect(channel);
+    broadcast.connect(channel);
     postgres.connect(channel);
 
     channel.subscribe(status => {
@@ -93,8 +93,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
     emitter.on(event, callback);
 
   const destroy = () => {
-    broadcast?.destroy();
     presence?.destroy();
+    broadcast?.destroy();
     postgres?.destroy();
 
     if (channel)

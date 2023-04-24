@@ -49,13 +49,14 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
 
     channel.on('broadcast', { event: 'select' }, event => {
       const { from, ids } = (event.payload as SelectEvent);
-      presence.notifySelection(from.presenceKey, ids);
+      presence.updateSelection(from.presenceKey, ids);
     });
   }
 
   return {
     connect,
     destroy: () => channel && channel.untrack(),
+    notifyActivity: presence.notifyActivity,
     trackUser
   }
 
