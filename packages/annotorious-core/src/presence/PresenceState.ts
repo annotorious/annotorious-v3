@@ -5,6 +5,9 @@ import { PALETTE } from './Palette';
 import type { PresentUser } from './PresentUser';
 import type { PresenceEvents } from './PresenceEvents';
 
+const isListEqual = (listA: any[], listB: any[]) => 
+  listA.every(a => listA.includes(a)) && listB.every(b => listA.includes(b));
+
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
@@ -71,17 +74,20 @@ export const createPresenceState = () => {
       emitter.emit('presence', getPresentUsers());
   }
 
-  const notifyActivity = (presenceKey: string, annotationIds: string[]) => {
-    // We currently use this only to fix possible missed selection events
-    if (annotationIds.length > 0 && !selectionStates.has(presenceKey)) {
+  const notifyActivity = (presenceKey: string, annotationIds: string[]) => {    
+    const user = presentUsers.get(presenceKey);
+    
+    if (!user) {
+      console.warn('Activity notification from user that is not present');
+      return;
+    }
 
-      const user = presentUsers.get(presenceKey);
-      if (!user) {
-        console.warn('Activity notification from user that is not present');
-      } else {
-        selectionStates.set(presenceKey, annotationIds);
-        emitter.emit('selectionChange', user, annotationIds);
-      }
+    const currentSelection = selectionStates.get(presenceKey);
+
+    // Was there a selection change we might have missed?
+    if (!currentSelection || !isListEqual(currentSelection, annotationIds)) {
+      selectionStates.set(presenceKey, annotationIds);
+      emitter.emit('selectionChange', user, annotationIds);
     }
   }
 
