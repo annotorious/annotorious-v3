@@ -35,10 +35,6 @@ export const OSDAnnotationLayer = (props: AnnotoriousOSDProps) => {
       (anno as OSDLayer).stopDrawing();
   }, [props.tool, props.keepEnabled]);
 
-  return (
-    <>
-      {props.children}
-    </>
-  );
+  return anno ? (<>{props.children}</>) : null;
 
 }
