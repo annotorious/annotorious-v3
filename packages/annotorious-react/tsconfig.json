@@ -22,10 +22,6 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "target": "ESNext",
-    "typeRoots": [
-      "node_modules/@types",
-      "src/index.d.ts"
-    ],
     "useDefineForClassFields": true
   },
   "include": ["src"],

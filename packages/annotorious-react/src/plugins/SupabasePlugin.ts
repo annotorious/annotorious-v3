@@ -6,17 +6,17 @@ import { useAnnotationLayer } from '../useAnnotationLayer';
 
 export interface SupabasePluginProps extends SupabasePluginConfig {
 
-  onInitialLoad(annotations: Annotation[]): void;
+  onInitialLoad?(annotations: Annotation[]): void;
 
-  onInitialLoadError(error: PostgrestError): void;
+  onInitialLoadError?(error: PostgrestError): void;
 
-  onIntegrityError(message: string): void;
+  onIntegrityError?(message: string): void;
 
-  onPresence(users: PresentUser[]): void;
+  onPresence?(users: PresentUser[]): void;
 
-  onSaveError(error: PostgrestError): void;
+  onSaveError?(error: PostgrestError): void;
 
-  onSelectionChange(user: PresentUser): void;
+  onSelectionChange?(user: PresentUser): void;
 
 }
 
