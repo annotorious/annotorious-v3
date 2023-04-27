@@ -1,2 +1,2 @@
-export * from './AnnotoriousOSD';
+export * from './OSDAnnotationLayer';
 export * from './OpenSeadragon';
