@@ -44,10 +44,12 @@ export const Annotorious = (props: { children: ReactElement }) => {
       setAnnotations(next);
     };
 
-    anno.store.observe(onStoreChange);
+    if (anno) {
+      anno.store.observe(onStoreChange);
 
-    return () => {
-      anno.store.unobserve(onStoreChange);
+      return () => {
+        anno.store.unobserve(onStoreChange);
+      }
     }
   }, [anno]);
 
