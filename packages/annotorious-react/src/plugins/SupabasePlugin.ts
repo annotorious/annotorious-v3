@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Annotation, PresentUser } from '@annotorious/core';
 import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotorious/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
-import { useAnnotationLayer } from '../useAnnotationLayer';
+import { useAnnotationLayer } from 'src/Annotorious';
 
 export interface SupabasePluginProps extends SupabasePluginConfig {
 

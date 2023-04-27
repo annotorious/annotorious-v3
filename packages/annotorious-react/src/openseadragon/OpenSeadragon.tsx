@@ -1,5 +1,5 @@
 import OSD from 'openseadragon';
-import React, {
+import {
   ReactElement, 
   createContext, 
   forwardRef,

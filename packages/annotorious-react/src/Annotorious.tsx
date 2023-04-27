@@ -59,9 +59,17 @@ export const Annotorious = (props: { children: ReactElement }) => {
 
 }
 
-export const useAnnotationLayerState = () => { 
+export const useAnnotationLayerState = (): [
+  AnnotationLayer<ImageAnnotation>,
+  (anno: AnnotationLayer<ImageAnnotation>) => void
+] => { 
   const { anno, setAnno } = useContext(AnnotoriousContext);
   return [anno, setAnno];
+}
+
+export const useAnnotationLayer = () => {
+  const { anno } = useContext(AnnotoriousContext);
+  return anno;
 }
 
 export const useAnnotationStore = () => {
