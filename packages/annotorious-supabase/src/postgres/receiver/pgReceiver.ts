@@ -80,8 +80,9 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
     const annotation = store.getAnnotation(annotation_id);
 
     if (annotation) {
-      if (annotation.target.version <= version)
+      if (annotation.target.version <= version) {
         store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
+      }
     } else {
       store.addAnnotation({
         id: annotation_id,
@@ -102,10 +103,6 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
     const { annotation_id, version } = event.new;
 
     const annotation = store.getAnnotation(annotation_id);
-
-    console.log('[CDC] target update');
-    console.log('[CDC] local version: ' + annotation.target.version);
-    console.log('[CDC] backend version: ' + version);
     
     if (annotation) {
       if (annotation.target.version <= version) {

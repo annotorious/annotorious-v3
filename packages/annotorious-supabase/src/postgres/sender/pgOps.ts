@@ -59,13 +59,22 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       )
     `);
 
-  const createAnnotation = (a: Annotation) => supabase
-    .from('annotations')
-    .insert({
-      id: a.id,
-      created_at: new Date(),
-      created_by: anno.getUser().id
-    });
+  const createAnnotation = (a: Annotation) => {
+    const versioned = {
+      ...a.target,
+      version: 1
+    };
+
+    store.updateTarget(versioned, Origin.REMOTE);
+    
+    return supabase
+      .from('annotations')
+      .insert({
+        id: a.id,
+        created_at: new Date(),
+        created_by: anno.getUser().id
+      });
+  }
 
   const upsertBodies = (bodies: AnnotationBody[]) => {
     // Increment body version numbers
@@ -86,32 +95,20 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
         updated_by: anno.getUser().id,
         annotation_id: b.annotation,
         purpose: b.purpose,
-        value: b.value,
-        version: b.version - 1 // Supabase will auto-increment!
+        value: b.value
       })));
   }
 
-  const createTarget = (t: AnnotationTarget) => { 
-    // Set target version number
-    const versioned = {
-      ...t,
-      version: 1
-    };
-
-    store.updateTarget(versioned, Origin.REMOTE);
-
-    return supabase
-      .from('targets')
-      .insert({
-        created_at: versioned.created,
-        created_by: anno.getUser().id,
-        updated_at: versioned.created,
-        updated_by: anno.getUser().id,
-        annotation_id: versioned.annotation,
-        value: JSON.stringify(versioned.selector),
-        version: versioned.version - 1 // Supabase will auto-increment!
-      });
-  }
+  const createTarget = (t: AnnotationTarget) => supabase
+    .from('targets')
+    .insert({
+      created_at: t.created,
+      created_by: anno.getUser().id,
+      updated_at: t.created,
+      updated_by: anno.getUser().id,
+      annotation_id: t.annotation,
+      value: JSON.stringify(t.selector)
+    });
 
   const deleteAnnotation = (a: Annotation) => supabase
     .from('annotations')
@@ -137,8 +134,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       .update({
         updated_at: versioned.updated,
         updated_by: anno.getUser().id,
-        value: JSON.stringify(versioned.selector),
-        version: versioned.version - 1 // Supabase will auto-increment!
+        value: JSON.stringify(versioned.selector)
       })
       .eq('annotation_id', versioned.annotation);
   }

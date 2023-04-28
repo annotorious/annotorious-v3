@@ -120,6 +120,10 @@
           console.log('user selection', user, selected);
         });
 
+        supabase.on('saveError', error => {
+          console.log('save error', error);
+        })
+
         supabase.connect();
 
         document.getElementById('draw').addEventListener('click', function() {

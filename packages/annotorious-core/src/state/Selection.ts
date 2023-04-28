@@ -25,8 +25,7 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
   }
 
   const clickSelect = (evt: PointerEvent, id: string) => {
-    // TODO allow CTRL select
-    set([id]);
+    set([id]); // TODO allow CTRL select
   }
 
   const setSelected = (idOrIds: string | string[]) => {

@@ -55,10 +55,11 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
     } else if (initialSelection && selected === null) {
       // Deselect!
       initialSelection.forEach(initial => {
-        const updatedState = store.getAnnotation(initial.id);        
-
-        if (updatedState && !equal(updatedState, initial))
+        const updatedState = store.getAnnotation(initial.id);  
+        
+        if (updatedState && !equal(updatedState, initial)) {
           emit('updateAnnotation', updatedState, initial);
+        }
       });
 
       initialSelection = null;

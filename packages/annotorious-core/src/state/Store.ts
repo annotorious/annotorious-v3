@@ -212,7 +212,13 @@ export function createStore<T extends Annotation>() {
     const oldValue = annotationIndex.get(target.annotation);
     
     if (oldValue) {
-      const newValue = { ...oldValue, target };
+      const newValue = { 
+        ...oldValue, 
+        target: {
+          ...oldValue.target,
+          ...target 
+        }
+      };
 
       annotationIndex.set(oldValue.id, newValue);
 
