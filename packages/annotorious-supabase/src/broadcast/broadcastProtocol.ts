@@ -1,6 +1,7 @@
 import { Origin } from '@annotorious/core';
 import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
-import { type BroadcastEvent, BroadcastEventType } from './Types';
+import { BroadcastEventType } from './Types';
+import type { BroadcastEvent, CreateBodyEvent, CreateAnnotationEvent } from './Types';
 
 /**
  * Returns a list of unique IDs of annotations that are 
@@ -25,27 +26,36 @@ export const affectedAnnotations = (events: BroadcastEvent[]) => {
   return Array.from(new Set(affectedAnnotations));
 }
 
-export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastEvent[] =>
+export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Store<Annotation>): BroadcastEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
     const { created, deleted, updated } = storeEvent.changes;
 
-    const createAnnotation: BroadcastEvent[] = created.map(annotation => 
-      ({ type: BroadcastEventType.CREATE_ANNOTATION, annotation }));
+    const createAnnotationEvents: BroadcastEvent[] = created.map(annotation => ({
+      type: BroadcastEventType.CREATE_ANNOTATION, 
+      annotation: {
+        ...annotation,
+        // Set target version to 1
+        target: {
+          ...annotation.target,
+          version: 1
+        }
+      }
+    }));
 
-    const deleteAnnotation: BroadcastEvent[] = deleted.map(annotation =>
+    const deleteAnnotationEvents: BroadcastEvent[] = deleted.map(annotation =>
       ({ type: BroadcastEventType.DELETE_ANNOTATION, id: annotation.id }));
 
-    const createBody: BroadcastEvent[] = updated
+    const createBodyEvents: BroadcastEvent[] = updated
       .filter(update => update.bodiesCreated?.length > 0)
       .reduce((all, update) => ([
         ...all, 
-        ...update.bodiesCreated.map(body => ({ 
+        ...update.bodiesCreated.map(body => { return ({ 
           type: BroadcastEventType.CREATE_BODY, 
-          body 
-        }))]
+          body: { ...body, version: 1 } 
+        }) })]
       ), []);
 
-    const deleteBody: BroadcastEvent[] = updated
+    const deleteBodyEvents: BroadcastEvent[] = updated
       .filter(update => update.bodiesDeleted?.length > 0)
       .reduce((all, update) => ([
         ...all, 
@@ -56,7 +66,7 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastE
         }))]
       ), []);
 
-    const updateBody: BroadcastEvent[] = updated
+    const updateBodyEvents: BroadcastEvent[] = updated
       .filter(update => update.bodiesUpdated?.length > 0)
       .reduce((all, update) => ([
         ...all,
@@ -66,21 +76,33 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[]): BroadcastE
         }))]
       ), []);
 
-    const updateTarget: BroadcastEvent[] = updated
+    const updateTargetEvents: BroadcastEvent[] = updated
       .filter(update => update.targetUpdated)
       .reduce((all, update) => ([
         ...all,
         { type: BroadcastEventType.UPDATE_TARGET, target: update.targetUpdated.newTarget }
       ]), []);
 
+    // Apply version updates to the store
+    const createdTargets = 
+      createAnnotationEvents.map(evt => (evt as CreateAnnotationEvent).annotation.target);
+
+    store.bulkUpdateTargets(createdTargets, Origin.REMOTE);
+
+    // Versioned copies of the created bodies
+    const createdBodies = 
+      createBodyEvents.map(evt => (evt as CreateBodyEvent).body);
+
+    store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
+
     return [
       ...all,
-      ...createAnnotation,
-      ...deleteAnnotation,
-      ...createBody,
-      ...deleteBody,
-      ...updateBody,
-      ...updateTarget
+      ...createAnnotationEvents,
+      ...deleteAnnotationEvents,
+      ...createBodyEvents,
+      ...deleteBodyEvents,
+      ...updateBodyEvents,
+      ...updateTargetEvents
     ];
   }, []);
 

@@ -1,4 +1,4 @@
-import type { PresentUser, User } from '@annotorious/core';
+import type { User } from '@annotorious/core';
 
 export interface SelectEvent {
 

@@ -30,7 +30,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
 
   const broadcast = BroadcastConnector(anno, presence);
   
-  const postgres = PostgresConnector(anno, supabase, emitter);
+  const postgres = PostgresConnector(anno, supabase, presence, emitter);
 
   // Creates the channel and inits all connectors
   const init = () => {

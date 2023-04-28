@@ -135,13 +135,13 @@ export type BodyChangeEvent = {
   
     created_at: string;
   
-    created_by: ProfileRecord;
+    created_by: string;
   
     purpose?: string;
   
     updated_at?: string;
   
-    updated_by?: ProfileRecord;
+    updated_by?: string;
   
     value: string;
 

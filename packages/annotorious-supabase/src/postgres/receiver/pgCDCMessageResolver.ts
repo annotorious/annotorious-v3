@@ -1,7 +1,20 @@
-import type { AnnotationBody, AnnotationTarget } from '@annotorious/core';
+import { Annotation, AnnotationBody, AnnotationTarget, getCollaborators, PresentUser } from '@annotorious/core';
 import type { BodyChangeEvent, TargetChangeEvent } from '../Types';
 
-export const resolveBodyChange = (event: BodyChangeEvent): AnnotationBody => {
+const findUser = (id: string, presentUsers: PresentUser[], annotation?: Annotation) => {
+  if (!id)
+    return;
+
+  // Check if this user is present
+  const present = presentUsers.find(({ user }) => user.id === id);
+  if (present)
+    return present.user;
+
+  // Check if this user is already in this annotation
+  return getCollaborators(annotation).find(u => u.id === id);
+}
+
+export const resolveBodyChange = (event: BodyChangeEvent, presentUsers: PresentUser[], annotation?: Annotation): AnnotationBody => {
   const b = event.new;
 
   return {
@@ -9,22 +22,24 @@ export const resolveBodyChange = (event: BodyChangeEvent): AnnotationBody => {
     annotation: b.annotation_id,
     purpose: b.purpose,
     value: JSON.parse(b.value),
-    creator: undefined, // TODO parseProfileRecord(body.created_by),
+    creator: findUser(b.created_by, presentUsers, annotation),
     created: new Date(b.created_at),
-    updatedBy: undefined, // TODO parseProfileRecord(body.updated_by),
-    updated: b.updated_at ? new Date(b.updated_at) : null
+    updatedBy: findUser(b.updated_by, presentUsers, annotation),
+    updated: b.updated_at ? new Date(b.updated_at) : null,
+    version: b.version
   }
 }
 
-export const resolveTargetChange = (event: TargetChangeEvent): AnnotationTarget => {
+export const resolveTargetChange = (event: TargetChangeEvent, presentUsers: PresentUser[], annotation?: Annotation): AnnotationTarget => {
   const t = event.new;
 
   return {
     annotation: t.annotation_id,
     selector: JSON.parse(t.value),
-    creator: undefined, // TODO parseProfileRecord(target.created_by),
+    creator: findUser(t.created_by, presentUsers, annotation),
     created: new Date(t.created_at),
-    updatedBy: undefined, // TODO parseProfileRecord(target.created_by),
-    updated: t.updated_at ? new Date(t.updated_at) : null
+    updatedBy: findUser(t.updated_by, presentUsers, annotation),
+    updated: t.updated_at ? new Date(t.updated_at) : null,
+    version: t.version
   }
 }

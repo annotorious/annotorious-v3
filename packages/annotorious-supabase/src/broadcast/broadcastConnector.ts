@@ -12,7 +12,7 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, presence: 
   const onStoreChange = (channel: RealtimeChannel) => ((event: StoreChangeEvent<Annotation>) =>  {
     const message: BroadcastMessage = {
       from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
-      events: marshal([ event ])
+      events: marshal([ event ], anno.store)
     };
 
     channel.send({
@@ -34,6 +34,8 @@ export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, presence: 
     // Listen to RT channel broadcast events
     channel.on('broadcast', { event: 'change' }, event => {
       const { from, events } = event.payload as BroadcastMessage;
+
+      console.log('[Broadcast Rx]', events);
 
       // Apply the change event to the store
       events.forEach(event => apply(anno.store, event));

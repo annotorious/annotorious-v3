@@ -1,11 +1,12 @@
 import { Annotation, AnnotationLayer, Origin } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
-import type { SupabasePluginEvents } from 'src/SupabasePluginEvents';
+import type { PresenceConnector } from '../../presence';
+import type { SupabasePluginEvents } from '../../SupabasePluginEvents';
 import type { AnnotationChangeEvent, BodyChangeEvent, ChangeEvent, TargetChangeEvent } from '../Types';
 import { resolveBodyChange, resolveTargetChange } from './pgCDCMessageResolver';
 
-export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel, emitter: Emitter<SupabasePluginEvents>) => {
+export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
 
   const { store } = anno;
 
@@ -41,11 +42,11 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
 
       if (existingBody) {
         if (existingBody.version <= version) {
-          store.updateBody(existingBody, resolveBodyChange(event), Origin.REMOTE);
+          store.updateBody(existingBody, resolveBodyChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
         }
       } else {
         // Body doesn't exist - add
-        store.addBody(resolveBodyChange(event), Origin.REMOTE);
+        store.addBody(resolveBodyChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
       }
     } else {
       emitter.emit('integrityError', 'Attempt to upsert body on missing annotation: ' + annotation_id);
@@ -80,12 +81,12 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
 
     if (annotation) {
       if (annotation.target.version <= version)
-        store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
+        store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
     } else {
       store.addAnnotation({
         id: annotation_id,
         bodies: [],
-        target: resolveTargetChange(event)
+        target: resolveTargetChange(event, presence.getPresentUsers())
       }, Origin.REMOTE);
     }
   }
@@ -102,9 +103,13 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
 
     const annotation = store.getAnnotation(annotation_id);
 
+    console.log('[CDC] target update');
+    console.log('[CDC] local version: ' + annotation.target.version);
+    console.log('[CDC] backend version: ' + version);
+    
     if (annotation) {
       if (annotation.target.version <= version) {
-        store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
+        store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
       }
     } else {
       emitter.emit('integrityError', 'Attempt to update target on missing annotation: ' + annotation_id);
@@ -120,8 +125,6 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       const event = payload as unknown as ChangeEvent;
 
       const { table, eventType } = event;
-
-      console.log('CDC event', table, eventType);
 
       if (table === 'annotations' && eventType === 'DELETE') {
         onDeleteAnnotation(event);

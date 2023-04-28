@@ -55,6 +55,7 @@ export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Em
 
   return {
     connect,
+    getPresentUsers: presence.getPresentUsers,
     destroy: () => channel && channel.untrack(),
     notifyActivity: presence.notifyActivity,
     trackUser
