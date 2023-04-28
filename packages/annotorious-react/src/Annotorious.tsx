@@ -66,3 +66,8 @@ export const useAnnotations = () => {
   const { annotations } = useContext(AnnotoriousContext);
   return annotations;
 }
+
+export const useUser = () => {
+  const { anno } = useContext(AnnotoriousContext);
+  return anno.getUser();
+}
