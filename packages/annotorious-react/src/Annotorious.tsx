@@ -24,8 +24,10 @@ export const Annotorious = (props: { children: ReactElement }) => {
   useEffect(() => {
     // This convenience function keeps annotations in sync with a React state,
     // so clients can render components the usual React way.
-    const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
+    const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) => {
+      console.log('[React] Store change', event);
       setAnnotations(event.state);
+    }
 
     if (anno) {
       anno.store.observe(onStoreChange);

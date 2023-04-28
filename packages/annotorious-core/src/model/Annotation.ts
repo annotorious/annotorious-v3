@@ -26,6 +26,8 @@ export interface AnnotationTarget {
 
   updated?: Date;
 
+  version?: number;
+
 }
 
 export interface AbstractSelector { }
@@ -49,6 +51,8 @@ export interface AnnotationBody {
   upatedBy?: User;
 
   updated?: Date;
+
+  version?: number;
 
 } 
 
