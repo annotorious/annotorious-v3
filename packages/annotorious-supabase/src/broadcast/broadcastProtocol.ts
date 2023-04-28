@@ -87,13 +87,15 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
     const createdTargets = 
       createAnnotationEvents.map(evt => (evt as CreateAnnotationEvent).annotation.target);
 
-    store.bulkUpdateTargets(createdTargets, Origin.REMOTE);
+    if (createdTargets.length > 0)
+      store.bulkUpdateTargets(createdTargets, Origin.REMOTE);
 
     // Versioned copies of the created bodies
     const createdBodies = 
       createBodyEvents.map(evt => (evt as CreateBodyEvent).body);
 
-    store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
+    if (createdBodies.length > 0)
+      store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
 
     return [
       ...all,
