@@ -24,25 +24,8 @@ export const Annotorious = (props: { children: ReactElement }) => {
   useEffect(() => {
     // This convenience function keeps annotations in sync with a React state,
     // so clients can render components the usual React way.
-    const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) => {
-      const { created, deleted, updated } = event.changes;
-
-      const deletedIds = new Set(deleted.map(a => a.id));
-      const updateIds = new Set(updated.map(a => a.oldValue.id));
-
-      const next = [ 
-        ...annotations
-          // Remove deleted
-          .filter(annotation => !deletedIds.has(annotation.id)) 
-          // Replace updated
-          .map(annotation => updateIds.has(annotation.id) ? 
-            updated.find(a => a.oldValue.id === annotation.id).newValue : annotation),
-        // Append created
-        ...created
-      ];
-
-      setAnnotations(next);
-    };
+    const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
+      setAnnotations(event.state);
 
     if (anno) {
       anno.store.observe(onStoreChange);

@@ -100,6 +100,13 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
     const annotation = store.getAnnotation(target.annotation);
 
     if (annotation && !equal(target, annotation.target)) {
+
+      // DEBUG
+      console.log('REPLACING TARGET AFTER CDC UPDATE');
+      console.log('previous', annotation);
+      console.log('updated target', target);
+      // /DEBUG
+
       store.updateTarget(target, Origin.REMOTE);
     } else {
       emitter.emit('integrityError', 'Attempt to update target on missing annotation: ' + target.annotation);
@@ -113,6 +120,8 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       schema: 'public' 
     }, (payload) => {
       const event = payload as unknown as ChangeEvent;
+
+      console.log('CDC change event', event)
 
       const { table, eventType } = event;
 
