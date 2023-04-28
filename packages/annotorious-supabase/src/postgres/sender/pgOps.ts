@@ -88,8 +88,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
         purpose: b.purpose,
         value: b.value,
         version: b.version - 1 // Supabase will auto-increment!
-      })))
-      .select();
+      })));
   }
 
   const createTarget = (t: AnnotationTarget) => { 

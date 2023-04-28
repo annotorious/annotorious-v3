@@ -95,12 +95,12 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
 
     // Updates are only applied immediately if they involve body changes
     const updatesWithBody = event.changes.updated.filter(u => [
-      ...u.bodiesCreated,
-      ...u.bodiesDeleted,
-      ...u.bodiesUpdated
+      ...(u.bodiesCreated || []),
+      ...(u.bodiesDeleted || []),
+      ...(u.bodiesUpdated || [])
     ].length > 0);
 
-    updatesWithBody.forEach(({ newValue }) => emit('updateAnnotation', newValue));
+    updatesWithBody.forEach(({ oldValue, newValue }) => emit('updateAnnotation', newValue, oldValue));
   }, { origin: Origin.LOCAL });
 
   // Track remote changes - these should update the initial state

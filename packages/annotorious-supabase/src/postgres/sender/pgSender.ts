@@ -23,8 +23,8 @@ export const createSender = (anno: AnnotationLayer<Annotation>, supabase: Supaba
     });
 
   const onDeleteAnnotation = (a: Annotation) => ops.deleteAnnotation(a)
-    .then(({ error, status }) => {
-      if (status !== 204)
+    .then(({ error }) => {
+      if (error)
         emitter.emit('saveError', error);
     });
 
@@ -37,7 +37,10 @@ export const createSender = (anno: AnnotationLayer<Annotation>, supabase: Supaba
     } = diffAnnotations(previous, a);
 
     if ((addedBodies.length + changedBodies.length) > 0)
-      ops.upsertBodies([...addedBodies, ...changedBodies ]);
+      ops.upsertBodies([...addedBodies, ...changedBodies ]).then(({ error }) => {
+        if (error)
+          emitter.emit('saveError', error);
+      });
 
     if (removedBodies.length > 0)
       ops.deleteBodies(removedBodies);

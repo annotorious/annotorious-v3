@@ -13,7 +13,7 @@ export interface AnnotoriousContextState {
 
 }
 
-const AnnotoriousContext = createContext<AnnotoriousContextState>(null);
+export const AnnotoriousContext = createContext<AnnotoriousContextState>({ anno: undefined, setAnno: undefined, annotations: [] });
 
 export const Annotorious = (props: { children: ReactElement }) => {
 
@@ -48,26 +48,26 @@ export const useAnnotationLayerState = (): [
   AnnotationLayer<ImageAnnotation>,
   (anno: AnnotationLayer<ImageAnnotation>) => void
 ] => { 
-  const { anno, setAnno } = useContext(AnnotoriousContext);
-  return [anno, setAnno];
+  const ctx = useContext(AnnotoriousContext);
+  return [ctx.anno, ctx.setAnno];
 }
 
 export const useAnnotationLayer = () => {
-  const { anno } = useContext(AnnotoriousContext);
-  return anno;
+  const ctx = useContext(AnnotoriousContext);
+  return ctx.anno;
 }
 
 export const useAnnotationStore = () => {
-  const { anno } = useContext(AnnotoriousContext);
-  return anno.store;
+  const ctx = useContext(AnnotoriousContext);
+  return ctx.anno.store;
 }
 
 export const useAnnotations = () => {
-  const { annotations } = useContext(AnnotoriousContext);
-  return annotations;
+  const ctx = useContext(AnnotoriousContext);
+  return ctx.annotations;
 }
 
 export const useUser = () => {
-  const { anno } = useContext(AnnotoriousContext);
-  return anno.getUser();
+  const ctx = useContext(AnnotoriousContext);
+  return ctx.anno.getUser();
 }

@@ -12,7 +12,7 @@ export const parseBodyRecord = (body: BodyRecord): AnnotationBody => ({
   id: body.id,
   annotation: body.annotation_id,
   purpose: body.purpose,
-  value: JSON.parse(body.value),
+  value: body.value,
   creator: parseProfileRecord(body.created_by),
   created: new Date(body.created_at),
   updatedBy: parseProfileRecord(body.updated_by),
