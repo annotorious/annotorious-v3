@@ -13,6 +13,11 @@
     "test": "npm run test --workspaces"
   },
   "workspaces": [
-    "./packages/*"
+    "./packages/annotorious-core",
+    "./packages/annotorious-formats",
+    "./packages/annotorious",
+    "./packages/annotorious-openseadragon",
+    "./packages/annotorious-supabase",
+    "./packages/annotorious-react"
   ]
 }

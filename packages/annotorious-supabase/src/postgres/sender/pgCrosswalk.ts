@@ -16,7 +16,8 @@ export const parseBodyRecord = (body: BodyRecord): AnnotationBody => ({
   creator: parseProfileRecord(body.created_by),
   created: new Date(body.created_at),
   updatedBy: parseProfileRecord(body.updated_by),
-  updated: body.updated_at ? new Date(body.updated_at) : null
+  updated: body.updated_at ? new Date(body.updated_at) : null,
+  version: body.version
 });
 
 export const parseTargetRecord = (target: TargetRecord): AnnotationTarget => ({
@@ -25,7 +26,8 @@ export const parseTargetRecord = (target: TargetRecord): AnnotationTarget => ({
   creator: parseProfileRecord(target.created_by),
   created: new Date(target.created_at),
   updatedBy: parseProfileRecord(target.created_by),
-  updated: target.updated_at ? new Date(target.updated_at) : null
+  updated: target.updated_at ? new Date(target.updated_at) : null,
+  version: target.version
 });
 
 export const parseAnnotationRecord = (record: AnnotationRecord) => {

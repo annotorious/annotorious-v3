@@ -173,7 +173,7 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const updateBody = (oldBodyId: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
+  const updateOneBody = (oldBodyId: AnnotationBodyIdentifier, newBody: AnnotationBody) => {
     if (oldBodyId.annotation !== newBody.annotation)
       throw 'Annotation integrity violation: annotation ID must be the same when updating bodies';
 
@@ -188,16 +188,24 @@ export function createStore<T extends Annotation>() {
 
       annotationIndex.set(oldAnnotation.id, newAnnotation);
 
-      const update: Update<T> = {
+      return {
         oldValue: oldAnnotation, 
         newValue: newAnnotation,
         bodiesUpdated: [{ oldBody, newBody }]
       }
-
-      emit(origin, { updated: [update] });
     } else {
       console.warn(`Attempt to add body to missing annotation ${oldBodyId.annotation}`);
     }
+  }
+
+  const updateBody = (oldBodyId: AnnotationBodyIdentifier, newBody: AnnotationBody, origin = Origin.LOCAL) => {
+    const update = updateOneBody(oldBodyId, newBody);
+    emit(origin, { updated: [ update ]} );
+  }
+
+  const bulkUpdateBodies = (bodies: AnnotationBody[], origin = Origin.LOCAL) => {
+    const updated = bodies.map(b => updateOneBody({ id: b.id, annotation: b.annotation }, b));
+    emit(origin, { updated });
   }
 
   const updateOneTarget = (target: AnnotationTarget): Update<T> => {
@@ -224,7 +232,7 @@ export function createStore<T extends Annotation>() {
     emit(origin, { updated: [ update ]} );
   }
 
-  const bulkUpdateTarget = (targets: AnnotationTarget[], origin = Origin.LOCAL) => {
+  const bulkUpdateTargets = (targets: AnnotationTarget[], origin = Origin.LOCAL) => {
     const updated = targets.map(updateOneTarget)
     emit(origin, { updated });
   }
@@ -234,7 +242,8 @@ export function createStore<T extends Annotation>() {
     addBody,
     all,
     bulkAddAnnotation,
-    bulkUpdateTarget,
+    bulkUpdateBodies,
+    bulkUpdateTargets,
     deleteAnnotation,
     deleteBody,
     getAnnotation,

@@ -1,7 +1,10 @@
+import { Origin } from '@annotorious/core';
 import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
+
+  const { store } = anno;
 
   const initialLoad = () =>
     supabase.from('annotations').select(`
@@ -64,30 +67,52 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       created_by: anno.getUser().id
     });
 
-  const upsertBodies = (bodies: AnnotationBody[]) => supabase
-    .from('bodies')
-    .upsert(bodies.map(b => ({
-      id: b.id,
-      created_at: b.created,
-      created_by: anno.getUser().id,
-      updated_at: b.created,
-      updated_by: anno.getUser().id,
-      annotation_id: b.annotation,
-      purpose: b.purpose,
-      value: b.value
-    })))
-    .select();
+  const upsertBodies = (bodies: AnnotationBody[]) => {
+    // Increment body version numbers
+    const versioned = bodies.map(b => ({
+      ...b,
+      version: b.version ? b.version + 1 : 1
+    }));
 
-  const createTarget = (t: AnnotationTarget) => supabase
-    .from('targets')
-    .insert({
-      created_at: t.created,
-      created_by: anno.getUser().id,
-      updated_at: t.created,
-      updated_by: anno.getUser().id,
-      annotation_id: t.annotation,
-      value: JSON.stringify(t.selector)
-    });
+    store.bulkUpdateBodies(versioned, Origin.REMOTE);
+
+    return supabase
+      .from('bodies')
+      .upsert(versioned.map(b => ({
+        id: b.id,
+        created_at: b.created,
+        created_by: anno.getUser().id,
+        updated_at: b.created,
+        updated_by: anno.getUser().id,
+        annotation_id: b.annotation,
+        purpose: b.purpose,
+        value: b.value,
+        version: b.version - 1 // Supabase will auto-increment!
+      })))
+      .select();
+  }
+
+  const createTarget = (t: AnnotationTarget) => { 
+    // Set target version number
+    const versioned = {
+      ...t,
+      version: 1
+    };
+
+    store.updateTarget(versioned, Origin.REMOTE);
+
+    return supabase
+      .from('targets')
+      .insert({
+        created_at: versioned.created,
+        created_by: anno.getUser().id,
+        updated_at: versioned.created,
+        updated_by: anno.getUser().id,
+        annotation_id: versioned.annotation,
+        value: JSON.stringify(versioned.selector),
+        version: versioned.version - 1 // Supabase will auto-increment!
+      });
+  }
 
   const deleteAnnotation = (a: Annotation) => supabase
     .from('annotations')
@@ -99,14 +124,25 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
     .delete()
     .in('id', b.map(body => body.id));
 
-  const updateTarget = (t: AnnotationTarget) => supabase
-    .from('targets')
-    .update({
-      updated_at: t.updated,
-      updated_by: anno.getUser().id,
-      value: JSON.stringify(t.selector)
-    })
-    .eq('annotation_id', t.annotation);
+  const updateTarget = (t: AnnotationTarget) => {
+    // Increment target version number
+    const versioned = {
+      ...t,
+      version: t.version ? t.version + 1 : 1
+    };
+
+    store.updateTarget(versioned, Origin.REMOTE);
+
+    return supabase
+      .from('targets')
+      .update({
+        updated_at: versioned.updated,
+        updated_by: anno.getUser().id,
+        value: JSON.stringify(versioned.selector),
+        version: versioned.version - 1 // Supabase will auto-increment!
+      })
+      .eq('annotation_id', versioned.annotation);
+  }
 
   return {
     createAnnotation,

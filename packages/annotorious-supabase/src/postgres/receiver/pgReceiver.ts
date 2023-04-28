@@ -40,9 +40,7 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       const existingBody = annotation.bodies.find(b => b.id === id);
 
       if (existingBody) {
-        if (existingBody.version < version) {
-          // The CDC update has a higher version number than the body in the store - replace
-          console.log('CDC BODY UPDATE!', existingBody, event);
+        if (existingBody.version <= version) {
           store.updateBody(existingBody, resolveBodyChange(event), Origin.REMOTE);
         }
       } else {
@@ -76,12 +74,12 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * 3. if it doesn't: create annotation with target.
    */
   const onInsertTarget = (event: TargetChangeEvent) => {
-    const { annotation_id, id, version } = event.new;
+    const { annotation_id, version } = event.new;
 
     const annotation = store.getAnnotation(annotation_id);
-    
+
     if (annotation) {
-      if (annotation.target.version < version)
+      if (annotation.target.version <= version)
         store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
     } else {
       store.addAnnotation({
@@ -100,18 +98,12 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * Throw integrity error if annotation does not exist.
    */
   const onUpdateTarget = (event: TargetChangeEvent) => {
-    const { annotation_id, id, version } = event.new;
+    const { annotation_id, version } = event.new;
 
     const annotation = store.getAnnotation(annotation_id);
 
     if (annotation) {
-      if (annotation.target.version < version) {
-        // DEBUG
-        console.log('REPLACING TARGET AFTER CDC UPDATE');
-        console.log('previous', annotation);
-        console.log(event);
-        // /DEBUG
-
+      if (annotation.target.version <= version) {
         store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
       }
     } else {
@@ -128,6 +120,8 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       const event = payload as unknown as ChangeEvent;
 
       const { table, eventType } = event;
+
+      console.log('CDC event', table, eventType);
 
       if (table === 'annotations' && eventType === 'DELETE') {
         onDeleteAnnotation(event);
