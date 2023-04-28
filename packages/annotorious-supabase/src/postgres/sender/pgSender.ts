@@ -2,7 +2,7 @@ import { Annotation, AnnotationLayer, diffAnnotations, Origin } from '@annotorio
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from 'src/SupabasePluginEvents';
-import { parseAnnotationRecord } from '../pgCrosswalk';
+import { parseAnnotationRecord } from './pgCrosswalk';
 import type { AnnotationRecord } from '../Types';
 import { pgOps } from './pgOps';
 

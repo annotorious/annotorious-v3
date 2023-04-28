@@ -1,10 +1,9 @@
 import { Annotation, AnnotationLayer, Origin } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
-import equal from 'deep-equal';
 import type { SupabasePluginEvents } from 'src/SupabasePluginEvents';
-import { parseBodyRecord, parseTargetRecord } from '../pgCrosswalk';
 import type { AnnotationChangeEvent, BodyChangeEvent, ChangeEvent, TargetChangeEvent } from '../Types';
+import { resolveBodyChange, resolveTargetChange } from './pgCDCMessageResolver';
 
 export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel, emitter: Emitter<SupabasePluginEvents>) => {
 
@@ -33,19 +32,25 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * - If it does not: insert.
    */
   const onUpsertBody = (event: BodyChangeEvent) => {
-    const body = parseBodyRecord(event.new);
+    const { annotation_id, id, version } = event.new;
 
-    const annotation = store.getAnnotation(body.annotation);
+    const annotation = store.getAnnotation(annotation_id);
 
     if (annotation) {
-      const existingBody = annotation.bodies.find(b => b.id === body.id);
-      if (existingBody && !equal(existingBody, body)) {
-        store.updateBody(existingBody, body, Origin.REMOTE);
+      const existingBody = annotation.bodies.find(b => b.id === id);
+
+      if (existingBody) {
+        if (existingBody.version < version) {
+          // The CDC update has a higher version number than the body in the store - replace
+          console.log('CDC BODY UPDATE!', existingBody, event);
+          store.updateBody(existingBody, resolveBodyChange(event), Origin.REMOTE);
+        }
       } else {
-        store.addBody(body, Origin.REMOTE);
+        // Body doesn't exist - add
+        store.addBody(resolveBodyChange(event), Origin.REMOTE);
       }
     } else {
-      emitter.emit('integrityError', 'Attempt to upsert body on missing annotation: ' + body.annotation);
+      emitter.emit('integrityError', 'Attempt to upsert body on missing annotation: ' + annotation_id);
     }
   }
 
@@ -71,18 +76,18 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * 3. if it doesn't: create annotation with target.
    */
   const onInsertTarget = (event: TargetChangeEvent) => {
-    const target = parseTargetRecord(event.new);
+    const { annotation_id, id, version } = event.new;
 
-    const annotation = store.getAnnotation(target.annotation);
+    const annotation = store.getAnnotation(annotation_id);
     
     if (annotation) {
-      if (!equal(target, annotation.target))
-        store.updateTarget(target, Origin.REMOTE);
+      if (annotation.target.version < version)
+        store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
     } else {
       store.addAnnotation({
-        id: target.annotation,
+        id: annotation_id,
         bodies: [],
-        target
+        target: resolveTargetChange(event)
       }, Origin.REMOTE);
     }
   }
@@ -95,21 +100,22 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
    * Throw integrity error if annotation does not exist.
    */
   const onUpdateTarget = (event: TargetChangeEvent) => {
-    const target = parseTargetRecord(event.new);
+    const { annotation_id, id, version } = event.new;
 
-    const annotation = store.getAnnotation(target.annotation);
+    const annotation = store.getAnnotation(annotation_id);
 
-    if (annotation && !equal(target, annotation.target)) {
+    if (annotation) {
+      if (annotation.target.version < version) {
+        // DEBUG
+        console.log('REPLACING TARGET AFTER CDC UPDATE');
+        console.log('previous', annotation);
+        console.log(event);
+        // /DEBUG
 
-      // DEBUG
-      console.log('REPLACING TARGET AFTER CDC UPDATE');
-      console.log('previous', annotation);
-      console.log('updated target', target);
-      // /DEBUG
-
-      store.updateTarget(target, Origin.REMOTE);
+        store.updateTarget(resolveTargetChange(event), Origin.REMOTE);
+      }
     } else {
-      emitter.emit('integrityError', 'Attempt to update target on missing annotation: ' + target.annotation);
+      emitter.emit('integrityError', 'Attempt to update target on missing annotation: ' + annotation_id);
     }
   }
 
@@ -120,8 +126,6 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
       schema: 'public' 
     }, (payload) => {
       const event = payload as unknown as ChangeEvent;
-
-      console.log('CDC change event', event)
 
       const { table, eventType } = event;
 

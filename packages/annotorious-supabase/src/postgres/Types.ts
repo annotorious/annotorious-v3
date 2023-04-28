@@ -20,10 +20,9 @@ export interface TargetRecord {
 
   updated_by?: ProfileRecord;
 
-  version?: number;
-
   value: string;
 
+  version: number;
 }
 
 export interface BodyRecord {
@@ -36,15 +35,15 @@ export interface BodyRecord {
 
   created_by: ProfileRecord;
 
+  purpose?: string;
+
   updated_at?: string;
 
   updated_by?: ProfileRecord;
 
-  version?: number;
-
-  purpose?: string;
-
   value: string;
+
+  version: number;
 
 }
 
@@ -86,9 +85,31 @@ export type TargetChangeEvent = {
 
   eventType: 'UPDATE' | 'INSERT' | 'DELETE';
 
-  old: { id: string };
+  old: {
 
-  new: TargetRecord;
+    id: string 
+
+  };
+
+  new: {
+
+    annotation_id: string;
+
+    created_at: string; 
+
+    created_by: string; 
+
+    id: string;
+
+    updated_at: string;
+
+    updated_by: string;
+
+    value: string;
+
+    version: number;
+
+  };
 
 }
 
@@ -100,9 +121,33 @@ export type BodyChangeEvent = {
 
   eventType: 'UPDATE' | 'INSERT' | 'DELETE';
 
-  old: { id: string };
+  old: {
+    
+    id: string 
   
-  new: BodyRecord;
+  };
+  
+  new: {
+
+    id: string;
+
+    annotation_id: string;
+  
+    created_at: string;
+  
+    created_by: ProfileRecord;
+  
+    purpose?: string;
+  
+    updated_at?: string;
+  
+    updated_by?: ProfileRecord;
+  
+    value: string;
+
+    version: number;
+
+  };
 
 }
 

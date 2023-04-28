@@ -48,7 +48,7 @@ export interface AnnotationBody {
 
   created?: Date;
 
-  upatedBy?: User;
+  updatedBy?: User;
 
   updated?: Date;
 
