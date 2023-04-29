@@ -71,18 +71,17 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
   /** 
    * After INSERT TARGET:
    * 1. check if annotation exists.
-   * 2. if it does: update target if different.
-   * 3. if it doesn't: create annotation with target.
+   * 2. if it doesn't: create annotation with target.
    */
   const onInsertTarget = (event: TargetChangeEvent) => {
-    const { annotation_id, version } = event.new;
+    const { annotation_id } = event.new;
 
     const annotation = store.getAnnotation(annotation_id);
 
     if (annotation) {
-      if (annotation.target.version <= version) {
-        store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
-      }
+      // if (annotation.target.version <= version) {
+      //   store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
+      // }
     } else {
       store.addAnnotation({
         id: annotation_id,
@@ -106,6 +105,7 @@ export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: Realt
     
     if (annotation) {
       if (annotation.target.version <= version) {
+        console.log('[PGCDC] Overriding target');
         store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
       }
     } else {

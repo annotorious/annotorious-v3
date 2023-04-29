@@ -14,9 +14,11 @@ export const createSender = (anno: AnnotationLayer<Annotation>, supabase: Supaba
       if (error) {
         emitter.emit('saveError', error);
       } else {
-        ops.createTarget(a.target).then(({ error }) => {
-          if (error) {
-            emitter.emit('saveError', error);
+        ops.createTarget(a.target).then(response => {
+          console.log('[PG] INSERT response', response);
+
+          if (response.error) {
+            emitter.emit('saveError', response.error);
           }
         });
       }
@@ -46,9 +48,17 @@ export const createSender = (anno: AnnotationLayer<Annotation>, supabase: Supaba
       ops.deleteBodies(removedBodies);
 
     if (changedTarget) {
-      ops.updateTarget(a.target).then(({ error }) => {
-        if (error)
-          emitter.emit('saveError', error);
+      ops.updateTarget(a.target).then(response => {
+        console.log('[PG] UPDATE response', response);
+
+        if (response.data?.length < 1) {
+          ops.updateTarget(a.target).then(response => {
+            console.log('[PG] Retry UPDATE response', response);
+          });
+        }
+
+        else if (response.error)
+          emitter.emit('saveError', response.error);
       });
     }
   }

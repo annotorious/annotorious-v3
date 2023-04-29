@@ -60,6 +60,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
     `);
 
   const createAnnotation = (a: Annotation) => {
+    console.log('[PG] Creating annotation');
+
     const versioned = {
       ...a.target,
       version: 1
@@ -108,7 +110,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
       updated_by: anno.getUser().id,
       annotation_id: t.annotation,
       value: JSON.stringify(t.selector)
-    });
+    })
+    .select();
 
   const deleteAnnotation = (a: Annotation) => supabase
     .from('annotations')
@@ -121,6 +124,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
     .in('id', b.map(body => body.id));
 
   const updateTarget = (t: AnnotationTarget) => {
+    console.log('[PG] Updating target');
+
     // Increment target version number
     const versioned = {
       ...t,
@@ -136,7 +141,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
         updated_by: anno.getUser().id,
         value: JSON.stringify(versioned.selector)
       })
-      .eq('annotation_id', versioned.annotation);
+      .eq('annotation_id', versioned.annotation)
+      .select();
   }
 
   return {
