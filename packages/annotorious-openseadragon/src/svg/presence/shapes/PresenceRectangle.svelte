@@ -1,7 +1,7 @@
 <script type="ts">
   import type { PresentUser } from '@annotorious/core';
   import type { ImageAnnotation, RectangleGeometry } from '@annotorious/annotorious';
-  import SVGPresenceLabel from './SVGPresenceLabel.svelte';
+  import SVGPresenceLabel from '../SVGPresenceLabel.svelte';
 
   export let annotation: ImageAnnotation;
 

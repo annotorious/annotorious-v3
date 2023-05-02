@@ -1,8 +1,10 @@
 <script type="ts">
+  import { onDestroy } from 'svelte';
   import type { PresenceProvider, PresentUser, StoreChangeEvent } from '@annotorious/core';
   import { ShapeType, type ImageAnnotation, type ImageAnnotationStore } from '@annotorious/annotorious';
   import OSDLayer from '../OSDLayer.svelte';
-  import SVGPresenceRectangle from './SVGPresenceRectangle.svelte';
+  import SVGPresencePolygon from './shapes/PresencePolygon.svelte';
+  import SVGPresenceRectangle from './shapes/PresenceRectangle.svelte';
 
   interface TrackedAnnotation {
 
@@ -25,6 +27,8 @@
   $: if (provider) provider.on('selectionChange', onSelectionChange);
 
   const onSelectionChange = (p: PresentUser, selection: string[] | null) => {
+    console.log('selection change', p, selection);
+     
     // Update tracked annotations for this present user
     trackedAnnotations = [
       ...trackedAnnotations
@@ -36,10 +40,8 @@
     ];
     
     // Track their state in the store
-    if (storeObserver) {
-      console.log('Unobserving');
+    if (storeObserver)
       store.unobserve(storeObserver);
-    }
 
     storeObserver = (event: StoreChangeEvent<ImageAnnotation>) => {      
       const { deleted, updated } = event.changes;
@@ -66,6 +68,11 @@
       annotations: trackedAnnotations.map(t => t.annotation.id)
     });
   }
+
+  onDestroy(() => {
+    if (storeObserver)
+      store.unobserve(storeObserver);
+  });
 </script>
 
 {#if Boolean(provider)}
@@ -80,6 +87,11 @@
           {#each trackedAnnotations as tracked}
             {#if (tracked.annotation.target.selector.type === ShapeType.RECTANGLE)}
               <SVGPresenceRectangle
+                annotation={tracked.annotation} 
+                user={tracked.selectedBy}
+                scale={scale} />
+            {:else if (tracked.annotation.target.selector.type === ShapeType.POLYGON)}
+              <SVGPresencePolygon
                 annotation={tracked.annotation} 
                 user={tracked.selectedBy}
                 scale={scale} />
