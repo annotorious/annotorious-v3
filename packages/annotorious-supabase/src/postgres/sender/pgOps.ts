@@ -15,7 +15,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
           if (retries > 0) {
             retries--;
             console.warn('[PG] Supbase save error - retrying');
-            doRequest();
+            setTimeout(doRequest, 250);
           } else {
             reject('Too many retries');
           }
@@ -164,7 +164,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
         value: JSON.stringify(versioned.selector)
       })
       .eq('annotation_id', versioned.annotation)
-      .single());
+      .select());
   }
 
   return {
