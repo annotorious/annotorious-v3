@@ -68,7 +68,15 @@ export const createPresenceState = () => {
 
     toAdd.forEach(({ presenceKey, user }) => addUser(presenceKey, user));
 
-    toRemove.forEach(({ presenceKey }) => removeUser(presenceKey));
+    toRemove.forEach(user => {
+      const { presenceKey } = user;
+
+      // If this user has a selection, fire deselect event
+      if (selectionStates.has(presenceKey))
+        emitter.emit('selectionChange', user, null);
+
+      removeUser(presenceKey)
+    });
 
     if (toAdd.length > 0 || toRemove.length > 0)
       emitter.emit('presence', getPresentUsers());
