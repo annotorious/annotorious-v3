@@ -124,6 +124,7 @@
           console.log('save error', error);
         })
 
+        console.log('Connecting Supabase');
         supabase.connect();
 
         document.getElementById('draw').addEventListener('click', function() {

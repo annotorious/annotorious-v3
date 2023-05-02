@@ -5,7 +5,7 @@ import type { AnnotoriousOptions } from '@annotorious/annotorious';
 import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLayer, type PresenceProvider, type User } from '@annotorious/core';
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
-import { SVGDrawingLayer } from './svg';
+import { SVGDrawingLayer, SVGPresenceLayer } from './svg';
 
 export type OSDAnnotationLayer = AnnotationLayer<ImageAnnotation> & ReturnType<typeof Annotorious>;
 
@@ -37,6 +37,11 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
       store.selection.clear();
   });
 
+  const presenceLayer = new SVGPresenceLayer({
+    target: viewer.element.querySelector('.openseadragon-canvas'),
+    props: { store, viewer }
+  });
+
   const setAnnotations = (annotations: WebAnnotation[]) => {
     const { parsed, failed } = parseW3C(annotations);
 
@@ -47,7 +52,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   }
 
   const setPresenceProvider = (provider: PresenceProvider) => {
-
+    presenceLayer.$set({ provider });
   }
 
   const setUser = (user: User) => {
