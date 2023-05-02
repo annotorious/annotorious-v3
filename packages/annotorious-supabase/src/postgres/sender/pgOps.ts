@@ -1,10 +1,32 @@
 import { Origin } from '@annotorious/core';
 import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import type { PostgrestBuilder, PostgrestSingleResponse } from '@supabase/postgrest-js';
 
 export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
 
   const { store } = anno;
+
+  // Generic Supabase retry handler
+  const withRetry = async (requestFn: () => PostgrestBuilder<{ [x: string]: any}[]>, retries: number = 3) => {
+    return new Promise<PostgrestSingleResponse<{ [x: string]: any}[]>>((resolve, reject) => {
+      const doRequest = () => requestFn().then(response => {
+        if (response.error || !(response.data?.length > 0)) {
+          if (retries > 0) {
+            retries--;
+            console.warn('[PG] Supbase save error - retrying');
+            doRequest();
+          } else {
+            reject('Too many retries');
+          }
+        } else {
+          resolve(response);
+        } 
+      });
+
+      doRequest();
+    });
+  }
 
   const initialLoad = () =>
     supabase.from('annotations').select(`
@@ -123,7 +145,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
     .delete()
     .in('id', b.map(body => body.id));
 
-  const updateTarget = (t: AnnotationTarget) => {
+  const updateTarget = (t: AnnotationTarget, retries = 3) => {
     console.log('[PG] Updating target');
 
     // Increment target version number
@@ -133,8 +155,8 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
     };
 
     store.updateTarget(versioned, Origin.REMOTE);
-
-    return supabase
+    
+    return withRetry(() => supabase
       .from('targets')
       .update({
         updated_at: versioned.updated,
@@ -142,7 +164,7 @@ export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClien
         value: JSON.stringify(versioned.selector)
       })
       .eq('annotation_id', versioned.annotation)
-      .select();
+      .single());
   }
 
   return {

@@ -51,13 +51,7 @@ export const createSender = (anno: AnnotationLayer<Annotation>, supabase: Supaba
       ops.updateTarget(a.target).then(response => {
         console.log('[PG] UPDATE response', response);
 
-        if (response.data?.length < 1) {
-          ops.updateTarget(a.target).then(response => {
-            console.log('[PG] Retry UPDATE response', response);
-          });
-        }
-
-        else if (response.error)
+        if (response.error)
           emitter.emit('saveError', response.error);
       });
     }
