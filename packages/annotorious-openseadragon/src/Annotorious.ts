@@ -39,7 +39,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
 
   const presenceLayer = new SVGPresenceLayer({
     target: viewer.element.querySelector('.openseadragon-canvas'),
-    props: { store, viewer }
+    props: { store, viewer, provider: null }
   });
 
   const setAnnotations = (annotations: WebAnnotation[]) => {
