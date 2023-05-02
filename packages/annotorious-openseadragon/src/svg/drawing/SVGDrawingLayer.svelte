@@ -5,7 +5,7 @@
   import type { StoreChangeEvent, User } from '@annotorious/core';
   import { getEditor } from '@annotorious/annotorious';
   import type { ImageAnnotation, Shape, ImageAnnotationStore } from '@annotorious/annotorious';
-  import OSDLayer from './OSDLayer.svelte';
+  import OSDLayer from '../OSDLayer.svelte';
     
   export let store: ImageAnnotationStore;
 
