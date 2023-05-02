@@ -2,7 +2,7 @@ import type OpenSeadragon from 'openseadragon';
 import type { SvelteComponent } from 'svelte';
 import { createImageStore, fillDefaults, listTools, getTool, type ImageAnnotation } from '@annotorious/annotorious';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
-import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLayer, type User } from '@annotorious/core';
+import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLayer, type PresenceProvider, type User } from '@annotorious/core';
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer } from './svg';
@@ -46,6 +46,10 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     store.bulkAddAnnotation(parsed, true, Origin.REMOTE);
   }
 
+  const setPresenceProvider = (provider: PresenceProvider) => {
+
+  }
+
   const setUser = (user: User) => {
     currentUser = user;
     drawingLayer.$set({ user });
@@ -70,6 +74,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     on: lifecycle.on,
     off: lifecycle.off,
     setAnnotations,
+    setPresenceProvider,
     setUser,
     startDrawing,
     stopDrawing,

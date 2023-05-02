@@ -87,6 +87,8 @@ export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, c
         }
       }
     });
+
+    anno.setPresenceProvider({ on });
   });
 
   const on = <E extends keyof SupabasePluginEvents>(event: E, callback: SupabasePluginEvents[E]) =>

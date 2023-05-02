@@ -1,5 +1,6 @@
 import type { Annotation } from './Annotation';
 import type { User } from './User';
+import type { PresenceProvider } from '../presence';
 import type { LifecycleEvents, Store } from '../state';
 
 export interface AnnotationLayer<T extends Annotation> {
@@ -9,6 +10,8 @@ export interface AnnotationLayer<T extends Annotation> {
   on: <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => void;
 
   off: <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => void;
+
+  setPresenceProvider: (provider: PresenceProvider) => void;
 
   setUser: (user: User) => void;
 
