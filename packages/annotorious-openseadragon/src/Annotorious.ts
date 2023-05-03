@@ -6,6 +6,7 @@ import { createAnonymousGuest, createLifecyleObserver, Origin, type AnnotationLa
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer, SVGPresenceLayer } from './svg';
+import Popup from './popup/Popup.svelte';
 
 export type OSDAnnotationLayer = AnnotationLayer<ImageAnnotation> & ReturnType<typeof Annotorious>;
 
@@ -41,6 +42,11 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     target: viewer.element.querySelector('.openseadragon-canvas'),
     props: { store, viewer, provider: null }
   });
+
+  const popup = new Popup({
+    target: viewer.element.querySelector('.openseadragon-canvas'),
+    props: { store, viewer }
+  })
 
   const setAnnotations = (annotations: WebAnnotation[]) => {
     const { parsed, failed } = parseW3C(annotations);
