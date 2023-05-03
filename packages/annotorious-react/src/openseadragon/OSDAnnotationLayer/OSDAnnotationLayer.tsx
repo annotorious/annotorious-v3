@@ -1,4 +1,4 @@
-import { ReactElement, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
 import { Annotorious, OSDAnnotator } from '@annotorious/openseadragon';
 import { useViewer } from '../OSDViewer';
@@ -6,7 +6,7 @@ import { useAnnotationLayerState } from 'src/Annotorious';
 
 export interface AnnotoriousOSDProps {
 
-  children?: ReactElement | never[];
+  children?: ReactNode;
 
   keepEnabled?: boolean;
 
