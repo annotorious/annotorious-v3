@@ -1,6 +1,6 @@
 import { ImageAnnotation } from '@annotorious/annotorious';
 
-export interface OSDPopupChildProps {
+export interface OSDPopupProps {
 
   viewer: OpenSeadragon.Viewer;
 
