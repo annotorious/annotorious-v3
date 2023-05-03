@@ -1,13 +1,13 @@
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Annotation, AnnotationLayer } from '@annotorious/core';
+import type { Annotator } from '@annotorious/core';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 import type { PresenceConnector } from '../presence';
 import { createReceiver } from './receiver';
 import { createSender } from './sender';
 
-export const PostgresConnector = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
+export const PostgresConnector = (anno: Annotator, supabase: SupabaseClient, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
 
   let sender: ReturnType<typeof createSender> | undefined;
 

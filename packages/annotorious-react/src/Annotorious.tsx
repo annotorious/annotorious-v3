@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { ImageAnnotation, ImageAnnotationStore } from '@annotorious/annotorious';
-import { AnnotationLayer, StoreChangeEvent } from '@annotorious/core';
+import { Annotator, StoreChangeEvent } from '@annotorious/core';
 import { createContext, ReactElement } from 'react';
 
 export interface AnnotoriousContextState {
 
-  anno: AnnotationLayer<ImageAnnotation>;
+  anno: Annotator<ImageAnnotation>;
 
-  setAnno(anno: AnnotationLayer<ImageAnnotation>): void;
+  setAnno(anno: Annotator<ImageAnnotation>): void;
 
   annotations: ImageAnnotation[];
 
@@ -31,7 +31,7 @@ export const Annotorious = (props: { children: ReactElement }) => {
 
   const [annotations, setAnnotations] = useState<ImageAnnotation[]>([]);
 
-  const [anno, setAnno] = useState<AnnotationLayer<ImageAnnotation>>(null);
+  const [anno, setAnno] = useState<Annotator<ImageAnnotation>>(null);
 
   const [selection, setSelection] = useState<ImageAnnotation[]>([]);
 
@@ -82,14 +82,14 @@ export const Annotorious = (props: { children: ReactElement }) => {
 
 }
 
-export const useAnnotationLayerState = <T extends AnnotationLayer<ImageAnnotation>>(): [
-  T, (anno: AnnotationLayer<ImageAnnotation>) => void
+export const useAnnotationLayerState = <T extends Annotator<ImageAnnotation>>(): [
+  T, (anno: Annotator<ImageAnnotation>) => void
 ] => { 
   const { anno, setAnno } = useContext(AnnotoriousContext);
   return [anno as T, setAnno];
 }
 
-export const useAnnotationLayer = <T extends AnnotationLayer<ImageAnnotation>>() => {
+export const useAnnotationLayer = <T extends Annotator<ImageAnnotation>>() => {
   const { anno } = useContext(AnnotoriousContext);
   return anno as T;
 }

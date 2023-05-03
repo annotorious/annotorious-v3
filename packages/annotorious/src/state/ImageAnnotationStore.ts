@@ -1,5 +1,5 @@
 import RBush from 'rbush';
-import { createHighlightState, createHoverState, createSelectionState, createStore } from '@annotorious/core';
+import { createHighlightState, createHoverState, createLifecyleObserver, createSelectionState, createStore } from '@annotorious/core';
 import { ShapeType, computeArea, intersects } from '../model';
 import type { ImageAnnotation, ImageAnnotationTarget } from '../model';
 import type { AnnotoriousOptions } from '../AnnotoriousOptions';
@@ -106,6 +106,8 @@ export const createImageStore = (opts: AnnotoriousOptions) => {
 
   const highlight = createHighlightState(store);
 
+  const lifecycle = createLifecyleObserver(selection, store);
+
   store.observe(( { changes }) => {
     tree.set(changes.created.map(a => a.target as ImageAnnotationTarget), false);
     
@@ -125,6 +127,7 @@ export const createImageStore = (opts: AnnotoriousOptions) => {
     getAt,
     highlight,
     hover,
+    lifecycle,
     selection
   }
 

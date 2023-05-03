@@ -1,6 +1,6 @@
 import { ReactElement, useEffect } from 'react';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
-import { Annotorious, OSDAnnotationLayer as OSDLayer } from '@annotorious/openseadragon';
+import { Annotorious, OSDAnnotator } from '@annotorious/openseadragon';
 import { useViewer } from '../OSDViewer';
 import { useAnnotationLayerState } from 'src/Annotorious';
 
@@ -30,9 +30,9 @@ export const OSDAnnotationLayer = (props: AnnotoriousOSDProps) => {
 
   useEffect(() => {
     if (props.tool)
-      (anno as OSDLayer).startDrawing(props.tool, props.keepEnabled);
+      (anno as OSDAnnotator).startDrawing(props.tool, props.keepEnabled);
     else if (props.tool)
-      (anno as OSDLayer).stopDrawing();
+      (anno as OSDAnnotator).stopDrawing();
   }, [props.tool, props.keepEnabled]);
 
   return anno ? (<>{props.children}</>) : null;

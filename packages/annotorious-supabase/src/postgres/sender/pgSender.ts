@@ -1,4 +1,4 @@
-import { Annotation, AnnotationLayer, diffAnnotations, Origin } from '@annotorious/core';
+import { Annotation, Annotator, diffAnnotations, Origin } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from 'src/SupabasePluginEvents';
@@ -6,7 +6,7 @@ import { parseAnnotationRecord } from './pgCrosswalk';
 import type { AnnotationRecord } from '../Types';
 import { pgOps } from './pgOps';
 
-export const createSender = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
+export const createSender = (anno: Annotator, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
   const ops = pgOps(anno, supabase);
 
   const onCreateAnnotation = (a: Annotation) => ops.createAnnotation(a)

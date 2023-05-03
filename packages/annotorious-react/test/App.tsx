@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { OSDAnnotationLayer as OSDLayer } from '@annotorious/openseadragon';
-import { OpenSeadragon, useAnnotationLayer, OSDAnnotationLayer, OSDPopup  } from '../src';
+import { OSDAnnotator } from '@annotorious/openseadragon';
+import { OSDViewer, OSDAnnotationLayer, OSDPopup, useAnnotationLayer } from '../src';
 
 import '@annotorious/openseadragon/dist/annotorious-openseadragon.css';
 
@@ -39,7 +39,7 @@ const OSD_OPTIONS = {
 
 export const App = () => {
 
-  const anno = useAnnotationLayer<OSDLayer>();
+  const anno = useAnnotationLayer<OSDAnnotator>();
 
   useEffect(() => {
     if (anno) {
@@ -52,13 +52,13 @@ export const App = () => {
   }, [anno]);
 
   return (
-    <OpenSeadragon className="openseadragon" options={OSD_OPTIONS}>
+    <OSDViewer className="openseadragon" options={OSD_OPTIONS}>
       <OSDAnnotationLayer>
         <OSDPopup>
           <div>Just a test</div>
         </OSDPopup>
       </OSDAnnotationLayer>
-    </OpenSeadragon>
+    </OSDViewer>
   )
 
 }

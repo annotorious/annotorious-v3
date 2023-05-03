@@ -1,9 +1,9 @@
 import { Origin } from '@annotorious/core';
-import type { Annotation, AnnotationBody, AnnotationLayer, AnnotationTarget } from '@annotorious/core';
+import type { Annotation, AnnotationBody, Annotator, AnnotationTarget } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PostgrestBuilder, PostgrestSingleResponse } from '@supabase/postgrest-js';
 
-export const pgOps = (anno: AnnotationLayer<Annotation>, supabase: SupabaseClient) => {
+export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
 
   const { store } = anno;
 

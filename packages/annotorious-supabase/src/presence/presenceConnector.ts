@@ -1,11 +1,11 @@
 import { createPresenceState, PRESENCE_KEY } from '@annotorious/core';
-import type { Annotation, AnnotationLayer, User } from '@annotorious/core';
+import type { Annotator, User } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 import type { SelectEvent } from './Types';
 
-export const PresenceConnector = (anno: AnnotationLayer<Annotation>, emitter: Emitter<SupabasePluginEvents>) => {
+export const PresenceConnector = (anno: Annotator, emitter: Emitter<SupabasePluginEvents>) => {
 
   let channel: RealtimeChannel;
 

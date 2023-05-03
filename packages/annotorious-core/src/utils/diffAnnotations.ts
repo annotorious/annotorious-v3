@@ -1,5 +1,5 @@
 import equal from 'deep-equal';
-import type { Annotation, AnnotationBody, AnnotationTarget } from './Annotation';
+import type { Annotation, AnnotationBody, AnnotationTarget } from '../model';
 
 export interface AnnotationDiff {
 

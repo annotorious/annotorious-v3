@@ -1,6 +1,6 @@
 import { createNanoEvents } from 'nanoevents';
 import { PRESENCE_KEY } from '@annotorious/core';
-import type { Annotation, AnnotationLayer, } from '@annotorious/core';
+import type { Annotation, Annotator } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
 import type { SupabasePluginEvents } from './SupabasePluginEvents';
@@ -8,7 +8,7 @@ import { BroadcastConnector } from './broadcast';
 import { PostgresConnector } from './postgres';
 import { PresenceConnector } from './presence';
 
-export const SupabasePlugin = <T extends Annotation>(anno: AnnotationLayer<T>, config: SupabasePluginConfig) => {
+export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config: SupabasePluginConfig) => {
 
   const emitter = createNanoEvents<SupabasePluginEvents>();
 

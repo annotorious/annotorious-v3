@@ -1,4 +1,4 @@
-import { Annotation, AnnotationLayer, Origin } from '@annotorious/core';
+import { Annotation, Annotator, Origin } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
 import type { PresenceConnector } from '../../presence';
@@ -6,7 +6,7 @@ import type { SupabasePluginEvents } from '../../SupabasePluginEvents';
 import type { AnnotationChangeEvent, BodyChangeEvent, ChangeEvent, TargetChangeEvent } from '../Types';
 import { resolveBodyChange, resolveTargetChange } from './pgCDCMessageResolver';
 
-export const createReceiver = (anno: AnnotationLayer<Annotation>, channel: RealtimeChannel, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
+export const createReceiver = (anno: Annotator, channel: RealtimeChannel, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
 
   const { store } = anno;
 

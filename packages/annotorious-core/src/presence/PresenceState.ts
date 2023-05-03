@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { createNanoEvents } from 'nanoevents';
 import type { User } from '../model';
-import { PALETTE } from './Palette';
+import { Palette, DEFAULT_PALETTE } from './Palette';
 import type { PresentUser } from './PresentUser';
 import type { PresenceEvents } from './PresenceEvents';
 
@@ -11,7 +11,7 @@ const isListEqual = (listA: any[], listB: any[]) =>
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
-export const createPresenceState = () => {
+export const createPresenceState = (props: { palette?: Palette } = {}) => {
 
   const emitter = createNanoEvents<PresenceEvents>();
 
@@ -19,7 +19,7 @@ export const createPresenceState = () => {
 
   const selectionStates = new Map<string, string[]>();
 
-  const unassignedColors = [...PALETTE];
+  const unassignedColors = [...(props?.palette || DEFAULT_PALETTE)];
 
   const assignRandomColor = () => {
     const rnd = Math.floor(Math.random() * unassignedColors.length);

@@ -1,5 +1,5 @@
 // SEABORN_BRIGHT
-export const PALETTE = [
+export const DEFAULT_PALETTE: Palette = [
   '#ff7c00', // orange
   '#1ac938', // green
   '#e8000b', // red
@@ -10,3 +10,5 @@ export const PALETTE = [
   '#00d7ff', // cyan
   '#023eff'  // blue
 ];
+
+export type Palette = string[];

@@ -1,11 +1,11 @@
 import { Origin } from '@annotorious/core';
-import { Annotation, AnnotationLayer, PRESENCE_KEY, StoreChangeEvent } from '@annotorious/core';
+import { Annotation, Annotator, PRESENCE_KEY, StoreChangeEvent } from '@annotorious/core';
 import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { PresenceConnector } from '../presence';
 import { affectedAnnotations, apply, marshal } from './broadcastProtocol';
 import type { BroadcastMessage } from './Types';
 
-export const BroadcastConnector = (anno: AnnotationLayer<Annotation>, presence: ReturnType<typeof PresenceConnector>) => {
+export const BroadcastConnector = (anno: Annotator<Annotation>, presence: ReturnType<typeof PresenceConnector>) => {
 
   let observer: (event: StoreChangeEvent<Annotation>) => void  = null;
 

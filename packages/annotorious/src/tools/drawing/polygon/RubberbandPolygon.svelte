@@ -1,5 +1,3 @@
-
-
 <script type="ts">
   import { onMount, createEventDispatcher } from 'svelte';
   import { boundsFromPoints, ShapeType, type Polygon } from '../../../model';

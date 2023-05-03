@@ -1,5 +1,4 @@
-import type { Annotation } from './Annotation';
-import type { User } from './User';
+import type { Annotation, User } from '../model';
 
 /**
  * Returns all users listed as creators or updaters in any parts of this
