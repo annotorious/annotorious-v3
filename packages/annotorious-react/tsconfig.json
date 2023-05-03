@@ -16,7 +16,7 @@
     "noEmit": true,
     "outDir": "dist",
     "paths": {
-      "annotorious-react": ["src/index.ts"]
+      "@annotorious/react": ["src/index.ts"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,

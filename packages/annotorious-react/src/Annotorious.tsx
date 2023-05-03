@@ -1,19 +1,31 @@
 import { useContext, useEffect, useState } from 'react';
-import { ImageAnnotation } from '@annotorious/annotorious';
+import { ImageAnnotation, ImageAnnotationStore } from '@annotorious/annotorious';
 import { AnnotationLayer, StoreChangeEvent } from '@annotorious/core';
 import { createContext, ReactElement } from 'react';
 
 export interface AnnotoriousContextState {
 
-  anno: AnnotationLayer<ImageAnnotation>
+  anno: AnnotationLayer<ImageAnnotation>;
 
   setAnno(anno: AnnotationLayer<ImageAnnotation>): void;
 
   annotations: ImageAnnotation[];
 
+  selection: ImageAnnotation[];
+
 }
 
-export const AnnotoriousContext = createContext<AnnotoriousContextState>({ anno: undefined, setAnno: undefined, annotations: [] });
+export const AnnotoriousContext = createContext<AnnotoriousContextState>({ 
+
+  anno: undefined, 
+
+  setAnno: undefined, 
+
+  annotations: [], 
+
+  selection: [] 
+
+});
 
 export const Annotorious = (props: { children: ReactElement }) => {
 
@@ -21,53 +33,83 @@ export const Annotorious = (props: { children: ReactElement }) => {
 
   const [anno, setAnno] = useState<AnnotationLayer<ImageAnnotation>>(null);
 
-  useEffect(() => {
-    // This convenience function keeps annotations in sync with a React state,
-    // so clients can render components the usual React way.
-    const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
-      setAnnotations(event.state);
+  const [selection, setSelection] = useState<ImageAnnotation[]>([]);
 
+  useEffect(() => {
     if (anno) {
-      anno.store.observe(onStoreChange);
+      const store = anno.store as ImageAnnotationStore;
+
+      // Keeps annotations in sync with a React state,
+      // so clients can render components the usual React way.
+      const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
+        setAnnotations(event.state);
+
+      // Keep selection in sync with a react state, and resolve them
+      // from IDs to annotations automatically, for convenience
+      let selectionStoreObserver: (event: StoreChangeEvent<ImageAnnotation>) => void;
+
+      const unsubscribeSelection = store.selection.subscribe((selection: string[]) => {
+        if (selectionStoreObserver) 
+          store.unobserve(selectionStoreObserver);
+
+        const annotations = (selection || []).map(id => store.getAnnotation(id));
+        setSelection(annotations);
+
+        selectionStoreObserver = event => {
+          const { updated } = event.changes;
+
+          setSelection(selection => selection.map(a => {
+            const next = updated.find(u => u.oldValue.id === a.id);
+            return next ? next.newValue : a;
+          }));
+        }
+
+        store.observe(selectionStoreObserver, { annotations: selection });
+      });
 
       return () => {
-        anno.store.unobserve(onStoreChange);
+        store.unobserve(onStoreChange);
+        unsubscribeSelection();
       }
     }
   }, [anno]);
 
   return (
-    <AnnotoriousContext.Provider value={{ anno, setAnno, annotations }}>
+    <AnnotoriousContext.Provider value={{ anno, setAnno, annotations, selection }}>
        {props.children}
     </AnnotoriousContext.Provider>
   )
 
 }
 
-export const useAnnotationLayerState = (): [
-  AnnotationLayer<ImageAnnotation>,
-  (anno: AnnotationLayer<ImageAnnotation>) => void
+export const useAnnotationLayerState = <T extends AnnotationLayer<ImageAnnotation>>(): [
+  T, (anno: AnnotationLayer<ImageAnnotation>) => void
 ] => { 
-  const ctx = useContext(AnnotoriousContext);
-  return [ctx.anno, ctx.setAnno];
+  const { anno, setAnno } = useContext(AnnotoriousContext);
+  return [anno as T, setAnno];
 }
 
-export const useAnnotationLayer = () => {
-  const ctx = useContext(AnnotoriousContext);
-  return ctx.anno;
+export const useAnnotationLayer = <T extends AnnotationLayer<ImageAnnotation>>() => {
+  const { anno } = useContext(AnnotoriousContext);
+  return anno as T;
 }
 
 export const useAnnotationStore = () => {
-  const ctx = useContext(AnnotoriousContext);
-  return ctx.anno.store;
+  const { anno } = useContext(AnnotoriousContext);
+  return anno.store;
 }
 
 export const useAnnotations = () => {
-  const ctx = useContext(AnnotoriousContext);
-  return ctx.annotations;
+  const { annotations } = useContext(AnnotoriousContext);
+  return annotations;
+}
+
+export const useSelection = () => {
+  const { selection } = useContext(AnnotoriousContext);
+  return selection;
 }
 
 export const useUser = () => {
-  const ctx = useContext(AnnotoriousContext);
-  return ctx.anno.getUser();
+  const { anno } = useContext(AnnotoriousContext);
+  return anno.getUser();
 }

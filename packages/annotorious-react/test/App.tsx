@@ -1,5 +1,8 @@
-import React from 'react';
-import { OpenSeadragon, AnnotoriousOSD  } from '../src/openseadragon';
+import React, { useEffect } from 'react';
+import { OSDAnnotationLayer as OSDLayer } from '@annotorious/openseadragon';
+import { OpenSeadragon, useAnnotationLayer, OSDAnnotationLayer, OSDPopup  } from '../src';
+
+import '@annotorious/openseadragon/dist/annotorious-openseadragon.css';
 
 const IIIF_SAMPLE = {
   "@context" : "http://iiif.io/api/image/2/context.json",
@@ -36,9 +39,25 @@ const OSD_OPTIONS = {
 
 export const App = () => {
 
+  const anno = useAnnotationLayer<OSDLayer>();
+
+  useEffect(() => {
+    if (anno) {
+      fetch('annotations.json')
+        .then((response) => response.json())
+        .then(annotations => { 
+          anno.setAnnotations(annotations)
+        });
+    }
+  }, [anno]);
+
   return (
     <OpenSeadragon className="openseadragon" options={OSD_OPTIONS}>
-      <AnnotoriousOSD />
+      <OSDAnnotationLayer>
+        <OSDPopup>
+          <div>Just a test</div>
+        </OSDPopup>
+      </OSDAnnotationLayer>
     </OpenSeadragon>
   )
 
