@@ -21,7 +21,7 @@ export const resolveBodyChange = (event: BodyChangeEvent, presentUsers: PresentU
     id: b.id,
     annotation: b.annotation_id,
     purpose: b.purpose,
-    value: JSON.parse(b.value),
+    value: b.value,
     creator: findUser(b.created_by, presentUsers, annotation),
     created: new Date(b.created_at),
     updatedBy: findUser(b.updated_by, presentUsers, annotation),
