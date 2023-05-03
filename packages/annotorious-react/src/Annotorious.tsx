@@ -44,6 +44,8 @@ export const Annotorious = (props: { children: ReactElement }) => {
       const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
         setAnnotations(event.state);
 
+      store.observe(onStoreChange);
+
       // Keep selection in sync with a react state, and resolve them
       // from IDs to annotations automatically, for convenience
       let selectionStoreObserver: (event: StoreChangeEvent<ImageAnnotation>) => void;

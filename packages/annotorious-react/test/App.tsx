@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { OSDAnnotator } from '@annotorious/openseadragon';
-import { OSDViewer, OSDAnnotationLayer, OSDPopup, useAnnotationLayer } from '../src';
+import { OSDViewer, OSDAnnotationLayer, OSDPopup, useAnnotationLayer, useAnnotations } from '../src';
 
 import '@annotorious/openseadragon/dist/annotorious-openseadragon.css';
 
@@ -40,6 +40,10 @@ const OSD_OPTIONS = {
 export const App = () => {
 
   const anno = useAnnotationLayer<OSDAnnotator>();
+
+  const annotations = useAnnotations();
+
+  console.log('annotations', annotations);
 
   useEffect(() => {
     if (anno) {
