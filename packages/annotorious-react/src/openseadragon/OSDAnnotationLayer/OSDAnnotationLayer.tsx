@@ -1,7 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
 import { Annotorious, OSDAnnotationLayer as OSDLayer } from '@annotorious/openseadragon';
-import { useViewer } from './OpenSeadragon';
+import { useViewer } from '../OSDViewer';
 import { useAnnotationLayerState } from 'src/Annotorious';
 
 export interface AnnotoriousOSDProps {

@@ -1,3 +1,3 @@
-export * from './OpenSeadragon';
 export * from './OSDAnnotationLayer';
-export * from './OSDPopup';
+export * from './OSDAnnotationPopup';
+export * from './OSDViewer';

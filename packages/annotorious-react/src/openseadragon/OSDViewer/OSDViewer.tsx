@@ -1,4 +1,4 @@
-import OSD from 'openseadragon';
+import OpenSeadragon from 'openseadragon';
 import {
   ReactElement, 
   createContext, 
@@ -10,11 +10,11 @@ import {
   useState 
 } from 'react';
 
-export interface OpenSeadragonProps {
+export interface OSDViewerProps {
 
   className?: string;
 
-  options: OSD.Options;
+  options: OpenSeadragon.Options;
 
   children: ReactElement | never[];
 
@@ -24,20 +24,23 @@ export interface OpenSeadragonProps {
 export const ViewerContext = createContext<OSD.Viewer>(null);
 
 /** A helper to use OpenSeadragon as a React JSX tag **/
-export const OpenSeadragon = forwardRef((props: OpenSeadragonProps, ref) => {
+export const OSDViewer = forwardRef((props: OSDViewerProps, ref) => {
 
   const { children, className, options } = props;
 
   const element = useRef<HTMLDivElement | null>(null);
 
-  const [viewer, setViewer] = useState<OSD.Viewer>();
+  const [viewer, setViewer] = useState<OpenSeadragon.Viewer>();
 
   useEffect(() => {
     if (element.current) {
-      const v = OSD({...options, element: element.current });
+      const v = OpenSeadragon({...options, element: element.current });
+
       setViewer(v);
 
-      return () => v.destroy();
+      return () => {
+        v.destroy();
+      }
     }
   }, []);
 
