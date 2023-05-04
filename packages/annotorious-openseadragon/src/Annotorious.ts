@@ -22,6 +22,11 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     props: { store, viewer }
   });
 
+  const presenceLayer = new SVGPresenceLayer({
+    target: viewer.element.querySelector('.openseadragon-canvas'),
+    props: { store, viewer, provider: null }
+  });
+
   const drawingLayer = new SVGDrawingLayer({
     target: viewer.element.querySelector('.openseadragon-canvas'),
     props: { store, viewer, user: currentUser }
@@ -33,11 +38,6 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
       store.selection.clickSelect(originalEvent, annotation.id);
     else if (!store.selection.isEmpty())
       store.selection.clear();
-  });
-
-  const presenceLayer = new SVGPresenceLayer({
-    target: viewer.element.querySelector('.openseadragon-canvas'),
-    props: { store, viewer, provider: null }
   });
 
   const setAnnotations = (annotations: WebAnnotation[]) => {
