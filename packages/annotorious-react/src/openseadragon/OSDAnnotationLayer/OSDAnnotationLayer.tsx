@@ -29,9 +29,12 @@ export const OSDAnnotationLayer = (props: AnnotoriousOSDProps) => {
   }, []);
 
   useEffect(() => {
+    if (!anno)
+      return;
+
     if (props.tool)
       (anno as OSDAnnotator).startDrawing(props.tool, props.keepEnabled);
-    else if (props.tool)
+    else
       (anno as OSDAnnotator).stopDrawing();
   }, [props.tool, props.keepEnabled]);
 
