@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import OpenSeadragon from 'openseadragon';
 import { Draggable } from './Draggable';
 import { useViewer } from '../OSDViewer';
@@ -7,7 +7,7 @@ import { OSDPopupProps } from './OSDPopupContentProps';
 
 export interface OSDPopupContainerProps {
 
-  children: ReactNode;
+  popup(props: OSDPopupProps): ReactNode;
 
 }
 
@@ -71,10 +71,7 @@ export const OSDPopup = (props: OSDPopupContainerProps) => {
   
   return selection.length > 0 ? (
     <Draggable ref={el} key={selection.map(a => a.id).join('-')} className="a9s-popup a9s-osd-popup" onDragStart={onDragStart}>
-      {React.Children.map(props.children, child =>
-        React.isValidElement<OSDPopupProps>(child) ?
-          React.cloneElement(child, { viewer, selection }) : child
-      )}
+      {props.popup({ viewer, selection})}
     </Draggable>
   ) : null;
 
