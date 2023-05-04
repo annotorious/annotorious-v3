@@ -3,11 +3,11 @@ import OpenSeadragon from 'openseadragon';
 import { Draggable } from './Draggable';
 import { useViewer } from '../OSDViewer';
 import { useSelection } from '../../Annotorious';
-import { OSDPopupProps } from './OSDPopupContentProps';
+import { OSDPopupContentProps } from './OSDPopupContentProps';
 
 export interface OSDPopupContainerProps {
 
-  popup(props: OSDPopupProps): ReactNode;
+  content(props: OSDPopupContentProps): ReactNode;
 
 }
 
@@ -71,7 +71,7 @@ export const OSDPopup = (props: OSDPopupContainerProps) => {
   
   return selection.length > 0 ? (
     <Draggable ref={el} key={selection.map(a => a.id).join('-')} className="a9s-popup a9s-osd-popup" onDragStart={onDragStart}>
-      {props.popup({ viewer, selection})}
+      {props.content({ viewer, selection})}
     </Draggable>
   ) : null;
 
