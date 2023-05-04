@@ -30,7 +30,7 @@ export const OSDViewer = forwardRef((props: OSDViewerProps, ref) => {
 
   const element = useRef<HTMLDivElement | null>(null);
 
-  const [viewer, setViewer] = useState<OpenSeadragon.Viewer>();
+  const [viewer, setViewer] = useState<OpenSeadragon.Viewer>(null);
 
   useEffect(() => {
     if (element.current) {

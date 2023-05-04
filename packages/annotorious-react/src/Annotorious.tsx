@@ -1,7 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { createContext, forwardRef, ReactNode} from 'react';
+import { useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { ImageAnnotation, ImageAnnotationStore } from '@annotorious/annotorious';
 import { Annotator, StoreChangeEvent } from '@annotorious/core';
-import { createContext, ReactElement } from 'react';
 
 export interface AnnotoriousContextState {
 
@@ -27,13 +27,15 @@ export const AnnotoriousContext = createContext<AnnotoriousContextState>({
 
 });
 
-export const Annotorious = (props: { children: ReactElement }) => {
+export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
   const [annotations, setAnnotations] = useState<ImageAnnotation[]>([]);
 
   const [anno, setAnno] = useState<Annotator<ImageAnnotation>>(null);
 
   const [selection, setSelection] = useState<ImageAnnotation[]>([]);
+
+  useImperativeHandle(ref, () => anno);
 
   useEffect(() => {
     if (anno) {
@@ -82,7 +84,7 @@ export const Annotorious = (props: { children: ReactElement }) => {
     </AnnotoriousContext.Provider>
   )
 
-}
+});
 
 export const useAnnotationLayerState = <T extends Annotator<ImageAnnotation>>(): [
   T, (anno: Annotator<ImageAnnotation>) => void
