@@ -1,0 +1,36 @@
+{
+  "name": "@annotorious/svelte",
+  "version": "3.0.0-pre-alpha-08",
+  "description": "Experimental rewrite of Annotorious",
+  "author": "Rainer Simon",
+  "license": "BSD-3-Clause",
+  "svelte": "src/index.ts",
+  "module": "./dist/annotorious-svelte.es.js",
+  "main": "./dist/annotorious-svelte.umd.js",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "test": "echo 'Skipping tests in @annotorious/svelte package'"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/annotorious-react.es.js",
+      "require": "./dist/annotorious-react.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.1.1",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.1",
+    "vite-plugin-dts": "^2.3.0"
+  },
+  "peerDependencies": {
+    "openseadragon": "^3.1.0"
+  }
+}

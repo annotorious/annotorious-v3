@@ -18,6 +18,7 @@
     "./packages/annotorious",
     "./packages/annotorious-openseadragon",
     "./packages/annotorious-supabase",
-    "./packages/annotorious-react"
+    "./packages/annotorious-react",
+    "./packages/annotorious-svelte"
   ]
 }
