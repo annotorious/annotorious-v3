@@ -45,11 +45,13 @@ export const createSender = (anno: Annotator, supabase: SupabaseClient, emitter:
       });
 
     if (removedBodies.length > 0)
-      ops.deleteBodies(removedBodies);
+      ops.deleteBodies(removedBodies).then(response => {
+        console.log('[PG] DELETE bodies response', response);
+      });
 
     if (changedTarget) {
       ops.updateTarget(a.target).then(response => {
-        console.log('[PG] UPDATE response', response);
+        console.log('[PG] UPDATE target response', response);
 
         if (response.error)
           emitter.emit('saveError', response.error);

@@ -57,14 +57,11 @@ export const createReceiver = (anno: Annotator, channel: RealtimeChannel, presen
    * After DELETE BODY:
    * - Check if body exists.
    * - Delete if it does.
-   * - Throw INTEGRITY ERROR if not.
    */
   const onDeleteBody = (event: BodyChangeEvent) => {
     const body = store.getBody(event.old.id);
     if (body) {
       store.deleteBody(body, Origin.REMOTE);
-    } else {
-      emitter.emit('integrityError', 'Attempt to delete missing body: ' + event.old.id);
     }
   }
 
