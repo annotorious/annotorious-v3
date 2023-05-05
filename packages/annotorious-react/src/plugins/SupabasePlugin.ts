@@ -25,19 +25,21 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
   const anno = useAnnotator();
 
   useEffect(() => {
-    const supabase = Supabase(anno, props);
-    
-    supabase.connect();
+    if (anno) {
+      const supabase = Supabase(anno, props);
+      
+      supabase.connect();
 
-    supabase.on('initialLoad', annotations => props.onInitialLoad && props.onInitialLoad(annotations));
-    supabase.on('initialLoadError', error => props.onInitialLoadError && props.onInitialLoadError(error));
-    supabase.on('integrityError', message => props.onIntegrityError && props.onIntegrityError(message));
-    supabase.on('presence', users => props.onPresence && props.onPresence(users));
-    supabase.on('saveError', error => props.onSaveError && props.onSaveError(error));
-    supabase.on('selectionChange', user => props.onSelectionChange && props.onSelectionChange(user));
+      supabase.on('initialLoad', annotations => props.onInitialLoad && props.onInitialLoad(annotations));
+      supabase.on('initialLoadError', error => props.onInitialLoadError && props.onInitialLoadError(error));
+      supabase.on('integrityError', message => props.onIntegrityError && props.onIntegrityError(message));
+      supabase.on('presence', users => props.onPresence && props.onPresence(users));
+      supabase.on('saveError', error => props.onSaveError && props.onSaveError(error));
+      supabase.on('selectionChange', user => props.onSelectionChange && props.onSelectionChange(user));
 
-    return () => supabase.destroy();
-  }, [props.onPresence]);
+      return () => supabase.destroy();
+    }
+  }, [anno, props.onPresence]);
 
   return null;
 
