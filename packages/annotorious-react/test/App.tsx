@@ -43,8 +43,6 @@ export const App = () => {
 
   const annotations = useAnnotations();
 
-  console.log('annotations', annotations);
-
   useEffect(() => {
     if (anno) {
       fetch('annotations.json')
@@ -55,12 +53,18 @@ export const App = () => {
     }
   }, [anno]);
 
+  const onClick = () => {
+    console.log('button clicked');
+  }
+
   return (
     <OSDViewer className="openseadragon" options={OSD_OPTIONS}>
       <OSDAnnotationLayer>
-        <OSDPopup>
-          <div>Just a test</div>
-        </OSDPopup>
+        <OSDPopup content={props => (
+            <div className="popup">
+              <button onClick={onClick}>click me</button>
+            </div>
+          )} />        
       </OSDAnnotationLayer>
     </OSDViewer>
   )

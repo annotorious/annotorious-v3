@@ -17,7 +17,7 @@ export const Draggable = forwardRef((props: DraggableProps, ref: React.MutableRe
 
   const { children, className, onDragStart, onDragEnd } = props;
 
-  useDraggable(ref, { onDragStart, onDragEnd });
+  useDraggable(ref, { onDragStart, onDragEnd, cancel: 'button, .no-drag' });
 
   return (
     <div 
