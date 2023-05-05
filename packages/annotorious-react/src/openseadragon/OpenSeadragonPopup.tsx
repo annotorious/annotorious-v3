@@ -4,9 +4,15 @@ import { AnnotoriousPopupProps, Draggable } from '../AnnotoriousPopup';
 import { useViewer } from './OpenSeadragonAnnotator';
 import { useSelection } from '../Annotorious';
 
+export type OpenSeadragonPopupProps = AnnotoriousPopupProps & {
+
+  viewer: OpenSeadragon.Viewer
+
+}
+
 export type OpenSeadragonPopupContainerProps = {
 
-  popup(props: AnnotoriousPopupProps & { viewer: OpenSeadragon.Viewer}): ReactNode
+  popup(props: OpenSeadragonPopupProps): ReactNode
 
 }
 

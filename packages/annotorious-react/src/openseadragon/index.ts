@@ -1,3 +1,3 @@
 export { OpenSeadragonAnnotator, type OpenSeadragonAnnotatorProps } from './OpenSeadragonAnnotator';
-export { OpenSeadragonPopup } from './OpenSeadragonPopup';
+export { OpenSeadragonPopup, type OpenSeadragonPopupProps } from './OpenSeadragonPopup';
 export * from './OpenSeadragonViewer';
