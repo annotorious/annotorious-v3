@@ -11,6 +11,9 @@
     "preview": "vite preview",
     "test": "echo 'Skipping tests in @annotorious/openseadragon package'"
   },
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/recogito/annotorious.git"
