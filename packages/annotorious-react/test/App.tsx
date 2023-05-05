@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import { OSDAnnotator } from '@annotorious/openseadragon';
-import { OSDViewer, OSDAnnotationLayer, OSDPopup, useAnnotationLayer, useAnnotations } from '../src';
+import { 
+  OpenSeadragonViewer, 
+  OpenSeadragonAnnotator, 
+  OpenSeadragonPopup, 
+  useAnnotator, 
+  useAnnotations
+} from '../src';
 
 import '@annotorious/openseadragon/dist/annotorious-openseadragon.css';
 
@@ -39,7 +45,7 @@ const OSD_OPTIONS = {
 
 export const App = () => {
 
-  const anno = useAnnotationLayer<OSDAnnotator>();
+  const anno = useAnnotator<OSDAnnotator>();
 
   const annotations = useAnnotations();
 
@@ -58,15 +64,14 @@ export const App = () => {
   }
 
   return (
-    <OSDViewer className="openseadragon" options={OSD_OPTIONS}>
-      <OSDAnnotationLayer>
-        <OSDPopup content={props => (
-            <div className="popup">
-              <button onClick={onClick}>click me</button>
-            </div>
-          )} />        
-      </OSDAnnotationLayer>
-    </OSDViewer>
+    <OpenSeadragonAnnotator>
+      <OpenSeadragonViewer className="openseadragon" options={OSD_OPTIONS} />
+
+      <OpenSeadragonPopup 
+        popup={props => (
+          <div>Just a test</div>
+        )} />
+    </OpenSeadragonAnnotator>
   )
 
 }

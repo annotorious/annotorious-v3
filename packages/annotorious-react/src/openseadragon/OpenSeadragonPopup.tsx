@@ -1,17 +1,16 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import OpenSeadragon from 'openseadragon';
-import { Draggable } from './Draggable';
-import { useViewer } from '../OSDViewer';
-import { useSelection } from '../../Annotorious';
-import { OSDPopupContentProps } from './OSDPopupContentProps';
+import { AnnotoriousPopupProps, Draggable } from '../AnnotoriousPopup';
+import { useViewer } from './OpenSeadragonAnnotator';
+import { useSelection } from '../Annotorious';
 
-export interface OSDPopupContainerProps {
+export type OpenSeadragonPopupContainerProps = {
 
-  content(props: OSDPopupContentProps): ReactNode;
+  popup(props: AnnotoriousPopupProps & { viewer: OpenSeadragon.Viewer}): ReactNode
 
 }
 
-export const OSDPopup = (props: OSDPopupContainerProps) => {
+export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
 
   const el = useRef<HTMLDivElement>(null);
 
@@ -71,7 +70,7 @@ export const OSDPopup = (props: OSDPopupContainerProps) => {
   
   return selection.length > 0 ? (
     <Draggable ref={el} key={selection.map(a => a.id).join('-')} className="a9s-popup a9s-osd-popup" onDragStart={onDragStart}>
-      {props.content({ viewer, selection})}
+      {props.popup({ viewer, selection})}
     </Draggable>
   ) : null;
 

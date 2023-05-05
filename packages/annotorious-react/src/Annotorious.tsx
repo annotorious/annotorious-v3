@@ -86,14 +86,7 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
 });
 
-export const useAnnotationLayerState = <T extends Annotator<ImageAnnotation>>(): [
-  T, (anno: Annotator<ImageAnnotation>) => void
-] => { 
-  const { anno, setAnno } = useContext(AnnotoriousContext);
-  return [anno as T, setAnno];
-}
-
-export const useAnnotationLayer = <T extends Annotator<ImageAnnotation>>() => {
+export const useAnnotator = <T extends Annotator<ImageAnnotation>>() => {
   const { anno } = useContext(AnnotoriousContext);
   return anno as T;
 }
@@ -113,7 +106,7 @@ export const useSelection = () => {
   return selection;
 }
 
-export const useUser = () => {
+export const useAnnotatorUser = () => {
   const { anno } = useContext(AnnotoriousContext);
   return anno.getUser();
 }

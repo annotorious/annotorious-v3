@@ -1,5 +1,12 @@
 import { forwardRef, ReactNode } from 'react';
+import { ImageAnnotation } from '@annotorious/annotorious';
 import { useDraggable } from '@neodrag/react';
+
+export interface AnnotoriousPopupProps {
+
+  selection: ImageAnnotation[];
+
+}
 
 export interface DraggableProps {
 
@@ -24,9 +31,7 @@ export const Draggable = forwardRef((props: DraggableProps, ref: React.MutableRe
       ref={ref} 
       className={className} 
       style={{ position: 'absolute' }}>
-
       {children}
-      
     </div>
   )
 

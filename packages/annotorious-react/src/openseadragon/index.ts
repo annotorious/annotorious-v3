@@ -1,3 +1,3 @@
-export * from './OSDAnnotationLayer';
-export * from './OSDAnnotationPopup';
-export * from './OSDViewer';
+export { OpenSeadragonAnnotator, type OpenSeadragonAnnotatorProps } from './OpenSeadragonAnnotator';
+export * from './OpenSeadragonPopup';
+export * from './OpenSeadragonViewer';
