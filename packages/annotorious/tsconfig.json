@@ -14,7 +14,9 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "outDir": "./dist",
-    "paths": { "@/*": ["src/*"] },
+    "paths": { 
+      "@annotorious/core": ["../annotorious-core/src"] 
+    },
     "resolveJsonModule": true,
     "skipLibCheck": false,
     "sourceMap": true,

@@ -6,6 +6,7 @@ import { createAnonymousGuest, createLifecyleObserver, Origin, type Annotator, t
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer, SVGPresenceLayer } from './svg';
+import { initKeyCommands } from './keyCommands';
 
 export type OSDAnnotator = Annotator<ImageAnnotation> & ReturnType<typeof Annotorious>;
 
@@ -14,6 +15,9 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   const opts = fillDefaults(options);
 
   const store = createImageStore(opts);
+
+  if (opts.keyboardCommands)
+    initKeyCommands(viewer.element, store);
 
   let currentUser: User = opts.readOnly ? null : createAnonymousGuest();
 

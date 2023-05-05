@@ -51,6 +51,7 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
   return { 
     clear, 
     clickSelect, 
+    get current() { return currentSelection ? [...currentSelection] : null},
     isEmpty, 
     isSelected, 
     setSelected, 

@@ -111,19 +111,35 @@ export function createStore<T extends Annotation>() {
     }
   }
 
-  const deleteAnnotation = (annotationOrId: T | string, origin = Origin.LOCAL) => {
+  const deleteOneAnnotation = (annotationOrId: T | string) => {
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
 
     const existing = annotationIndex.get(id);
     if (existing) {
       annotationIndex.delete(id);
       existing.bodies.forEach(b => bodyIndex.delete(b.id));
-      emit(origin, { deleted: [ existing ] });
+      return existing;
     } else {
       console.warn(`Attempt to delete missing annotation: ${id}`);
     }
   }
 
+  const deleteAnnotation = (annotationOrId: T | string, origin = Origin.LOCAL) => {
+    const deleted = deleteOneAnnotation(annotationOrId);
+    if (deleted)
+      emit(origin, { deleted: [ deleted  ]});
+  }
+
+  const bulkDeleteAnnotation = (annotationsOrIds: (T | string)[], origin = Origin.LOCAL) => {
+    const deleted = annotationsOrIds.reduce((deleted, arg) => {
+      const existing = deleteOneAnnotation(arg);
+      return existing ? [...deleted, existing] : deleted;
+    }, [] as T[]);
+
+    if (deleted.length > 0)
+      emit(origin, { deleted });
+  }
+ 
   const deleteBody = (body: AnnotationBodyIdentifier, origin = Origin.LOCAL) => {
     const oldAnnotation = annotationIndex.get(body.annotation);
 
@@ -248,6 +264,7 @@ export function createStore<T extends Annotation>() {
     addBody,
     all,
     bulkAddAnnotation,
+    bulkDeleteAnnotation,
     bulkUpdateBodies,
     bulkUpdateTargets,
     deleteAnnotation,

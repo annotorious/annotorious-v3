@@ -1,8 +1,10 @@
 export interface AnnotoriousOptions {
 
-  readOnly?: boolean;
+  keyboardCommands?: boolean;
 
   pointerSelection?: SelectAction;
+
+  readOnly?: boolean;
 
   style?: Style;
 
@@ -37,8 +39,11 @@ export interface Style {
 }
 
 export const fillDefaults = (opts: AnnotoriousOptions): AnnotoriousOptions => ({
+
   ...opts,
 
-  pointerSelection: opts.pointerSelection === undefined ? 
-    SelectAction.EDIT_AND_HIGHLIGHT_IF_LOCKED : SelectAction.NONE
+  keyboardCommands: opts.keyboardCommands === undefined ? true : opts.keyboardCommands,
+
+  pointerSelection: opts.pointerSelection || SelectAction.EDIT_AND_HIGHLIGHT_IF_LOCKED
+
 })
