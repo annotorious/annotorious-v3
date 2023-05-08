@@ -13,6 +13,8 @@
 
   let g: SVGGElement;
 
+  $: label = user.user.name || user.user.email?.substring(0, user.user.email.indexOf('@')) || user.user.id;
+
   $: if (g) setWidth(scale);
 
   const setWidth = (scale: number) => {
@@ -38,7 +40,7 @@
     fill={user.color}
     stroke={user.color} />
 
-  <text font-size={12 / scale} x={x + Math.round(5 / scale)} y={y - 5 / scale}>{user.user.email}</text>
+  <text font-size={12 / scale} x={x + Math.round(5 / scale)} y={y - 5 / scale}>{label}</text>
 </g>
 
 <style>

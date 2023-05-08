@@ -27,9 +27,6 @@
   $: if (provider) provider.on('selectionChange', onSelectionChange);
 
   const onSelectionChange = (p: PresentUser, selection: string[] | null) => {
-    console.log('selection change', p, selection);
-     
-    // Update tracked annotations for this present user
     trackedAnnotations = [
       ...trackedAnnotations
         .filter(({ selectedBy }) => selectedBy.presenceKey !== p.presenceKey),
@@ -39,7 +36,7 @@
         }))
     ];
     
-    // Track their state in the store
+    // Track selection state in the store
     if (storeObserver)
       store.unobserve(storeObserver);
 
