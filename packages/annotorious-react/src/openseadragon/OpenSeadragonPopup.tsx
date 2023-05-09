@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ImageAnnotation } from '@annotorious/annotorious';
 import OpenSeadragon from 'openseadragon';
 import { AnnotoriousPopupProps, Draggable } from '../AnnotoriousPopup';
 import { useViewer } from './OpenSeadragonAnnotator';
@@ -22,7 +23,7 @@ export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
 
   const viewer = useViewer();
 
-  const selection = useSelection();
+  const selection = useSelection<ImageAnnotation>();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 

@@ -1,17 +1,17 @@
 import { createContext, forwardRef, ReactNode} from 'react';
 import { useContext, useEffect, useImperativeHandle, useState } from 'react';
-import { ImageAnnotation, ImageAnnotationStore } from '@annotorious/annotorious';
-import { Annotator, StoreChangeEvent } from '@annotorious/core';
+import { ImageAnnotation } from '@annotorious/annotorious';
+import { Annotation, Annotator, Store, StoreChangeEvent } from '@annotorious/core';
 
 export interface AnnotoriousContextState {
 
-  anno: Annotator<ImageAnnotation>;
+  anno: Annotator;
 
-  setAnno(anno: Annotator<ImageAnnotation>): void;
+  setAnno(anno: Annotator): void;
 
-  annotations: ImageAnnotation[];
+  annotations: Annotation[];
 
-  selection: ImageAnnotation[];
+  selection: Annotation[];
 
 }
 
@@ -29,17 +29,17 @@ export const AnnotoriousContext = createContext<AnnotoriousContextState>({
 
 export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
-  const [annotations, setAnnotations] = useState<ImageAnnotation[]>([]);
+  const [anno, setAnno] = useState<Annotator>(null);
 
-  const [anno, setAnno] = useState<Annotator<ImageAnnotation>>(null);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
-  const [selection, setSelection] = useState<ImageAnnotation[]>([]);
+  const [selection, setSelection] = useState<Annotation[]>([]);
 
   useImperativeHandle(ref, () => anno);
 
   useEffect(() => {
     if (anno) {
-      const store = anno.store as ImageAnnotationStore;
+      const { store, selection } = anno;
 
       // Keeps annotations in sync with a React state,
       // so clients can render components the usual React way.
@@ -52,7 +52,7 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
       // from IDs to annotations automatically, for convenience
       let selectionStoreObserver: (event: StoreChangeEvent<ImageAnnotation>) => void;
 
-      const unsubscribeSelection = store.selection.subscribe((selection: string[]) => {
+      const unsubscribeSelection = selection.subscribe((selection: string[]) => {
         if (selectionStoreObserver) 
           store.unobserve(selectionStoreObserver);
 
@@ -86,24 +86,24 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
 });
 
-export const useAnnotator = <T extends Annotator<ImageAnnotation>>() => {
+export const useAnnotator = <T extends Annotation>() => {
   const { anno } = useContext(AnnotoriousContext);
-  return anno as T;
+  return anno as Annotator<T>;
 }
 
-export const useAnnotationStore = () => {
+export const useAnnotationStore = <T extends Store<Annotation>>() => {
   const { anno } = useContext(AnnotoriousContext);
-  return anno.store;
+  return anno.store as T;
 }
 
-export const useAnnotations = () => {
+export const useAnnotations = <T extends Annotation>() => {
   const { annotations } = useContext(AnnotoriousContext);
-  return annotations;
+  return annotations as T[];
 }
 
-export const useSelection = () => {
+export const useSelection = <T extends Annotation>() => {
   const { selection } = useContext(AnnotoriousContext);
-  return selection;
+  return selection as T[];
 }
 
 export const useAnnotatorUser = () => {
