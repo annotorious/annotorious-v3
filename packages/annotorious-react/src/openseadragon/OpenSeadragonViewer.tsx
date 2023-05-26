@@ -19,7 +19,9 @@ export const OpenSeadragonViewer = forwardRef((props: OpenSeadragonViewerProps, 
   const { viewer, setViewer } = useContext(OpenSeadragonAnnotatorContext);
 
   useEffect(() => {
-    if (element.current) {
+    // Checking for setViewer is just a convenience so we can
+    // use this component also without an OpenSeadragonAnnotator
+    if (element.current && setViewer) {
       const v = OpenSeadragon({...options, element: element.current });
       setViewer(v);
 

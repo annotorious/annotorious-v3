@@ -10,7 +10,8 @@ export default defineConfig(({ command, mode }) => ({
     react(),
     tsConfigPaths(),
     dts({
-      include: ['./src/']
+      include: ['./src/'],
+      entryRoot: '.'
     })
   ],
   server: {
@@ -26,11 +27,13 @@ export default defineConfig(({ command, mode }) => ({
     rollupOptions: {
       external: [...Object.keys(packageJson.peerDependencies)],
       output: {
+        assetFileNames: 'annotorious-react.[ext]',
         globals: {
           react: 'React',
           openseadragon: 'OpenSeadragon'
         }
       }
-    }
+    },
+    sourcemap: true
   }
 }));

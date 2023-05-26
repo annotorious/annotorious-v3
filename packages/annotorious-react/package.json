@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/react",
-  "version": "3.0.0-pre-alpha-10",
+  "version": "3.0.0-pre-alpha-11",
   "description": "Experimental rewrite of Annotorious",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
@@ -18,11 +18,11 @@
       "import": "./dist/annotorious-react.es.js",
       "require": "./dist/annotorious-react.umd.js"
     },
-    "./dist/style.css": "./dist/style.css"
+    "./dist/style.css": "./dist/annotorious-react.css"
   },
   "main": "./dist/annotorious-react.umd.js",
   "module": "./dist/annotorious-react.es.js",
-  "types": "./dist/packages/annotorious-react/src/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "devDependencies": {
     "@types/react-dom": "^18.0.11",
     "@vitejs/plugin-react": "^3.1.0",
