@@ -18,7 +18,7 @@
       "import": "./dist/annotorious-react.es.js",
       "require": "./dist/annotorious-react.umd.js"
     },
-    "./dist/style.css": "./dist/annotorious-react.css"
+    "./dist/annotorious-react.css": "./dist/annotorious-react.css"
   },
   "main": "./dist/annotorious-react.umd.js",
   "module": "./dist/annotorious-react.es.js",
