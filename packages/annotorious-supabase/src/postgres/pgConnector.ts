@@ -7,15 +7,15 @@ import type { PresenceConnector } from '../presence';
 import { createReceiver } from './receiver';
 import { createSender } from './sender';
 
-export const PostgresConnector = (anno: Annotator, supabase: SupabaseClient, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
+export const PostgresConnector = (anno: Annotator, layerId: string, supabase: SupabaseClient, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
 
   let sender: ReturnType<typeof createSender> | undefined;
 
   let receiver: ReturnType<typeof createReceiver> | undefined;
 
   const connect = (channel: RealtimeChannel) => {
-    sender = createSender(anno, supabase, emitter);
-    receiver = createReceiver(anno, channel, presence, emitter);
+    sender = createSender(anno, layerId, supabase, emitter);
+    receiver = createReceiver(anno, layerId, channel, presence, emitter);
   }
 
   return {

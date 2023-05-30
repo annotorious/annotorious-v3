@@ -6,6 +6,8 @@ export interface SupabasePluginConfig {
 
   channel: string;
 
+  layerId: string;
+
   eventsPerSecond?: number;
   
 }

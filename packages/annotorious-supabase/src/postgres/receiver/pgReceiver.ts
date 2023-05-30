@@ -6,7 +6,7 @@ import type { SupabasePluginEvents } from '../../SupabasePluginEvents';
 import type { AnnotationChangeEvent, BodyChangeEvent, ChangeEvent, TargetChangeEvent } from '../Types';
 import { resolveBodyChange, resolveTargetChange } from './pgCDCMessageResolver';
 
-export const createReceiver = (anno: Annotator, channel: RealtimeChannel, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
+export const createReceiver = (anno: Annotator, layerId: string, channel: RealtimeChannel, presence: ReturnType<typeof PresenceConnector>, emitter: Emitter<SupabasePluginEvents>) => {
 
   const { store } = anno;
 
@@ -114,7 +114,8 @@ export const createReceiver = (anno: Annotator, channel: RealtimeChannel, presen
     'postgres_changes', 
     { 
       event: '*', 
-      schema: 'public' 
+      schema: 'public',
+      filter: `layer_id=eq.${layerId}`
     }, (payload) => {
       const event = payload as unknown as ChangeEvent;
 

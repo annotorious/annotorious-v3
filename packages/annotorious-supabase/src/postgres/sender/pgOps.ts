@@ -28,65 +28,69 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
     });
   }
 
-  const initialLoad = () =>
-    supabase.from('annotations').select(`
-      id,
-      targets ( 
-        annotation_id,
-        created_at,
-        created_by:profiles!targets_created_by_fkey(
-          id,
-          email,
-          nickname,
-          first_name,
-          last_name,
-          avatar_url
-        ),
-        updated_at,
-        updated_by:profiles!targets_updated_by_fkey(
-          id,
-          email,
-          nickname,
-          first_name,
-          last_name,
-          avatar_url
-        ),
-        version,
-        value
-      ),
-      bodies ( 
+  const initialLoad = (layerId: string) =>
+    supabase
+      .from('annotations')
+      .select(`
         id,
-        annotation_id,
-        created_at,
-        created_by:profiles!bodies_created_by_fkey(
-          id,
-          email,
-          nickname,
-          first_name,
-          last_name,
-          avatar_url
+        targets ( 
+          annotation_id,
+          created_at,
+          created_by:profiles!targets_created_by_fkey(
+            id,
+            email,
+            nickname,
+            first_name,
+            last_name,
+            avatar_url
+          ),
+          updated_at,
+          updated_by:profiles!targets_updated_by_fkey(
+            id,
+            email,
+            nickname,
+            first_name,
+            last_name,
+            avatar_url
+          ),
+          version,
+          value
         ),
-        updated_at,
-        updated_by:profiles!bodies_updated_by_fkey(
+        bodies ( 
           id,
-          email,
-          nickname,
-          first_name,
-          last_name,
-          avatar_url
-        ),
-        version,
-        purpose,
-        value
-      )
-    `);
+          annotation_id,
+          created_at,
+          created_by:profiles!bodies_created_by_fkey(
+            id,
+            email,
+            nickname,
+            first_name,
+            last_name,
+            avatar_url
+          ),
+          updated_at,
+          updated_by:profiles!bodies_updated_by_fkey(
+            id,
+            email,
+            nickname,
+            first_name,
+            last_name,
+            avatar_url
+          ),
+          version,
+          purpose,
+          value
+        )
+      `)
+      .eq('layer_id', layerId);
 
-  const createAnnotation = (a: Annotation) => {
+  const createAnnotation = (a: Annotation, layer_id: string) => {
     console.log('[PG] Creating annotation');
 
     const versioned = {
       ...a.target,
-      version: 1
+      version: 1,
+      layer_id
     };
 
     store.updateTarget(versioned, Origin.REMOTE);
@@ -96,11 +100,12 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       .insert({
         id: a.id,
         created_at: new Date(),
-        created_by: anno.getUser().id
+        created_by: anno.getUser().id,
+        layer_id
       });
   }
 
-  const upsertBodies = (bodies: AnnotationBody[]) => {
+  const upsertBodies = (bodies: AnnotationBody[], layer_id: string) => {
     // Increment body version numbers
     const versioned = bodies.map(b => ({
       ...b,
@@ -119,11 +124,12 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
         updated_by: anno.getUser().id,
         annotation_id: b.annotation,
         purpose: b.purpose,
-        value: b.value
+        value: b.value,
+        layer_id
       })));
   }
 
-  const createTarget = (t: AnnotationTarget) => supabase
+  const createTarget = (t: AnnotationTarget, layer_id: string) => supabase
     .from('targets')
     .insert({
       created_at: t.created,
@@ -131,7 +137,8 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       updated_at: t.created,
       updated_by: anno.getUser().id,
       annotation_id: t.annotation,
-      value: JSON.stringify(t.selector)
+      value: JSON.stringify(t.selector),
+      layer_id
     })
     .select();
 

@@ -6,15 +6,15 @@ import { parseAnnotationRecord } from './pgCrosswalk';
 import type { AnnotationRecord } from '../Types';
 import { pgOps } from './pgOps';
 
-export const createSender = (anno: Annotator, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
+export const createSender = (anno: Annotator, layerId: string, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
   const ops = pgOps(anno, supabase);
 
-  const onCreateAnnotation = (a: Annotation) => ops.createAnnotation(a)
+  const onCreateAnnotation = (a: Annotation) => ops.createAnnotation(a, layerId)
     .then(({ error }) => {
       if (error) {
         emitter.emit('saveError', error);
       } else {
-        ops.createTarget(a.target).then(response => {
+        ops.createTarget(a.target, layerId).then(response => {
           console.log('[PG] INSERT response', response);
 
           if (response.error) {
@@ -39,7 +39,7 @@ export const createSender = (anno: Annotator, supabase: SupabaseClient, emitter:
     } = diffAnnotations(previous, a);
 
     if ((addedBodies.length + changedBodies.length) > 0)
-      ops.upsertBodies([...addedBodies, ...changedBodies ]).then(({ error }) => {
+      ops.upsertBodies([...addedBodies, ...changedBodies ], layerId).then(({ error }) => {
         if (error)
           emitter.emit('saveError', error);
       });
@@ -63,7 +63,7 @@ export const createSender = (anno: Annotator, supabase: SupabaseClient, emitter:
   anno.on('deleteAnnotation', onDeleteAnnotation);
   anno.on('updateAnnotation', onUpdateAnnotation);
 
-  ops.initialLoad().then(({ data, error }) => {
+  ops.initialLoad(layerId).then(({ data, error }) => {
     if (error) {
       emitter.emit('initialLoadError', error);
     } else {
