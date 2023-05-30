@@ -102,7 +102,9 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
         created_at: new Date(),
         created_by: anno.getUser().id,
         layer_id
-      });
+      })
+      .select()
+      .single();
   }
 
   const upsertBodies = (bodies: AnnotationBody[], layer_id: string) => {
@@ -140,7 +142,8 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       value: JSON.stringify(t.selector),
       layer_id
     })
-    .select();
+    .select()
+    .single();
 
   const deleteAnnotation = (a: Annotation) => supabase
     .from('annotations')

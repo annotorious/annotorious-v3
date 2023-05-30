@@ -1,5 +1,5 @@
-import { Annotation, Annotator, Origin } from '@annotorious/core';
-import type { RealtimeChannel } from '@supabase/supabase-js';
+import { Annotator, Origin } from '@annotorious/core';
+import type { RealtimeChannel, RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import type { Emitter } from 'nanoevents';
 import type { PresenceConnector } from '../../presence';
 import type { SupabasePluginEvents } from '../../SupabasePluginEvents';
@@ -110,30 +110,55 @@ export const createReceiver = (anno: Annotator, layerId: string, channel: Realti
     }
   }
 
-  channel.on(
-    'postgres_changes', 
-    { 
-      event: '*', 
-      schema: 'public',
-      filter: `layer_id=eq.${layerId}`
-    }, (payload) => {
-      const event = payload as unknown as ChangeEvent;
+  const onEvent = (evt: RealtimePostgresChangesPayload<ChangeEvent>) => {
+    const event = evt as unknown as ChangeEvent;
+    const { table, eventType } = event;
 
-      const { table, eventType } = event;
+    if (table === 'annotations' && eventType === 'DELETE') {
+      onDeleteAnnotation(event);
+    } else if (table === 'bodies' && eventType === 'INSERT') {
+      onUpsertBody(event);
+    } else if (table === 'bodies' && eventType === 'UPDATE') {
+      onUpsertBody(event);
+    } else if (table === 'bodies' && eventType === 'DELETE') {
+      onDeleteBody(event);
+    } else if (table === 'targets' && eventType === 'INSERT') {
+      onInsertTarget(event);
+    } else if (table === 'targets' && eventType === 'UPDATE') {
+      onUpdateTarget(event);
+    }  
+  }
 
-      if (table === 'annotations' && eventType === 'DELETE') {
-        onDeleteAnnotation(event);
-      } else if (table === 'bodies' && eventType === 'INSERT') {
-        onUpsertBody(event);
-      } else if (table === 'bodies' && eventType === 'UPDATE') {
-        onUpsertBody(event);
-      } else if (table === 'bodies' && eventType === 'DELETE') {
-        onDeleteBody(event);
-      } else if (table === 'targets' && eventType === 'INSERT') {
-        onInsertTarget(event);
-      } else if (table === 'targets' && eventType === 'UPDATE') {
-        onUpdateTarget(event);
-      }  
-    });
-  
+  channel
+    .on<ChangeEvent>(
+     'postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public',
+        table: 'annotations',
+        filter: `layer_id=eq.${layerId}`
+      }, 
+      onEvent
+    )
+    .on(
+      'postgres_changes', 
+       { 
+         event: '*', 
+         schema: 'public',
+         table: 'targets',
+         filter: `layer_id=eq.${layerId}`
+       }, 
+       onEvent
+     )
+     .on(
+      'postgres_changes', 
+       { 
+         event: '*', 
+         schema: 'public',
+         table: 'bodies',
+         filter: `layer_id=eq.${layerId}`
+       }, 
+       onEvent
+     ); 
+
 }
