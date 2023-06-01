@@ -13,5 +13,6 @@ export type {
   Appearance,
   AppearanceProvider,
   PresentUser, 
-  User 
+  User,
+  defaultColorProvider
 } from '@annotorious/core';
