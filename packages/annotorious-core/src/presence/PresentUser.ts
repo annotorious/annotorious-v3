@@ -1,11 +1,10 @@
 import type { User } from '../model';
+import type { Appearance } from './Appearance';
 
 export interface PresentUser extends User {
 
   presenceKey: string;
 
-  presenceLabel: string;
-
-  presenceColor: string;
+  appearance: Appearance
 
 }

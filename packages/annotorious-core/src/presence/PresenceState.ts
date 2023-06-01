@@ -1,10 +1,9 @@
 import { nanoid } from 'nanoid';
 import { createNanoEvents } from 'nanoevents';
 import type { User } from '../model';
-import { Palette, DEFAULT_PALETTE } from './Palette';
 import type { PresentUser } from './PresentUser';
 import type { PresenceEvents } from './PresenceEvents';
-import type { PresenceLabelProvider } from './PresenceLabelProvider';
+import { AppearanceProvider, createDefaultAppearenceProvider } from './AppearanceProvider';
 
 const isListEqual = (listA: any[], listB: any[]) => 
   listA.every(a => listA.includes(a)) && listB.every(b => listA.includes(b));
@@ -14,13 +13,11 @@ export const PRESENCE_KEY = nanoid();
 
 interface PresenceStateProps {
 
-  palette?: Palette;
-
-  labels?: PresenceLabelProvider;
+  appearance: AppearanceProvider;
 
 }
 
-export const createPresenceState = (props: PresenceStateProps = {}) => {
+export const createPresenceState = (props: PresenceStateProps = { appearance: createDefaultAppearenceProvider() }) => {
 
   const emitter = createNanoEvents<PresenceEvents>();
 
@@ -28,33 +25,18 @@ export const createPresenceState = (props: PresenceStateProps = {}) => {
 
   const selectionStates = new Map<string, string[]>();
 
-  const unassignedColors = [...(props?.palette || DEFAULT_PALETTE)];
-
-  const assignRandomColor = () => {
-    const rnd = Math.floor(Math.random() * unassignedColors.length);
-    const color = unassignedColors[rnd];
-
-    unassignedColors.splice(rnd, 1);
-
-    return color;
-  }
-
   const addUser = (presenceKey: string, user: User) => {
     if (presentUsers.has(presenceKey)) {
       console.warn('Attempt to add user that is already present', presenceKey, user);
       return;    
     }
 
-    const presenceColor = assignRandomColor();
-
-    const presenceLabel = props.labels ? 
-      props.labels.getLabel(presenceKey, user) : (user.name || user.id);
+    const appearance = props.appearance.addUser(presenceKey, user);
 
     presentUsers.set(presenceKey, { 
       ...user,
-      presenceKey, 
-      presenceColor,
-      presenceLabel
+      presenceKey,
+      appearance
     });
   }
 
@@ -65,7 +47,7 @@ export const createPresenceState = (props: PresenceStateProps = {}) => {
       return;
     }
 
-    unassignedColors.push(user.presenceColor);
+    props.appearance.removeUser(user);
 
     presentUsers.delete(presenceKey);
   }
