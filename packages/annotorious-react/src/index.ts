@@ -6,6 +6,9 @@ export * from './plugins';
 export * from './Annotorious';
 export * from './AnnotoriousPopup';
 
+// Re-export useful utility functions for convenience
+export { defaultColorProvider } from '@annotorious/core';
+
 // Re-export essential Types for convenience
 export type { 
   Annotation,
@@ -13,6 +16,5 @@ export type {
   Appearance,
   AppearanceProvider,
   PresentUser, 
-  User,
-  defaultColorProvider
+  User
 } from '@annotorious/core';
