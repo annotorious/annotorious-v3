@@ -61,8 +61,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
       if (data?.user) {
         // Update Annotorious identity with Supbase identity
         anno.setUser({ 
-          id: data.user.id,
-          email: data.user.email
+          id: data.user.id
         });
 
         init();
@@ -79,8 +78,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
         const hasChanged = anno.getUser().id !== session.user.id;
         if (hasChanged) {
           anno.setUser({
-            id: session.user.id,
-            email: session.user.email
+            id: session.user.id
           });
 
           presence.trackUser(); 
