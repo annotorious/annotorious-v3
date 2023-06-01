@@ -10,6 +10,8 @@ export * from './AnnotoriousPopup';
 export type { 
   Annotation,
   AnnotationBody,
+  Appearance,
+  AppearanceProvider,
   PresentUser, 
   User 
 } from '@annotorious/core';
