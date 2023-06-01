@@ -1,11 +1,11 @@
 import type { User } from '../model';
 
-export interface PresentUser {
+export interface PresentUser extends User {
 
   presenceKey: string;
 
-  user: User;
+  presenceLabel: string;
 
-  color: string;
+  presenceColor: string;
 
 }

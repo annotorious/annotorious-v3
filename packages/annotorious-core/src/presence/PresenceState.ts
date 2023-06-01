@@ -4,6 +4,7 @@ import type { User } from '../model';
 import { Palette, DEFAULT_PALETTE } from './Palette';
 import type { PresentUser } from './PresentUser';
 import type { PresenceEvents } from './PresenceEvents';
+import type { PresenceLabelProvider } from './PresenceLabelProvider';
 
 const isListEqual = (listA: any[], listB: any[]) => 
   listA.every(a => listA.includes(a)) && listB.every(b => listA.includes(b));
@@ -11,7 +12,15 @@ const isListEqual = (listA: any[], listB: any[]) =>
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
-export const createPresenceState = (props: { palette?: Palette } = {}) => {
+interface PresenceStateProps {
+
+  palette?: Palette;
+
+  labels?: PresenceLabelProvider;
+
+}
+
+export const createPresenceState = (props: PresenceStateProps = {}) => {
 
   const emitter = createNanoEvents<PresenceEvents>();
 
@@ -36,19 +45,27 @@ export const createPresenceState = (props: { palette?: Palette } = {}) => {
       return;    
     }
 
-    const color = assignRandomColor();
+    const presenceColor = assignRandomColor();
 
-    presentUsers.set(presenceKey, { presenceKey, user, color });
+    const presenceLabel = props.labels ? 
+      props.labels.getLabel(presenceKey, user) : (user.name || user.id);
+
+    presentUsers.set(presenceKey, { 
+      ...user,
+      presenceKey, 
+      presenceColor,
+      presenceLabel
+    });
   }
 
   const removeUser = (presenceKey: string) => {
-    const state = presentUsers.get(presenceKey);
-    if (!state) {
+    const user = presentUsers.get(presenceKey);
+    if (!user) {
       console.warn('Attempt to remove user that is not present', presenceKey);
       return;
     }
 
-    unassignedColors.push(state.color);
+    unassignedColors.push(user.presenceColor);
 
     presentUsers.delete(presenceKey);
   }

@@ -5,13 +5,13 @@ const findUser = (id: string, presentUsers: PresentUser[], annotation?: Annotati
   if (!id)
     return;
 
-  // Check if this user is present
-  const present = presentUsers.find(({ user }) => user.id === id);
-  if (present)
-    return present.user;
-
   // Check if this user is already in this annotation
-  return getCollaborators(annotation).find(u => u.id === id);
+  const collaborator = getCollaborators(annotation).find(u => u.id === id);
+  if (collaborator)
+    return collaborator;
+
+  // Last resort: check if this user is present
+  return presentUsers.find(user => user.id === id);
 }
 
 export const resolveBodyChange = (event: BodyChangeEvent, presentUsers: PresentUser[], annotation?: Annotation): AnnotationBody => {

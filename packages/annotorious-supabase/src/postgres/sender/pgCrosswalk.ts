@@ -4,7 +4,6 @@ import type { AnnotationRecord, BodyRecord, ProfileRecord, TargetRecord } from '
 export const parseProfileRecord = (p: ProfileRecord | undefined): User => p ? ({
   id: p.id,
   name: p.nickname,
-  email: p.email,
   avatar: p.avatar_url
 }) : undefined;
 
