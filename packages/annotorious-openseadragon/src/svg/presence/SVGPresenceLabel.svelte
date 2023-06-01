@@ -35,10 +35,10 @@
     x={x} 
     y={y - 18 / scale} 
     height={18 / scale} 
-    fill={user.color}
-    stroke={user.color} />
+    fill={user.appearance.color}
+    stroke={user.appearance.color} />
 
-  <text font-size={12 / scale} x={x + Math.round(5 / scale)} y={y - 5 / scale}>{user.label}</text>
+  <text font-size={12 / scale} x={x + Math.round(5 / scale)} y={y - 5 / scale}>{user.appearance.label}</text>
 </g>
 
 <style>

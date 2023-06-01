@@ -16,7 +16,7 @@
   <SVGPresenceLabel scale={scale} user={user} x={geom.x} y={geom.y} />
   <rect
     class="a9s-presence-shape a9s-presence-rectangle"
-    stroke={user.color}
+    stroke={user.appearance.color}
     fill="transparent"
     x={geom.x} y={geom.y} width={geom.w} height={geom.h} />
 </g>

@@ -34,7 +34,7 @@
   
   <polygon
     class="a9s-presence-shape a9s-presence-polygon"
-    stroke={user.color}
+    stroke={user.appearance.color}
     fill="transparent"
     points={geom.points.map(xy => xy.join(',')).join(' ')} />
 </g>
