@@ -1,3 +1,5 @@
+import type { AppearanceProvider } from "@annotorious/core/dist/presence/AppearanceProvider";
+
 export interface SupabasePluginConfig {
 
   apiKey: string;
@@ -9,5 +11,7 @@ export interface SupabasePluginConfig {
   layerId: string;
 
   eventsPerSecond?: number;
+
+  appearanceProvider?: AppearanceProvider;
   
 }

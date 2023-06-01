@@ -11,7 +11,8 @@ export interface AppearanceProvider {
 
 }
 
-export const createDefaultAppearenceProvider = () => {
+export const defaultColorProvider = () => {
+
   const unassignedColors = [...DEFAULT_PALETTE];
 
   const assignRandomColor = () => {
@@ -23,8 +24,19 @@ export const createDefaultAppearenceProvider = () => {
     return color;
   }
 
+  const releaseColor = (color: string) =>
+    unassignedColors.push(color);
+
+  return { assignRandomColor, releaseColor };
+
+}
+
+export const createDefaultAppearenceProvider = () => {
+
+  const colorProvider = defaultColorProvider();
+
   const addUser = (presenceKey: string, user: User): Appearance => {
-    const color = assignRandomColor();
+    const color = colorProvider.assignRandomColor();
 
     return {
       label: user.name || user.id,
@@ -34,7 +46,7 @@ export const createDefaultAppearenceProvider = () => {
   }
 
   const removeUser = (user: PresentUser) =>
-    unassignedColors.push(user.appearance.color);
+    colorProvider.releaseColor(user.appearance.color);
 
   return { addUser, removeUser }
   

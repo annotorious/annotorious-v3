@@ -4,12 +4,13 @@ import type { RealtimeChannel } from '@supabase/realtime-js';
 import type { Emitter } from 'nanoevents';
 import type { SupabasePluginEvents } from '../SupabasePluginEvents';
 import type { SelectEvent } from './Types';
+import type { AppearanceProvider } from '@annotorious/core/dist/presence/AppearanceProvider';
 
-export const PresenceConnector = (anno: Annotator, emitter: Emitter<SupabasePluginEvents>) => {
+export const PresenceConnector = (anno: Annotator, appearanceProvider: AppearanceProvider, emitter: Emitter<SupabasePluginEvents>) => {
 
   let channel: RealtimeChannel;
 
-  const presence = createPresenceState();
+  const presence = createPresenceState(appearanceProvider);
 
   // Forward presence events
   presence.on('presence', users => emitter.emit('presence', users));

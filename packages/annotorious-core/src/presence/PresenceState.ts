@@ -11,13 +11,7 @@ const isListEqual = (listA: any[], listB: any[]) =>
 // This client's presence key
 export const PRESENCE_KEY = nanoid();
 
-interface PresenceStateProps {
-
-  appearance: AppearanceProvider;
-
-}
-
-export const createPresenceState = (props: PresenceStateProps = { appearance: createDefaultAppearenceProvider() }) => {
+export const createPresenceState = (appearanceProvider: AppearanceProvider = createDefaultAppearenceProvider()) => {
 
   const emitter = createNanoEvents<PresenceEvents>();
 
@@ -31,7 +25,7 @@ export const createPresenceState = (props: PresenceStateProps = { appearance: cr
       return;    
     }
 
-    const appearance = props.appearance.addUser(presenceKey, user);
+    const appearance = appearanceProvider.addUser(presenceKey, user);
 
     presentUsers.set(presenceKey, { 
       ...user,
@@ -47,7 +41,7 @@ export const createPresenceState = (props: PresenceStateProps = { appearance: cr
       return;
     }
 
-    props.appearance.removeUser(user);
+    appearanceProvider.removeUser(user);
 
     presentUsers.delete(presenceKey);
   }

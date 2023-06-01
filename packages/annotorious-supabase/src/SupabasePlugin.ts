@@ -26,7 +26,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
   // Set up channel and connectors for each channel type
   let channel: RealtimeChannel = null;
   
-  const presence = PresenceConnector(anno, emitter);
+  const presence = PresenceConnector(anno, config.appearanceProvider, emitter);
 
   const broadcast = BroadcastConnector(anno, presence);
   
