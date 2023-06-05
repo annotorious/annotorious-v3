@@ -45,15 +45,17 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
     const deleteAnnotationEvents: BroadcastEvent[] = deleted.map(annotation =>
       ({ type: BroadcastEventType.DELETE_ANNOTATION, id: annotation.id }));
 
-    const createBodyEvents: BroadcastEvent[] = updated
-      .filter(update => update.bodiesCreated?.length > 0)
-      .reduce((all, update) => ([
-        ...all, 
-        ...update.bodiesCreated.map(body => { return ({ 
-          type: BroadcastEventType.CREATE_BODY, 
-          body: { ...body, version: 1 } 
-        }) })]
-      ), []);
+    // Bodies may contain privacy-relevant information - we 
+    // won't broadcast them for now, but rely on secured CDC events instead
+    // const createBodyEvents: BroadcastEvent[] = updated
+    //   .filter(update => update.bodiesCreated?.length > 0)
+    //   .reduce((all, update) => ([
+    //     ...all, 
+    //    ...update.bodiesCreated.map(body => { return ({ 
+    //       type: BroadcastEventType.CREATE_BODY, 
+    //       body: { ...body, version: 1 } 
+    //     }) })]
+    //   ), []);
 
     const deleteBodyEvents: BroadcastEvent[] = updated
       .filter(update => update.bodiesDeleted?.length > 0)
@@ -66,15 +68,16 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
         }))]
       ), []);
 
-    const updateBodyEvents: BroadcastEvent[] = updated
-      .filter(update => update.bodiesUpdated?.length > 0)
-      .reduce((all, update) => ([
-        ...all,
-        ...update.bodiesUpdated.map(({ newBody }) => ({
-          type: BroadcastEventType.UPDATE_BODY,
-          body: newBody
-        }))]
-      ), []);
+    // Bodies may contain privacy-relevant information - see above 
+    // const updateBodyEvents: BroadcastEvent[] = updated
+    //   .filter(update => update.bodiesUpdated?.length > 0)
+    //   .reduce((all, update) => ([
+    //     ...all,
+    //     ...update.bodiesUpdated.map(({ newBody }) => ({
+    //       type: BroadcastEventType.UPDATE_BODY,
+    //       body: newBody
+    //     }))]
+    //   ), []);
 
     const updateTargetEvents: BroadcastEvent[] = updated
       .filter(update => update.targetUpdated)
@@ -92,19 +95,19 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
     }
 
     // Versioned copies of the created bodies
-    const createdBodies = 
-      createBodyEvents.map(evt => (evt as CreateBodyEvent).body);
+    // const createdBodies = 
+    //   createBodyEvents.map(evt => (evt as CreateBodyEvent).body);
 
-    if (createdBodies.length > 0)
-      store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
+    // if (createdBodies.length > 0)
+    //   store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
 
     return [
       ...all,
       ...createAnnotationEvents,
       ...deleteAnnotationEvents,
-      ...createBodyEvents,
+      // ...createBodyEvents,
       ...deleteBodyEvents,
-      ...updateBodyEvents,
+      // ...updateBodyEvents,
       ...updateTargetEvents
     ];
   }, []);
