@@ -59,14 +59,44 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
 
     supabase.auth.getUser().then(({ data }) => {
       if (data?.user) {
-        // Update Annotorious identity with Supbase identity
-        anno.setUser({ 
-          id: data.user.id
-        });
+        supabase 
+          .from('profiles')
+          .select(`
+            id,
+            first_name,
+            last_name,
+            nickname,
+            avatar_url
+          `)
+          .eq('id', data.user.id)
+          .single()
+          .then(({ error, data }) => {
+            if (error) {
+              console.error(error);
+              reject('No profile found');
+            } else {              
+              const { id, nickname, first_name, last_name } = data;
 
-        init();
+              let name: string;
 
-        resolve(anno.getUser());
+              // Prefer nickname
+              if (nickname)
+                name = nickname;
+              // Otherwise, take full name (first, last)
+              else if (first_name && last_name)
+                name = `${first_name} ${last_name}`;
+              // Or any of them, if only one is available
+              else
+                name = first_name || last_name;
+
+              // Update Annotorious identity with Supabase identity
+              anno.setUser({ id, name, avatar: data.avatar_url });
+
+              init();
+
+              resolve(anno.getUser());
+            }
+          });
       } else {
         reject('No credentials - user signed out.');
       }
