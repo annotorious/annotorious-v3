@@ -93,7 +93,7 @@ export const useAnnotator = <T extends Annotation>() => {
 
 export const useAnnotationStore = <T extends Store<Annotation>>() => {
   const { anno } = useContext(AnnotoriousContext);
-  return anno.store as T;
+  return anno?.store as T | undefined;
 }
 
 export const useAnnotations = <T extends Annotation>() => {
