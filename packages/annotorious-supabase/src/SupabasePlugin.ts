@@ -103,8 +103,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
     });
 
     supabase.auth.onAuthStateChange((event,session) => {
-      // Note that sign-in events are also triggered it the same user opens a second tab
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+      if (event === 'USER_UPDATED') {
         const hasChanged = anno.getUser().id !== session.user.id;
         if (hasChanged) {
           anno.setUser({
