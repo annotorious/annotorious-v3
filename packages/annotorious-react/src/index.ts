@@ -13,6 +13,7 @@ export { defaultColorProvider } from '@annotorious/core';
 export type { 
   Annotation,
   AnnotationBody,
+  AnnotationTarget,
   Appearance,
   AppearanceProvider,
   PresentUser, 
