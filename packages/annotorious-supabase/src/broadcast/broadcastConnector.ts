@@ -15,11 +15,15 @@ export const BroadcastConnector = (anno: Annotator<Annotation>, presence: Return
       events: marshal([ event ], anno.store)
     };
 
-    channel.send({
-      type: 'broadcast',
-      event: 'change',
-      payload: message
-    });
+    // Not all store changes trigger broadcast events - make
+    // sure we only send a message when there are >0 events!
+    if (message.events.length > 0) {
+      channel.send({
+        type: 'broadcast',
+        event: 'change',
+        payload: message
+      });
+    }
   });
 
   const connect = (channel: RealtimeChannel) => {
