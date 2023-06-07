@@ -44,6 +44,14 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
       store.selection.clear();
   });
 
+  const loadAnnotations = (url: string) =>
+    fetch(url)
+      .then((response) => response.json())
+      .then((annotations: WebAnnotation[]) => {
+        setAnnotations(annotations);
+        return annotations;
+      });
+
   const setAnnotations = (annotations: WebAnnotation[]) => {
     const { parsed, failed } = parseW3C(annotations);
 
@@ -78,6 +86,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   return {
     getUser,
     listTools,
+    loadAnnotations,
     on: store.lifecycle.on,
     off: store.lifecycle.off,
     setAnnotations,
