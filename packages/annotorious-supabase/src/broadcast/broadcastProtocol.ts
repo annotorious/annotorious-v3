@@ -1,7 +1,7 @@
-import { Origin } from '@annotorious/core';
+import { Origin, Visibility } from '@annotorious/core';
 import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
 import { BroadcastEventType } from './Types';
-import type { BroadcastEvent, CreateBodyEvent, CreateAnnotationEvent } from './Types';
+import type { BroadcastEvent, CreateAnnotationEvent } from './Types';
 
 /**
  * Returns a list of unique IDs of annotations that are 
@@ -26,9 +26,19 @@ export const affectedAnnotations = (events: BroadcastEvent[]) => {
   return Array.from(new Set(affectedAnnotations));
 }
 
+// Shorthand
+const excludePrivate = (annotations?: Annotation[]): Annotation[] =>
+  (annotations || []).filter(a => a.visibility !== Visibility.PRIVATE);
+
 export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Store<Annotation>): BroadcastEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
-    const { created, deleted, updated } = storeEvent.changes;
+    const { changes } = storeEvent;
+
+    const created = excludePrivate(changes.created);
+    const deleted = excludePrivate(changes.deleted);
+
+    const updated = (changes.updated || [])
+      .filter(update => update.newValue.visibility !== Visibility.PRIVATE)
 
     const createAnnotationEvents: BroadcastEvent[] = created.map(annotation => ({
       type: BroadcastEventType.CREATE_ANNOTATION, 
@@ -45,18 +55,6 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
     const deleteAnnotationEvents: BroadcastEvent[] = deleted.map(annotation =>
       ({ type: BroadcastEventType.DELETE_ANNOTATION, id: annotation.id }));
 
-    // Bodies may contain privacy-relevant information - we 
-    // won't broadcast them for now, but rely on secured CDC events instead
-    // const createBodyEvents: BroadcastEvent[] = updated
-    //   .filter(update => update.bodiesCreated?.length > 0)
-    //   .reduce((all, update) => ([
-    //     ...all, 
-    //    ...update.bodiesCreated.map(body => { return ({ 
-    //       type: BroadcastEventType.CREATE_BODY, 
-    //       body: { ...body, version: 1 } 
-    //     }) })]
-    //   ), []);
-
     const deleteBodyEvents: BroadcastEvent[] = updated
       .filter(update => update.bodiesDeleted?.length > 0)
       .reduce((all, update) => ([
@@ -67,17 +65,6 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
           annotation: body.annotation 
         }))]
       ), []);
-
-    // Bodies may contain privacy-relevant information - see above 
-    // const updateBodyEvents: BroadcastEvent[] = updated
-    //   .filter(update => update.bodiesUpdated?.length > 0)
-    //   .reduce((all, update) => ([
-    //     ...all,
-    //     ...update.bodiesUpdated.map(({ newBody }) => ({
-    //       type: BroadcastEventType.UPDATE_BODY,
-    //       body: newBody
-    //     }))]
-    //   ), []);
 
     const updateTargetEvents: BroadcastEvent[] = updated
       .filter(update => update.targetUpdated)
@@ -94,20 +81,11 @@ export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Stor
       store.bulkUpdateTargets(createdTargets, Origin.REMOTE);
     }
 
-    // Versioned copies of the created bodies
-    // const createdBodies = 
-    //   createBodyEvents.map(evt => (evt as CreateBodyEvent).body);
-
-    // if (createdBodies.length > 0)
-    //   store.bulkUpdateBodies(createdBodies, Origin.REMOTE);
-
     return [
       ...all,
       ...createAnnotationEvents,
       ...deleteAnnotationEvents,
-      // ...createBodyEvents,
       ...deleteBodyEvents,
-      // ...updateBodyEvents,
       ...updateTargetEvents
     ];
   }, []);
