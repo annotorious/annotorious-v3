@@ -1,4 +1,5 @@
 import type { Annotation, AnnotationBody, AnnotationTarget } from '../model';
+import { diffAnnotations } from '../utils';
 import { Origin, shouldNotify, type Update, type ChangeSet } from './StoreObserver';
 import type { StoreObserver, StoreChangeEvent, StoreObserveOptions } from './StoreObserver';
 
@@ -52,6 +53,20 @@ export function createStore<T extends Annotation>() {
       annotation.bodies.forEach(b => bodyIndex.set(b.id, annotation.id));
 
       emit(origin, { created: [annotation] });
+    }
+  }
+
+  const updateAnnotation = (annotation: T, origin = Origin.LOCAL) => {
+    const oldValue = annotationIndex.get(annotation.id);
+
+    if (oldValue) {
+      const update: Update<T> = diffAnnotations(oldValue, annotation);
+
+      annotationIndex.set(annotation.id, annotation);
+
+      emit(origin, { updated: [update] })
+    } else {
+      throw Error(`Cannot update annotation ${annotation.id} - does not exist`);
     }
   }
 
@@ -273,6 +288,7 @@ export function createStore<T extends Annotation>() {
     getBody,
     observe,
     unobserve,
+    updateAnnotation,
     updateBody,
     updateTarget
 	};

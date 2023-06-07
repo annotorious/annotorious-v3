@@ -12,13 +12,9 @@ export const BroadcastConnector = (anno: Annotator<Annotation>, presence: Return
   let observer: (event: StoreChangeEvent<Annotation>) => void  = null;
 
   const onStoreChange = (channel: RealtimeChannel) => ((event: StoreChangeEvent<Annotation>) =>  {
-    // Don't broadcast when in private mode
-    if (privacyMode)
-      return;
-
     const message: BroadcastMessage = {
       from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
-      events: marshal([ event ], anno.store)
+      events: marshal([ event ], anno.store, privacyMode)
     };
 
     // Not all store changes trigger broadcast events - make

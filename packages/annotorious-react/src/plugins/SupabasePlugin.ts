@@ -30,8 +30,6 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
 
   useEffect(() => {
     if (anno) {
-      console.log('Running Supabase plugin setup effect');
-
       const supabase = Supabase(anno, props);
       
       supabase.connect();

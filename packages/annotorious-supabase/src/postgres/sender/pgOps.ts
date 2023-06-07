@@ -1,4 +1,4 @@
-import { Origin } from '@annotorious/core';
+import { Origin, Visibility } from '@annotorious/core';
 import type { Annotation, AnnotationBody, Annotator, AnnotationTarget } from '@annotorious/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PostgrestBuilder, PostgrestSingleResponse } from '@supabase/postgrest-js';
@@ -76,14 +76,16 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
   const createAnnotation = (a: Annotation, layer_id: string, is_private: boolean) => {
     console.log('[PG] Creating annotation');
 
-    const versioned = {
-      ...a.target,
-      version: 1,
-      layer_id,
-      is_private
+    const versioned: Annotation = {
+      ...a,
+      target: {
+        ...a.target,
+        version: 1
+      },
+      visibility: is_private ? Visibility.PRIVATE : undefined
     };
 
-    store.updateTarget(versioned, Origin.REMOTE);
+    store.updateAnnotation(versioned, Origin.REMOTE);
     
     return supabase
       .from('annotations')
@@ -91,7 +93,8 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
         id: a.id,
         created_at: new Date(),
         created_by: anno.getUser().id,
-        layer_id
+        layer_id,
+        is_private
       })
       .select()
       .single();

@@ -36,16 +36,16 @@ describe('diffAnnotations', () => {
   it('should compute proper diffs', () => {
     const diff = diffAnnotations(annotation1, annotation2);
 
-    expect(diff.addedBodies.length).toBe(1);
-    expect(diff.addedBodies[0].id).toBe('body-3');
-    expect(diff.addedBodies[0].value).toBe('body-3');
-    expect(diff.removedBodies.length).toBe(1);
-    expect(diff.removedBodies[0].id).toBe('body-2');
-    expect(diff.removedBodies[0].value).toBe('body-2');
-    expect(diff.changedBodies.length).toBe(1);
-    expect(diff.changedBodies[0].id).toBe('body-1');
-    expect(diff.changedBodies[0].value).toBe('body-1-changed');
-    expect(diff.changedTarget).toBe(undefined);
+    expect(diff.bodiesCreated.length).toBe(1);
+    expect(diff.bodiesCreated[0].id).toBe('body-3');
+    expect(diff.bodiesCreated[0].value).toBe('body-3');
+    expect(diff.bodiesDeleted.length).toBe(1);
+    expect(diff.bodiesDeleted[0].id).toBe('body-2');
+    expect(diff.bodiesDeleted[0].value).toBe('body-2');
+    expect(diff.bodiesUpdated.length).toBe(1);
+    expect(diff.bodiesUpdated[0].newBody.id).toBe('body-1');
+    expect(diff.bodiesUpdated[0].newBody.value).toBe('body-1-changed');
+    expect(diff.targetUpdated).toBe(undefined);
   })
 
 });

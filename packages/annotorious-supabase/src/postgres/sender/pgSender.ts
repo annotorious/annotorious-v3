@@ -35,24 +35,27 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
 
   const onUpdateAnnotation = (a: Annotation, previous: Annotation) => {
     const { 
-      addedBodies, 
-      removedBodies, 
-      changedBodies, 
-      changedTarget 
+      bodiesCreated, 
+      bodiesDeleted, 
+      bodiesUpdated, 
+      targetUpdated 
     } = diffAnnotations(previous, a);
 
-    if ((addedBodies.length + changedBodies.length) > 0)
-      ops.upsertBodies([...addedBodies, ...changedBodies ], layerId).then(({ error }) => {
+    if ((bodiesCreated.length + bodiesUpdated.length) > 0)
+      ops.upsertBodies([
+        ...bodiesCreated, 
+        ...bodiesUpdated.map(u => u.newBody) 
+      ], layerId).then(({ error }) => {
         if (error)
           emitter.emit('saveError', error);
       });
 
-    if (removedBodies.length > 0)
-      ops.deleteBodies(removedBodies).then(response => {
+    if (bodiesDeleted.length > 0)
+      ops.deleteBodies(bodiesDeleted).then(response => {
         console.log('[PG] DELETE bodies response', response);
       });
 
-    if (changedTarget) {
+    if (targetUpdated) {
       ops.updateTarget(a.target).then(response => {
         console.log('[PG] UPDATE target response', response);
 
