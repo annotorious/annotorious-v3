@@ -8,6 +8,8 @@ export interface Annotation {
 
   bodies: AnnotationBody[];
 
+  visibility?: Visibility;
+
 }
 
 export interface AnnotationTarget {
@@ -53,3 +55,9 @@ export interface AnnotationBody {
   version?: number;
 
 }
+
+export type Visibility = string;
+
+export const Visibility = (value: string) => value;
+
+Visibility.PRIVATE = 'PRIVATE';

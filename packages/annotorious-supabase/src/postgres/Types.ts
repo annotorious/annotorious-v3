@@ -6,6 +6,8 @@ export interface AnnotationRecord {
 
   bodies: BodyRecord[];
 
+  is_private: boolean;
+
 }
 
 export interface TargetRecord {

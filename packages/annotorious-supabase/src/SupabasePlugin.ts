@@ -136,10 +136,14 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
     destroy,
     on,
     get privacyMode() {
+      if (broadcast.privacyMode !== postgres.privacyMode)
+        throw 'Fatal privacy mode integrity error. Should never happen';
+
       return broadcast.privacyMode;
     },
     set privacyMode(mode: boolean) {
       broadcast.privacyMode = mode;
+      postgres.privacyMode = mode;
     }
   }
 

@@ -7,9 +7,12 @@ import type { AnnotationRecord } from '../Types';
 import { pgOps } from './pgOps';
 
 export const createSender = (anno: Annotator, layerId: string, supabase: SupabaseClient, emitter: Emitter<SupabasePluginEvents>) => {
+
+  let privacyMode = false;
+
   const ops = pgOps(anno, supabase);
 
-  const onCreateAnnotation = (a: Annotation) => ops.createAnnotation(a, layerId)
+  const onCreateAnnotation = (a: Annotation) => ops.createAnnotation(a, layerId, privacyMode)
     .then(({ error }) => {
       if (error) {
         emitter.emit('saveError', error);
@@ -76,13 +79,17 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
   });
 
   return {
-
     destroy: () => {
       anno.off('createAnnotation', onCreateAnnotation);
       anno.off('deleteAnnotation', onDeleteAnnotation);
       anno.off('updateAnnotation', onUpdateAnnotation);
+    },
+    get privacyMode() {
+      return privacyMode;
+    },
+    set privacyMode(mode: boolean) {
+      privacyMode = mode;
     }
-
   }
 
 }

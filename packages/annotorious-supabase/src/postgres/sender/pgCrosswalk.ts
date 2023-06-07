@@ -1,4 +1,4 @@
-import type { AnnotationBody, AnnotationTarget, User } from '@annotorious/core';
+import { Annotation, AnnotationBody, AnnotationTarget, User, Visibility } from '@annotorious/core';
 import type { AnnotationRecord, BodyRecord, ProfileRecord, TargetRecord } from '../Types';
 
 export const parseProfileRecord = (p: ProfileRecord | undefined): User => p ? ({
@@ -29,7 +29,7 @@ export const parseTargetRecord = (target: TargetRecord): AnnotationTarget => ({
   version: target.version
 });
 
-export const parseAnnotationRecord = (record: AnnotationRecord) => {
+export const parseAnnotationRecord = (record: AnnotationRecord): Annotation => {
   // Fatal integrity issue
   if (record.targets.length === 0)
     throw { message: 'Invalid annotation: target missing', record };
@@ -43,6 +43,7 @@ export const parseAnnotationRecord = (record: AnnotationRecord) => {
   return {
     id: record.id,
     target: parseTargetRecord(record.targets[0]),
-    bodies
+    bodies,
+    visibility: record.is_private && Visibility.PRIVATE 
   };
 }

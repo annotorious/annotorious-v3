@@ -33,6 +33,7 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       .from('annotations')
       .select(`
         id,
+        is_private,
         targets ( 
           annotation_id,
           created_at,
@@ -72,13 +73,14 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       `)
       .eq('layer_id', layerId);
 
-  const createAnnotation = (a: Annotation, layer_id: string) => {
+  const createAnnotation = (a: Annotation, layer_id: string, is_private: boolean) => {
     console.log('[PG] Creating annotation');
 
     const versioned = {
       ...a.target,
       version: 1,
-      layer_id
+      layer_id,
+      is_private
     };
 
     store.updateTarget(versioned, Origin.REMOTE);
