@@ -60,8 +60,9 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
   ]);
 
   useEffect(() => {
-    plugin.privacyMode = props.privacyMode;
-  }, [props.privacyMode])
+    if (plugin)
+      plugin.privacyMode = props.privacyMode;
+  }, [props.privacyMode, plugin])
 
   return null;
 
