@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Annotation, PresentUser } from '@annotorious/core';
 import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotorious/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { useAnnotator } from 'src/Annotorious';
 
 export interface SupabasePluginProps extends SupabasePluginConfig {
+
+  privacyMode?: boolean
 
   onInitialLoad?(annotations: Annotation[]): void;
 
@@ -24,8 +26,12 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
 
   const anno = useAnnotator();
 
+  const [plugin, setPlugin] = useState<ReturnType<typeof Supabase>>(null);
+
   useEffect(() => {
     if (anno) {
+      console.log('Running Supabase plugin setup effect');
+
       const supabase = Supabase(anno, props);
       
       supabase.connect();
@@ -37,9 +43,25 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
       supabase.on('saveError', error => props.onSaveError && props.onSaveError(error));
       supabase.on('selectionChange', user => props.onSelectionChange && props.onSelectionChange(user));
 
-      return () => supabase.destroy();
+      setPlugin(supabase);
+
+      return () => {
+        supabase.destroy();
+      }
     }
-  }, [anno, props.onPresence]);
+  }, [
+    anno, 
+    props.onInitialLoad,
+    props.onInitialLoadError,
+    props.onIntegrityError,
+    props.onPresence,
+    props.onSaveError,
+    props.onSelectionChange
+  ]);
+
+  useEffect(() => {
+    plugin.privacyMode = props.privacyMode;
+  }, [props.privacyMode])
 
   return null;
 
