@@ -108,7 +108,7 @@ export const createImageStore = (opts: AnnotoriousOptions) => {
 
   const lifecycle = createLifecyleObserver(selection, store);
 
-  store.observe(( { changes }) => {
+  store.observe(({ changes }) => {
     tree.set(changes.created.map(a => a.target as ImageAnnotationTarget), false);
     
     changes.deleted.forEach(a => tree.remove(a.target as ImageAnnotationTarget));

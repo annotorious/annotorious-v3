@@ -134,7 +134,13 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
     auth: supabase.auth,
     connect,
     destroy,
-    on
+    on,
+    get privacyMode() {
+      return broadcast.privacyMode;
+    },
+    set privacyMode(mode: boolean) {
+      broadcast.privacyMode = mode;
+    }
   }
 
 }

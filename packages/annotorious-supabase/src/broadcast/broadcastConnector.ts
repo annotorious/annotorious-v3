@@ -7,9 +7,15 @@ import type { BroadcastMessage } from './Types';
 
 export const BroadcastConnector = (anno: Annotator<Annotation>, presence: ReturnType<typeof PresenceConnector>) => {
 
+  let privacyMode = false;
+
   let observer: (event: StoreChangeEvent<Annotation>) => void  = null;
 
   const onStoreChange = (channel: RealtimeChannel) => ((event: StoreChangeEvent<Annotation>) =>  {
+    // Don't broadcast when in private mode
+    if (privacyMode)
+      return;
+
     const message: BroadcastMessage = {
       from: { presenceKey: PRESENCE_KEY, ...anno.getUser() },
       events: marshal([ event ], anno.store)
@@ -51,7 +57,13 @@ export const BroadcastConnector = (anno: Annotator<Annotation>, presence: Return
 
   return {
     connect,
-    destroy: () => observer && anno.store.unobserve(observer)
+    destroy: () => observer && anno.store.unobserve(observer),
+    get privacyMode() {
+      return privacyMode;
+    },
+    set privacyMode(mode: boolean) {
+      privacyMode = mode;
+    }
   }
 
 }

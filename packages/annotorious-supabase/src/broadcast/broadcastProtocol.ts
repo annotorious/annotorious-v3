@@ -1,4 +1,4 @@
-import { Origin, Visibility } from '@annotorious/core';
+import { Origin } from '@annotorious/core';
 import type { Annotation, Store, StoreChangeEvent } from '@annotorious/core';
 import { BroadcastEventType } from './Types';
 import type { BroadcastEvent, CreateAnnotationEvent } from './Types';
@@ -26,19 +26,9 @@ export const affectedAnnotations = (events: BroadcastEvent[]) => {
   return Array.from(new Set(affectedAnnotations));
 }
 
-// Shorthand
-const excludePrivate = (annotations?: Annotation[]): Annotation[] =>
-  (annotations || []).filter(a => a.visibility !== Visibility.PRIVATE);
-
 export const marshal = (storeEvents: StoreChangeEvent<Annotation>[], store: Store<Annotation>): BroadcastEvent[] =>
   storeEvents.reduce((all, storeEvent) => {
-    const { changes } = storeEvent;
-
-    const created = excludePrivate(changes.created);
-    const deleted = excludePrivate(changes.deleted);
-
-    const updated = (changes.updated || [])
-      .filter(update => update.newValue.visibility !== Visibility.PRIVATE)
+    const { created, deleted, updated } = storeEvent.changes;
 
     const createAnnotationEvents: BroadcastEvent[] = created.map(annotation => ({
       type: BroadcastEventType.CREATE_ANNOTATION, 

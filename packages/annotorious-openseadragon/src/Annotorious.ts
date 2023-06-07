@@ -2,7 +2,7 @@ import type OpenSeadragon from 'openseadragon';
 import type { SvelteComponent } from 'svelte';
 import { createImageStore, fillDefaults, listTools, getTool, type ImageAnnotation } from '@annotorious/annotorious';
 import type { AnnotoriousOptions } from '@annotorious/annotorious';
-import { createAnonymousGuest, createLifecyleObserver, Origin, type Annotator, type PresenceProvider, type User } from '@annotorious/core';
+import { createAnonymousGuest, Origin, type Annotator, type PresenceProvider, type User } from '@annotorious/core';
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer, SVGPresenceLayer } from './svg';
