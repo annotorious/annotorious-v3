@@ -6,8 +6,8 @@ export * from './plugins';
 export * from './Annotorious';
 export * from './AnnotoriousPopup';
 
-// Re-export useful utility functions for convenience
-export { defaultColorProvider } from '@annotorious/core';
+// Re-export useful utilities for convenience
+export { defaultColorProvider, Visibility } from '@annotorious/core';
 
 // Re-export essential Types for convenience
 export type { 
