@@ -3,13 +3,11 @@ import type { Update } from '../state';
 import type { Annotation } from '../model';
 
 const getAddedBodies = (oldValue: Annotation, newValue: Annotation) => {
-  console.log('added bodies', oldValue, newValue);
   const oldBodyIds = new Set(oldValue.bodies.map(b => b.id));
   return newValue.bodies.filter(b => !oldBodyIds.has(b.id));
 }
 
 const getRemovedBodies = (oldValue: Annotation, newValue: Annotation) => {
-  console.log('removed bodies', oldValue, newValue);
   const newBodyIds = new Set(newValue.bodies.map(b => b.id));
   return oldValue.bodies.filter(b => !newBodyIds.has(b.id));
 }
