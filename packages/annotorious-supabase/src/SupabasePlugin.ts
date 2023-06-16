@@ -1,5 +1,5 @@
 import { createNanoEvents } from 'nanoevents';
-import { PRESENCE_KEY } from '@annotorious/core';
+import { PRESENCE_KEY, User } from '@annotorious/core';
 import type { Annotation, Annotator } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
@@ -53,7 +53,7 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
   }
 
   // Will check if user is logged in, and fail otherwise
-  const connect = () => new Promise((resolve, reject) => {
+  const connect = () => new Promise<User>((resolve, reject) => {
     if (channel)
       reject('Connection already established');
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Annotation, PresentUser } from '@annotorious/core';
+import { Annotation, PresentUser, User } from '@annotorious/core';
 import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotorious/supabase';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { useAnnotator } from 'src/Annotorious';
@@ -7,6 +7,10 @@ import { useAnnotator } from 'src/Annotorious';
 export interface SupabasePluginProps extends SupabasePluginConfig {
 
   privacyMode?: boolean
+
+  onConnected?(user: User): void;
+
+  onConnectError?(error: string): void;
 
   onInitialLoad?(annotations: Annotation[]): void;
 
@@ -32,7 +36,10 @@ export const SupabasePlugin = (props: SupabasePluginProps) => {
     if (anno) {
       const supabase = Supabase(anno, props);
       
-      supabase.connect();
+      supabase
+        .connect()
+        .then(user => props.onConnected && props.onConnected(user))
+        .catch(error => props.onConnectError && props.onConnectError(error));
 
       supabase.on('initialLoad', annotations => props.onInitialLoad && props.onInitialLoad(annotations));
       supabase.on('initialLoadError', error => props.onInitialLoadError && props.onInitialLoadError(error));
