@@ -121,7 +121,7 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
     .in('id', b.map(body => body.id));
 
   const updateVisibility = (a: Annotation) => supabase
-    .from('bodies')
+    .from('annotations')
     .update({
       is_private: a.visibility === Visibility.PRIVATE
     })
