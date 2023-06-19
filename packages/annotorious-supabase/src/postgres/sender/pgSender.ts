@@ -35,11 +35,23 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
 
   const onUpdateAnnotation = (a: Annotation, previous: Annotation) => {
     const { 
+      oldValue,
+      newValue,
       bodiesCreated, 
       bodiesDeleted, 
       bodiesUpdated, 
       targetUpdated 
     } = diffAnnotations(previous, a);
+
+    // Check if annotation visibility has changed
+    const oldVisibility = oldValue.visibility;
+    const newVisibility = newValue.visibility;
+
+    if (oldVisibility !== newVisibility)
+      ops.updateVisibility(newValue).then(({ error }) => {
+        if (error)
+          emitter.emit('saveError', error);
+      });
 
     if ((bodiesCreated.length + bodiesUpdated.length) > 0)
       ops.upsertBodies([

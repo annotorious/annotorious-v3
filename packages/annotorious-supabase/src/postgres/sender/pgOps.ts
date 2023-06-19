@@ -95,11 +95,60 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
         created_by: anno.getUser().id,
         layer_id,
         is_private
-      })
-      .select()
-      .single();
+      });
   }
 
+  const createTarget = (t: AnnotationTarget, layer_id: string) => supabase
+    .from('targets')
+    .insert({
+      created_at: t.created,
+      created_by: anno.getUser().id,
+      updated_at: t.created,
+      updated_by: anno.getUser().id,
+      annotation_id: t.annotation,
+      value: JSON.stringify(t.selector),
+      layer_id
+    });
+
+  const deleteAnnotation = (a: Annotation) => supabase
+    .from('annotations')
+    .delete()
+    .eq('id', a.id);
+  
+  const deleteBodies = (b: AnnotationBody[]) => supabase
+    .from('bodies')
+    .delete()
+    .in('id', b.map(body => body.id));
+
+  const updateVisibility = (a: Annotation) => supabase
+    .from('bodies')
+    .update({
+      is_private: a.visibility === Visibility.PRIVATE
+    })
+    .eq('id', a.id);
+
+  const updateTarget = (t: AnnotationTarget, retries = 3) => {
+    console.log('[PG] Updating target');
+
+    // Increment target version number
+    const versioned = {
+      ...t,
+      version: t.version ? t.version + 1 : 1
+    };
+
+    store.updateTarget(versioned, Origin.REMOTE);
+    
+    return withRetry(() => supabase
+      .from('targets')
+      .update({
+        updated_at: versioned.updated,
+        updated_by: anno.getUser().id,
+        value: JSON.stringify(versioned.selector)
+      })
+      .eq('annotation_id', versioned.annotation)
+      .select());
+  }
+  
   const upsertBodies = (bodies: AnnotationBody[], layer_id: string) => {
     // Increment body version numbers
     const versioned = bodies.map(b => ({
@@ -124,52 +173,6 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       })));
   }
 
-  const createTarget = (t: AnnotationTarget, layer_id: string) => supabase
-    .from('targets')
-    .insert({
-      created_at: t.created,
-      created_by: anno.getUser().id,
-      updated_at: t.created,
-      updated_by: anno.getUser().id,
-      annotation_id: t.annotation,
-      value: JSON.stringify(t.selector),
-      layer_id
-    })
-    .select()
-    .single();
-
-  const deleteAnnotation = (a: Annotation) => supabase
-    .from('annotations')
-    .delete()
-    .eq('id', a.id);
-  
-  const deleteBodies = (b: AnnotationBody[]) => supabase
-    .from('bodies')
-    .delete()
-    .in('id', b.map(body => body.id));
-
-  const updateTarget = (t: AnnotationTarget, retries = 3) => {
-    console.log('[PG] Updating target');
-
-    // Increment target version number
-    const versioned = {
-      ...t,
-      version: t.version ? t.version + 1 : 1
-    };
-
-    store.updateTarget(versioned, Origin.REMOTE);
-    
-    return withRetry(() => supabase
-      .from('targets')
-      .update({
-        updated_at: versioned.updated,
-        updated_by: anno.getUser().id,
-        value: JSON.stringify(versioned.selector)
-      })
-      .eq('annotation_id', versioned.annotation)
-      .select());
-  }
-
   return {
     createAnnotation,
     createTarget,
@@ -177,6 +180,7 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
     deleteBodies,
     initialLoad,
     updateTarget,
+    updateVisibility,
     upsertBodies
   }
 
