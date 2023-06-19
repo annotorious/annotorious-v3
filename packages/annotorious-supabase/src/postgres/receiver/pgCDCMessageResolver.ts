@@ -6,9 +6,11 @@ const findUser = (id: string, presentUsers: PresentUser[], annotation?: Annotati
     return;
 
   // Check if this user is already in this annotation
-  const collaborator = getCollaborators(annotation).find(u => u.id === id);
-  if (collaborator)
-    return collaborator;
+  if (annotation) {
+    const collaborator = getCollaborators(annotation).find(u => u.id === id);
+    if (collaborator)
+      return collaborator;
+  }
 
   // Last resort: check if this user is present
   return presentUsers.find(user => user.id === id);

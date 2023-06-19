@@ -31,10 +31,16 @@
       ...trackedAnnotations
         .filter(({ selectedBy }) => selectedBy.presenceKey !== p.presenceKey),
       ...(selection || []).map(id => ({ 
+          // Warning - could be undefined!
           annotation: store.getAnnotation(id),
           selectedBy: p
         }))
-    ];
+    ].filter(({ annotation }) => {
+      if (!annotation)
+        console.warn('Selection event on unknown annotation');
+
+      return Boolean(annotation);
+    });
     
     // Track selection state in the store
     if (storeObserver)
