@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/supabase",
-  "version": "3.0.0-pre-alpha-16",
+  "version": "3.0.0-pre-alpha-17",
   "description": "Experimental rewrite of Annotorious",
   "type": "module",
   "main": "dist/annotorious-supabase.js",
