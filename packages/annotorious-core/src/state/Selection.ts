@@ -12,20 +12,22 @@ export type Selection = {
 
 }
 
+const EMPTY = { selected: [] };
+
 export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
 
-  const { subscribe, set } = writable<Selection>(null);
+  const { subscribe, set } = writable<Selection>(EMPTY);
 
-  let currentSelection: Selection = { selected: [] };
+  let currentSelection: Selection = EMPTY;
 
   subscribe(updated => currentSelection = updated);
 
-  const clear = () => set(null);
+  const clear = () => set(EMPTY);
 
-  const isEmpty = () => !currentSelection || currentSelection.selected.length === 0;
+  const isEmpty = () => currentSelection.selected?.length === 0;
 
   const isSelected = (annotationOrId: T | string) => {
-    if (!currentSelection)
+    if (currentSelection.selected.length === 0)
       return false;
 
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
@@ -42,8 +44,8 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
   }
 
   const removeFromSelection = (ids: string[]) => {
-    if (!currentSelection)
-      return;
+    if (currentSelection.selected.length === 0)
+      return false;
 
     const { selected } = currentSelection;
 
