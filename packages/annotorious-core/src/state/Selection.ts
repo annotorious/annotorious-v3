@@ -4,7 +4,7 @@ import type { Store } from './Store';
    
 export type SelectionState<T extends Annotation> = ReturnType<typeof createSelectionState<T>>;
 
-export type SelectionFoo = {
+export type Selection = {
 
   selected: string[],
 
@@ -14,9 +14,9 @@ export type SelectionFoo = {
 
 export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
 
-  const { subscribe, set } = writable<SelectionFoo>(null);
+  const { subscribe, set } = writable<Selection>(null);
 
-  let currentSelection: SelectionFoo = null;
+  let currentSelection: Selection = { selected: [] };
 
   subscribe(updated => currentSelection = updated);
 
