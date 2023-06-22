@@ -9,6 +9,13 @@
     "dist",
     "src"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/core.js",
+      "require": "./dist/core.umd.js"
+    }
+  },
+  "module": "./dist/core.js",
   "scripts": {
     "build": "vite build",
     "test": "vitest",
