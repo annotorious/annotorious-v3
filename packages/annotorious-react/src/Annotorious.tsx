@@ -68,12 +68,11 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
         selectionStoreObserver = event => {
           const { updated } = event.changes;
 
-          setSelection(({ selected, pointerEvent }) => ({
+          setSelection(({ selected }) => ({
             selected: selected.map(a => {
               const next = updated.find(u => u.oldValue.id === a.id);
               return next ? next.newValue : a;
-            }),
-            pointerEvent
+            })
           }));
         }
 
