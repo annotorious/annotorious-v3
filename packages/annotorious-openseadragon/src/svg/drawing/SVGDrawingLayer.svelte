@@ -29,12 +29,12 @@
   $: tool ? viewer.setMouseNavEnabled(false) : viewer.setMouseNavEnabled(true); 
 
   // Clear selection when new tool activates
-  $: tool && selection.clear();
+  $: tool && store.selection.clear();
 
   // If there's no selection and keepEnabled is on, disable mouse nav
-  $: if (!$selection && keepEnabled && tool) { viewer.setMouseNavEnabled(false) }
+  $: if ($selection.selected.length === 0 && keepEnabled && tool) { viewer.setMouseNavEnabled(false) }
   
-  $: trackSelection($selection);
+  $: trackSelection($selection.selected);
 
   const trackSelection = (ids: string[] | null) => {
     store.unobserve(storeObserver);
@@ -49,7 +49,7 @@
         selectedAnnotations = updated.map(change => change.newValue);
       }   
       
-      store.observe(storeObserver, { annotations: $selection });
+      store.observe(storeObserver, { annotations: ids });
     } else {
       selectedAnnotations = null;
     }
