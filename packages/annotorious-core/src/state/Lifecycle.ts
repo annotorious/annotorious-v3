@@ -24,7 +24,7 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
 
   // The currently selected annotations, in the state 
   // when they were selected 
-  let initialSelection: T[] = null;
+  let initialSelection: T[] = [];
 
   const on = <E extends keyof LifecycleEvents<T>>(event: E, callback: LifecycleEvents<T>[E]) => {
     if (observers.has(event)) {
@@ -46,13 +46,13 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
   }
 
   selectionState.subscribe(({ selected })=> {
-    if (!initialSelection && !selected)
+    if (initialSelection.length === 0 && selected.length === 0)
       return;
 
-    if (initialSelection === null && selected) {
+    if (initialSelection.length === 0 && selected.length > 0) {
       // A new selection was made - store as initial state
       initialSelection = selected.map(id => store.getAnnotation(id));
-    } else if (initialSelection && selected === null) {
+    } else if (initialSelection.length > 0 && selected.length === 0) {
       // Deselect!
       initialSelection.forEach(initial => {
         const updatedState = store.getAnnotation(initial.id);  
@@ -62,7 +62,7 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
         }
       });
 
-      initialSelection = null;
+      initialSelection = [];
     } else {
       // Changed selection
       const initialIds = new Set(initialSelection.map(a => a.id));
