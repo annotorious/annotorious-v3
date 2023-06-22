@@ -4,7 +4,7 @@ import { useDraggable } from '@neodrag/react';
 
 export interface AnnotoriousPopupProps {
 
-  selection: ImageAnnotation[];
+  selected: ImageAnnotation[];
 
 }
 

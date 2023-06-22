@@ -23,7 +23,7 @@ export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
 
   const viewer = useViewer();
 
-  const selection = useSelection<ImageAnnotation>();
+  const { selected } = useSelection<ImageAnnotation>();
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -33,7 +33,7 @@ export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
 
   const updatePosition = () => {
     // Note: this popup only supports a single selection
-    const annotation = selection[0];
+    const annotation = selected[0];
 
     const { minX, minY, maxX, maxY } = annotation.target.selector.geometry.bounds;
 
@@ -51,13 +51,13 @@ export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
 
   useEffect(() => {
     // Reset drag flag if selected IDs have changed
-    const nextIds = selection.map(a => a.id);
+    const nextIds = selected.map(a => a.id);
 
     if (!equal(selectedIds, nextIds)) {
       setDragged(false);
       setSelectedIds(nextIds);
     }
-  }, [selection]);
+  }, [selected]);
 
   useEffect(() => {
     if (!el.current) return;
@@ -73,11 +73,11 @@ export const OpenSeadragonPopup = (props: OpenSeadragonPopupContainerProps) => {
     return () => {
       viewer.removeHandler('update-viewport', onUpdateViewport);
     }
-  }, [selection, dragged]);
+  }, [selected, dragged]);
   
-  return selection.length > 0 ? (
-    <Draggable ref={el} key={selection.map(a => a.id).join('-')} className="a9s-popup a9s-osd-popup" onDragStart={onDragStart}>
-      {props.popup({ viewer, selection})}
+  return selected.length > 0 ? (
+    <Draggable ref={el} key={selected.map(a => a.id).join('-')} className="a9s-popup a9s-osd-popup" onDragStart={onDragStart}>
+      {props.popup({ viewer, selected })}
     </Draggable>
   ) : null;
 
