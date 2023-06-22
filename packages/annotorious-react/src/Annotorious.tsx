@@ -3,6 +3,14 @@ import { useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { ImageAnnotation } from '@annotorious/annotorious';
 import { Annotation, Annotator, Store, StoreChangeEvent } from '@annotorious/core';
 
+interface Selection<T extends Annotation = Annotation> {
+
+  selected: T[];
+
+  pointerEvent?: PointerEvent;
+
+}
+
 export interface AnnotoriousContextState {
 
   anno: Annotator;
@@ -11,7 +19,7 @@ export interface AnnotoriousContextState {
 
   annotations: Annotation[];
 
-  selection: Annotation[];
+  selection: Selection;
 
 }
 
@@ -23,7 +31,7 @@ export const AnnotoriousContext = createContext<AnnotoriousContextState>({
 
   annotations: [], 
 
-  selection: [] 
+  selection: { selected: [] }
 
 });
 
@@ -33,46 +41,47 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
-  const [selection, setSelection] = useState<Annotation[]>([]);
+  const [selection, setSelection] = useState<Selection>({ selected: [] });
 
   useImperativeHandle(ref, () => anno);
 
   useEffect(() => {
     if (anno) {
-      const { store, selection } = anno;
-
       // Keeps annotations in sync with a React state,
       // so clients can render components the usual React way.
       const onStoreChange = (event: StoreChangeEvent<ImageAnnotation>) =>
         setAnnotations(event.state);
 
-      store.observe(onStoreChange);
+      anno.store.observe(onStoreChange);
 
       // Keep selection in sync with a react state, and resolve them
       // from IDs to annotations automatically, for convenience
       let selectionStoreObserver: (event: StoreChangeEvent<ImageAnnotation>) => void;
 
-      const unsubscribeSelection = selection.subscribe(({ selected }) => {
+      const unsubscribeSelection = anno.selection.subscribe(({ selected, pointerEvent }) => {
         if (selectionStoreObserver) 
-          store.unobserve(selectionStoreObserver);
+          anno.store.unobserve(selectionStoreObserver);
 
-        const annotations = (selected || []).map(id => store.getAnnotation(id));
-        setSelection(annotations);
+        const annotations = (selected || []).map(id => anno.store.getAnnotation(id));
+        setSelection({ selected: annotations, pointerEvent });
 
         selectionStoreObserver = event => {
           const { updated } = event.changes;
 
-          setSelection(selection => selection.map(a => {
-            const next = updated.find(u => u.oldValue.id === a.id);
-            return next ? next.newValue : a;
+          setSelection(({ selected, pointerEvent }) => ({
+            selected: selected.map(a => {
+              const next = updated.find(u => u.oldValue.id === a.id);
+              return next ? next.newValue : a;
+            }),
+            pointerEvent
           }));
         }
 
-        store.observe(selectionStoreObserver, { annotations: selected });
+        anno.store.observe(selectionStoreObserver, { annotations: selected });
       });
 
       return () => {
-        store.unobserve(onStoreChange);
+        anno.store.unobserve(onStoreChange);
         unsubscribeSelection();
       }
     }
@@ -103,7 +112,7 @@ export const useAnnotations = <T extends Annotation>() => {
 
 export const useSelection = <T extends Annotation>() => {
   const { selection } = useContext(AnnotoriousContext);
-  return selection as T[];
+  return selection as Selection<T>;
 }
 
 export const useAnnotatorUser = () => {
