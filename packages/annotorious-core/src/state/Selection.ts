@@ -2,46 +2,56 @@ import { writable } from 'svelte/store';
 import type { Annotation } from '../model';
 import type { Store } from './Store';
    
-export type Selection<T extends Annotation> = ReturnType<typeof createSelectionState<T>>;
+export type SelectionState<T extends Annotation> = ReturnType<typeof createSelectionState<T>>;
+
+export type SelectionFoo = {
+
+  selected: string[],
+
+  pointerEvent?: PointerEvent;
+
+}
 
 export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
 
-  const { subscribe, set } = writable<string[]>(null);
+  const { subscribe, set } = writable<SelectionFoo>(null);
 
-  let currentSelection: string[] = null;
+  let currentSelection: SelectionFoo = null;
 
   subscribe(updated => currentSelection = updated);
 
   const clear = () => set(null);
 
-  const isEmpty = () => !currentSelection || currentSelection.length === 0;
+  const isEmpty = () => !currentSelection || currentSelection.selected.length === 0;
 
   const isSelected = (annotationOrId: T | string) => {
     if (!currentSelection)
       return false;
 
     const id = typeof annotationOrId === 'string' ? annotationOrId : annotationOrId.id;
-    return currentSelection.some(i => i === id);
+    return currentSelection.selected.some(i => i === id);
   }
 
-  const clickSelect = (evt: PointerEvent, id: string) => {
-    set([id]); // TODO allow CTRL select
+  const clickSelect = (id: string, pointerEvent: PointerEvent) => {
+    set({ selected: [id], pointerEvent }); // TODO allow CTRL select
   }
 
   const setSelected = (idOrIds: string | string[]) => {
     const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-    set(ids); 
+    set({ selected: ids }); 
   }
 
   const removeFromSelection = (ids: string[]) => {
     if (!currentSelection)
       return;
 
+    const { selected } = currentSelection;
+
     // Checks which of the given annotations are actually in the selection
-    const toRemove = currentSelection.filter(id => ids.includes(id))
+    const toRemove = selected.filter(id => ids.includes(id))
 
     if (toRemove.length > 0)
-      set(currentSelection.filter(id => !ids.includes(id)))
+      set({ selected: selected.filter(id => !ids.includes(id)) });
   }
 
   // Track store delete and update events
@@ -51,7 +61,8 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
   return { 
     clear, 
     clickSelect, 
-    get current() { return currentSelection ? [...currentSelection] : null},
+    get selected() { return currentSelection ? [...currentSelection.selected ] : null},
+    get pointerEvent() { return currentSelection ? currentSelection.pointerEvent : null },
     isEmpty, 
     isSelected, 
     setSelected, 

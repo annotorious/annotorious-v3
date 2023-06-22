@@ -11,7 +11,7 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/core.js",
+      "import": "./src/index.ts",
       "require": "./dist/core.umd.js"
     }
   },

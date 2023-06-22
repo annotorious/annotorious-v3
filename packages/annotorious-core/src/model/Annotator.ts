@@ -1,7 +1,7 @@
 import type { Annotation } from './Annotation';
 import type { User } from './User';
 import type { PresenceProvider } from '../presence';
-import type { LifecycleEvents, Selection, Store } from '../state';
+import type { LifecycleEvents, SelectionState, Store } from '../state';
 
 export interface Annotator<T extends Annotation = Annotation> {
 
@@ -17,6 +17,6 @@ export interface Annotator<T extends Annotation = Annotation> {
 
   store: Store<T>;
 
-  selection: Selection<T>;
+  selection: SelectionState<T>;
 
 }

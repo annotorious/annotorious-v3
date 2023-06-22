@@ -2,7 +2,7 @@ import equal from 'deep-equal';
 import type { Annotation } from '../model';
 import type { Store } from './Store';
 import { Origin } from './StoreObserver';
-import type { Selection } from './Selection';
+import type { SelectionState } from './Selection';
 
 export type Lifecycle<T extends Annotation> = ReturnType<typeof createLifecyleObserver<T>>;
 
@@ -18,7 +18,7 @@ export interface LifecycleEvents<T extends Annotation> {
 
 }
 
-export const createLifecyleObserver = <T extends Annotation>(selectionState: Selection<T>, store: Store<T> ) => {
+export const createLifecyleObserver = <T extends Annotation>(selectionState: SelectionState<T>, store: Store<T> ) => {
 
   const observers = new Map<string, LifecycleEvents<T>[keyof LifecycleEvents<T>][]>();
 
@@ -45,7 +45,7 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
       observers.get(event).forEach(callback => callback(arg0 as T & T[], arg1));
   }
 
-  selectionState.subscribe(selected => {
+  selectionState.subscribe(({ selected })=> {
     if (!initialSelection && !selected)
       return;
 

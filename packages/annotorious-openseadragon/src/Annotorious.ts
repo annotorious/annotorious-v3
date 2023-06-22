@@ -39,7 +39,7 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   displayLayer.$on('click', (evt: CustomEvent<PixiLayerClickEvent>) => {
     const { originalEvent, annotation } = evt.detail;
     if (annotation)
-      store.selection.clickSelect(originalEvent, annotation.id);
+      store.selection.clickSelect(annotation.id, originalEvent);
     else if (!store.selection.isEmpty())
       store.selection.clear();
   });

@@ -5,8 +5,8 @@ export const initKeyCommands = (container: HTMLElement, store: ImageAnnotationSt
   const { selection } = store;
 
   const onDeleteSelection = () => {
-    if (selection.current) {
-      store.bulkDeleteAnnotation(selection.current);
+    if (selection.selected) {
+      store.bulkDeleteAnnotation(selection.selected);
     }
   }
 

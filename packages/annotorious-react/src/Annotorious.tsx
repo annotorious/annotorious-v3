@@ -52,11 +52,11 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
       // from IDs to annotations automatically, for convenience
       let selectionStoreObserver: (event: StoreChangeEvent<ImageAnnotation>) => void;
 
-      const unsubscribeSelection = selection.subscribe((selection: string[]) => {
+      const unsubscribeSelection = selection.subscribe(({ selected }) => {
         if (selectionStoreObserver) 
           store.unobserve(selectionStoreObserver);
 
-        const annotations = (selection || []).map(id => store.getAnnotation(id));
+        const annotations = (selected || []).map(id => store.getAnnotation(id));
         setSelection(annotations);
 
         selectionStoreObserver = event => {
@@ -68,7 +68,7 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
           }));
         }
 
-        store.observe(selectionStoreObserver, { annotations: selection });
+        store.observe(selectionStoreObserver, { annotations: selected });
       });
 
       return () => {
