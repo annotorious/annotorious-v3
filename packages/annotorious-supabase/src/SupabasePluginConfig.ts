@@ -1,17 +1,17 @@
 import type { AppearanceProvider } from "@annotorious/core/dist/presence/AppearanceProvider";
 
-export interface SupabasePluginConfig {
+export type SupabasePluginConfig = {
 
-  apiKey: string;
+  apiKey: string,
   
-  base: string;
+  base: string,
 
-  channel: string;
+  channel: string,
 
-  layerId: string;
+  layerId: string,
 
-  eventsPerSecond?: number;
+  eventsPerSecond?: number,
 
-  appearanceProvider?: AppearanceProvider;
+  appearanceProvider?: AppearanceProvider
   
 }

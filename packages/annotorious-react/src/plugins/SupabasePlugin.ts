@@ -4,25 +4,25 @@ import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotori
 import type { PostgrestError } from '@supabase/supabase-js';
 import { useAnnotator } from 'src/Annotorious';
 
-export interface SupabasePluginProps extends SupabasePluginConfig {
+export type SupabasePluginProps = SupabasePluginConfig & {
 
-  privacyMode?: boolean
+  privacyMode?: boolean,
 
-  onConnected?(user: User): void;
+  onConnected?(user: User): void,
 
-  onConnectError?(error: string): void;
+  onConnectError?(error: string): void,
 
-  onInitialLoad?(annotations: Annotation[]): void;
+  onInitialLoad?(annotations: Annotation[]): void,
 
-  onInitialLoadError?(error: PostgrestError): void;
+  onInitialLoadError?(error: PostgrestError): void,
 
-  onIntegrityError?(message: string): void;
+  onIntegrityError?(message: string): void,
 
-  onPresence?(users: PresentUser[]): void;
+  onPresence?(users: PresentUser[]): void,
 
-  onSaveError?(error: PostgrestError): void;
+  onSaveError?(error: PostgrestError): void,
 
-  onSelectionChange?(user: PresentUser): void;
+  onSelectionChange?(user: PresentUser): void
 
 }
 
