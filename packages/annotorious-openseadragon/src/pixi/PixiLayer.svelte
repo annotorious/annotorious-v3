@@ -5,6 +5,8 @@
   import type { PixiLayerClickEvent } from './PixiLayerClickEvent';
   import { createStage } from './stageRenderer';
 
+  import './PixiLayer.css';
+
   export let store: ImageAnnotationStore;
 
   export let viewer: OpenSeadragon.Viewer;
@@ -113,18 +115,3 @@
     stage.redraw();
   });
 </script>
-
-<style>
-  :global(canvas.a9s-gl-canvas) {
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
-
-  :global(canvas.a9s-gl-canvas.hover) {
-    cursor: pointer !important;
-  }
-</style>
-

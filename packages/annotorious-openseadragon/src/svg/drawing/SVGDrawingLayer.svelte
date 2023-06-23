@@ -29,17 +29,17 @@
   $: tool ? viewer.setMouseNavEnabled(false) : viewer.setMouseNavEnabled(true); 
 
   // Clear selection when new tool activates
-  $: tool && store.selection.clear();
+  $: tool && selection.clear();
 
   // If there's no selection and keepEnabled is on, disable mouse nav
   $: if ($selection.selected.length === 0 && keepEnabled && tool) { viewer.setMouseNavEnabled(false) }
   
   $: trackSelection($selection.selected);
 
-  const trackSelection = (ids: string[] | null) => {
+  const trackSelection = (ids: string[]) => {
     store.unobserve(storeObserver);
 
-    if (ids) {
+    if (ids.length > 0) {
       // Resolve selected IDs from the store
       selectedAnnotations = ids.map(id => store.getAnnotation(id));
 
