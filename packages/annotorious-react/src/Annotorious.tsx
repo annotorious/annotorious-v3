@@ -94,9 +94,9 @@ export const Annotorious = forwardRef((props: { children: ReactNode }, ref) => {
 
 });
 
-export const useAnnotator = <T extends Annotation>() => {
+export const useAnnotator = <T extends Annotator>() => {
   const { anno } = useContext(AnnotoriousContext);
-  return anno as Annotator<T>;
+  return anno as T;
 }
 
 export const useAnnotationStore = <T extends Store<Annotation>>() => {
