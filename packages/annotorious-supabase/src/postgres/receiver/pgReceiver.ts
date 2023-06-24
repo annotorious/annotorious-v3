@@ -41,7 +41,7 @@ export const createReceiver = (anno: Annotator, layerId: string, channel: Realti
       const existingBody = annotation.bodies.find(b => b.id === id);
 
       if (existingBody) {
-        if (existingBody.version <= version) {
+        if (existingBody.version < version) {
           store.updateBody(existingBody, resolveBodyChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
         }
       } else {
@@ -75,11 +75,7 @@ export const createReceiver = (anno: Annotator, layerId: string, channel: Realti
 
     const annotation = store.getAnnotation(annotation_id);
 
-    if (annotation) {
-      // if (annotation.target.version <= version) {
-      //   store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
-      // }
-    } else {
+    if (!annotation) {
       store.addAnnotation({
         id: annotation_id,
         bodies: [],
@@ -101,7 +97,7 @@ export const createReceiver = (anno: Annotator, layerId: string, channel: Realti
     const annotation = store.getAnnotation(annotation_id);
     
     if (annotation) {
-      if (annotation.target.version <= version) {
+      if (annotation.target.version < version) {
         console.log('[PGCDC] Overriding target');
         store.updateTarget(resolveTargetChange(event, presence.getPresentUsers(), annotation), Origin.REMOTE);
       }
