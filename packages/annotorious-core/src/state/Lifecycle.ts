@@ -101,7 +101,16 @@ export const createLifecyleObserver = <T extends Annotation>(selectionState: Sel
       ...(u.bodiesUpdated || [])
     ].length > 0);
 
-    updatesWithBody.forEach(({ oldValue, newValue }) => emit('updateAnnotation', newValue, oldValue));
+    // Emit an update with the new annototation and the stored initial state
+    updatesWithBody.forEach(({ oldValue, newValue }) => {
+      const initial = initialSelection.find(a => a.id === oldValue.id) || oldValue;
+
+      // Record the update as the new last known state
+      initialSelection = initialSelection
+        .map(a => a.id === oldValue.id ? newValue : a);
+
+      emit('updateAnnotation', newValue, initial);
+    });
   }, { origin: Origin.LOCAL });
 
   // Track remote changes - these should update the initial state
