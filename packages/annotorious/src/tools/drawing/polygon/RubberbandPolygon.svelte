@@ -61,17 +61,35 @@
     }
   }
 
+  const onDblClick = () => {
+    const p = [...points, cursor];
+    const shape: Polygon = {
+        type: ShapeType.POLYGON, 
+        geometry: {
+          bounds: boundsFromPoints(p),
+          points: p
+        }
+      }
+
+      points = [];
+      cursor = null;
+    
+      dispatch('create', shape);
+  }
+
   onMount(() => {
     const svg = container.closest('svg');
 
     svg.addEventListener('pointerdown', onPointerDown);
     svg.addEventListener('pointermove', onPointerMove);
     svg.addEventListener('pointerup', onPointerUp);
+    svg.addEventListener('dblclick', onDblClick);
 
     return () => {
       svg.removeEventListener('pointerdown', onPointerDown);
       svg.removeEventListener('pointermove', onPointerMove);
       svg.removeEventListener('pointerup', onPointerUp);
+      svg.addEventListener('dblclick', onDblClick);
     }
   });
 </script>
