@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/svelte",
-  "version": "3.0.0-pre-alpha-23",
+  "version": "3.0.0-pre-alpha-24",
   "description": "Experimental rewrite of Annotorious",
   "author": "Rainer Simon",
   "license": "BSD-3-Clause",
