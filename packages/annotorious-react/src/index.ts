@@ -7,7 +7,11 @@ export * from './Annotorious';
 export * from './AnnotoriousPopup';
 
 // Re-export useful utilities for convenience
-export { defaultColorProvider, Visibility } from '@annotorious/core';
+export { 
+  defaultColorProvider, 
+  PRESENCE_KEY,
+  Visibility 
+} from '@annotorious/core';
 
 // Re-export essential Types for convenience
 export type { 
