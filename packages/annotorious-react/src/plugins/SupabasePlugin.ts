@@ -4,6 +4,9 @@ import { type SupabasePluginConfig, SupabasePlugin as Supabase } from '@annotori
 import type { PostgrestError } from '@supabase/supabase-js';
 import { useAnnotator } from 'src/Annotorious';
 
+// Re-export isMe utility
+export { isMe } from '@annotorious/supabase';
+
 export type SupabasePluginProps = SupabasePluginConfig & {
 
   privacyMode?: boolean,

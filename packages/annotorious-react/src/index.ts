@@ -9,7 +9,6 @@ export * from './AnnotoriousPopup';
 // Re-export useful utilities for convenience
 export { 
   defaultColorProvider,
-  isMe,
   Visibility 
 } from '@annotorious/core';
 

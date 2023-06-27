@@ -1,5 +1,5 @@
 import { createNanoEvents } from 'nanoevents';
-import { PRESENCE_KEY, User } from '@annotorious/core';
+import { PRESENCE_KEY, PresentUser, User } from '@annotorious/core';
 import type { Annotation, Annotator } from '@annotorious/core';
 import { createClient, RealtimeChannel } from '@supabase/supabase-js';
 import type { SupabasePluginConfig } from './SupabasePluginConfig';
@@ -148,3 +148,5 @@ export const SupabasePlugin = <T extends Annotation>(anno: Annotator<T>, config:
   }
 
 }
+
+export const isMe = (user: PresentUser) => user.presenceKey === PRESENCE_KEY;
