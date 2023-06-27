@@ -8,8 +8,8 @@ export * from './AnnotoriousPopup';
 
 // Re-export useful utilities for convenience
 export { 
-  defaultColorProvider, 
-  PRESENCE_KEY,
+  defaultColorProvider,
+  isMe,
   Visibility 
 } from '@annotorious/core';
 
