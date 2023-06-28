@@ -24,5 +24,9 @@ export type {
 } from '@annotorious/core';
 
 export type {
+  ImageAnnotation
+} from '@annotorious/annotorious';
+
+export type {
   OSDAnnotator
 } from '@annotorious/openseadragon';
