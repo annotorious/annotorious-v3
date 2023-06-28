@@ -14,6 +14,11 @@ const _fitBounds = (
   store: ImageAnnotationStore,
   fn: string
 ) => (arg: { id: string } | string, opts: FitboundsOptions = {}) => {
+  const id = typeof arg === 'string' ? arg : arg.id;
+
+  const annotation = store.getAnnotation(id);
+  if  (!annotation)
+    return;
 
   const containerBounds = viewer.container.getBoundingClientRect();
 
@@ -28,10 +33,6 @@ const _fitBounds = (
   pr = pr / containerBounds.width;
   pb = pb / containerBounds.height;
   pl = pl / containerBounds.width;
-
-  const id = typeof arg === 'string' ? arg : arg.id;
-
-  const annotation = store.getAnnotation(id);
 
   const { minX, minY, maxX, maxY } = annotation.target.selector.geometry.bounds;
 
