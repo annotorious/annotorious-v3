@@ -1,12 +1,14 @@
 import type OpenSeadragon from 'openseadragon';
 import type { SvelteComponent } from 'svelte';
-import { createImageStore, fillDefaults, listTools, getTool, type ImageAnnotation } from '@annotorious/annotorious';
-import type { AnnotoriousOptions } from '@annotorious/annotorious';
-import { createAnonymousGuest, Origin, type Annotator, type PresenceProvider, type User } from '@annotorious/core';
+import { createAnonymousGuest, Origin } from '@annotorious/core';
+import type { Annotator, PresenceProvider, User } from '@annotorious/core';
+import { createImageStore, fillDefaults, listTools, getTool } from '@annotorious/annotorious';
+import type { AnnotoriousOptions, ImageAnnotation } from '@annotorious/annotorious';
 import { parseW3C, type WebAnnotation } from '@annotorious/formats';
 import { PixiLayer, type PixiLayerClickEvent } from './pixi';
 import { SVGDrawingLayer, SVGPresenceLayer } from './svg';
 import { initKeyCommands } from './keyCommands';
+import { fitBounds as _fitBounds, fitBoundsWithConstraints as _fitBoundsWithConstraints } from './api';
 
 export type OSDAnnotator = Annotator<ImageAnnotation> & ReturnType<typeof Annotorious>;
 
@@ -44,6 +46,16 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
       store.selection.clear();
   });
 
+  /*************************/
+  /*      External API     */
+  /******++++++*************/
+
+  const fitBounds = _fitBounds(viewer, store);
+
+  const fitBoundsWithConstraints = _fitBoundsWithConstraints(viewer, store);
+
+  const getUser = () => currentUser;
+
   const loadAnnotations = (url: string) =>
     fetch(url)
       .then((response) => response.json())
@@ -61,16 +73,13 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
     store.bulkAddAnnotation(parsed, true, Origin.REMOTE);
   }
 
-  const setPresenceProvider = (provider: PresenceProvider) => {
+  const setPresenceProvider = (provider: PresenceProvider) =>
     presenceLayer.$set({ provider });
-  }
 
   const setUser = (user: User) => {
     currentUser = user;
     drawingLayer.$set({ user });
   }
-
-  const getUser = () => currentUser;
 
   const startDrawing = (tool: string, keepEnabled: boolean = false) => {
     const t = getTool(tool) as typeof SvelteComponent;
@@ -84,6 +93,8 @@ export const Annotorious = (viewer: OpenSeadragon.Viewer, options: AnnotoriousOp
   }
 
   return {
+    fitBounds,
+    fitBoundsWithConstraints,
     getUser,
     listTools,
     loadAnnotations,
