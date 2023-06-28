@@ -1,5 +1,4 @@
 import type OpenSeadragon from 'openseadragon';
-import type { WebAnnotation } from '@annotorious/formats';
 import type { ImageAnnotationStore } from '@annotorious/annotorious';
 
 export interface FitboundsOptions {
@@ -14,7 +13,7 @@ const _fitBounds = (
   viewer: OpenSeadragon.Viewer,
   store: ImageAnnotationStore,
   fn: string
-) => (arg: WebAnnotation | string, opts: FitboundsOptions) => {
+) => (arg: { id: string } | string, opts: FitboundsOptions = {}) => {
 
   const containerBounds = viewer.container.getBoundingClientRect();
 
@@ -32,7 +31,7 @@ const _fitBounds = (
   const { minX, minY, maxX, maxY } = annotation.target.selector.geometry.bounds;
 
   const w = maxX - minX;
-  const h = maxY - maxY;
+  const h = maxY - minY;
 
   const padX = minX - paddingRelative * w;
   const padY = minY - paddingRelative * h;
@@ -40,7 +39,7 @@ const _fitBounds = (
   const padH = h + 2 * paddingRelative * h;
 
   const rect = viewer.viewport.imageToViewportRectangle(padX, padY, padW, padH);
-      
+
   viewer.viewport[fn](rect, opts.immediately);
 } 
 
