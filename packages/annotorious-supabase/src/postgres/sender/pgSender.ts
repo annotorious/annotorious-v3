@@ -18,8 +18,6 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
         emitter.emit('saveError', error);
       } else {
         ops.createTarget(a.target, layerId).then(response => {
-          console.log('[PG] INSERT response', response);
-
           if (response.error) {
             emitter.emit('saveError', response.error);
           }
@@ -64,13 +62,12 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
 
     if (bodiesDeleted.length > 0)
       ops.deleteBodies(bodiesDeleted).then(response => {
-        console.log('[PG] DELETE bodies response', response);
+        if (response.error)
+          emitter.emit('saveError', response.error);
       });
 
     if (targetUpdated) {
       ops.updateTarget(a.target).then(response => {
-        console.log('[PG] UPDATE target response', response);
-
         if (response.error)
           emitter.emit('saveError', response.error);
       });

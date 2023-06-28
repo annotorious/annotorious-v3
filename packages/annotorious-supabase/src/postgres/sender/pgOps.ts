@@ -74,8 +74,6 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
       .eq('layer_id', layerId);
 
   const createAnnotation = (a: Annotation, layer_id: string, is_private: boolean) => {
-    console.log('[PG] Creating annotation');
-
     const versioned: Annotation = {
       ...a,
       target: {
@@ -128,9 +126,6 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
     .eq('id', a.id);
 
   const updateTarget = (t: AnnotationTarget, retries = 3) => {
-    console.log('[PG] Updating target');
-
-    // Increment target version number
     const versioned = {
       ...t,
       version: t.version ? t.version + 1 : 1
@@ -150,7 +145,6 @@ export const pgOps = (anno: Annotator, supabase: SupabaseClient) => {
   }
   
   const upsertBodies = (bodies: AnnotationBody[], layer_id: string) => {
-    // Increment body version numbers
     const versioned = bodies.map(b => ({
       ...b,
       version: b.version ? b.version + 1 : 1

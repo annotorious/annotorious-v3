@@ -38,7 +38,7 @@ export function createStore<T extends Annotation>() {
 
     observers.forEach(observer => {
       if (shouldNotify(observer, event))
-        observer.onChange(event)
+        observer.onChange(event);
     });
   }
 
