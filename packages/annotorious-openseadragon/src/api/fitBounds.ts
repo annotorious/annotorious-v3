@@ -17,7 +17,7 @@ const _fitBounds = (
 
   const containerBounds = viewer.container.getBoundingClientRect();
 
-  const { immediately, padding } = opts;
+  const { padding } = opts;
 
   let [pt, pr, pb, pl] = padding ? (
     Array.isArray(padding) ? padding : [ padding, padding, padding, padding ]
