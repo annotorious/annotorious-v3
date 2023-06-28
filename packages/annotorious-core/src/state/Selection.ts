@@ -35,12 +35,24 @@ export const createSelectionState = <T extends Annotation>(store: Store<T>) => {
   }
 
   const clickSelect = (id: string, pointerEvent: PointerEvent) => {
-    set({ selected: [id], pointerEvent }); // TODO allow CTRL select
+    const annotation = store.getAnnotation(id);
+    if (annotation)
+      set({ selected: [id], pointerEvent }); // TODO allow CTRL select
+    else
+      console.warn('Invalid selection: ' + id);
   }
 
   const setSelected = (idOrIds: string | string[]) => {
     const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-    set({ selected: ids }); 
+
+    // Remove invalid
+    const annotations = 
+      ids.map(id => store.getAnnotation(id)).filter(a => a); 
+
+    set({ selected: annotations.map(a => a.id) });
+    
+    if (annotations.length !== ids.length)
+      console.warn('Invalid selection', idOrIds);
   }
 
   const removeFromSelection = (ids: string[]) => {
