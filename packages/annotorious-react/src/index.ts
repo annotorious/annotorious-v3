@@ -22,3 +22,7 @@ export type {
   PresentUser, 
   User
 } from '@annotorious/core';
+
+export type {
+  OSDAnnotator
+} from '@annotorious/openseadragon';
