@@ -82,7 +82,7 @@ export const createSender = (anno: Annotator, layerId: string, supabase: Supabas
     if (error) {
       emitter.emit('initialLoadError', error);
     } else {
-      const annotations = (data as AnnotationRecord[]).map(parseAnnotationRecord);
+      const annotations = (data as unknown as AnnotationRecord[]).map(parseAnnotationRecord);
       
       anno.store.bulkAddAnnotation(annotations, true, Origin.REMOTE);
 

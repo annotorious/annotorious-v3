@@ -1,6 +1,6 @@
 {
   "name": "@annotorious/formats",
-  "version": "3.0.0-pre-alpha-25",
+  "version": "3.0.0-pre-alpha-26",
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
